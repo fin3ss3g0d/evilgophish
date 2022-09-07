@@ -10,6 +10,10 @@ Before I begin, I would like to say that I am in no way bashing [Kuba Gretzky](h
 
 You should have a fundamental understanding of how to use `GoPhish`, `evilginx2`, and `Apache2`.
 
+## Disclaimer
+
+I shall not be responsible or liable for any misuse or illegitimate use of this software. This software is only to be used in authorized penetration testing or red team engagements where the operator(s) has(ve) been given explicit written permission to carry out social engineering. 
+
 ## Why?
 
 As a penetration tester or red teamer, you may have heard of `evilginx2` as a proxy man-in-the-middle framework capable of bypassing `two-factor/multi-factor authentication`. This is enticing to us to say the least, but when trying to use it for social engineering engagements, there are some issues off the bat. I will highlight the two main problems that have been addressed with this project, although some other bugs have been fixed in this version which I will highlight later.
