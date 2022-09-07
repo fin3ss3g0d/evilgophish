@@ -65,6 +65,14 @@ You **CANNOT** use the default `Add Tracking Image` button when creating your em
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
 
+## Phishlets Surprise
+
+Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
+
+1. `O3652` - modified/updated version of the original `o365`
+2. `google` - updated from previous examples online
+3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single factor campaigns, have not fully tested MFA)
+
 ## Limitations 
 
 - All events will only be submitted once into `GoPhish`
