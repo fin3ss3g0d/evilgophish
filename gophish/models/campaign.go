@@ -12,9 +12,9 @@ import (
     "strings"
     "time"
     "strconv"
-	"regexp"
+    "regexp"
 
-	"github.com/gophish/gophish/config"
+    "github.com/gophish/gophish/config"
     log "github.com/gophish/gophish/logger"
     "github.com/gophish/gophish/webhook"
     "github.com/jinzhu/gorm"
@@ -107,9 +107,9 @@ type EventError struct {
 
 // Struct for parsing evilginx2 creds
 type Creds struct {
-	Username string				`json:"Username"`
-	Password string             `json:"Password"`
-	SubmitTime time.Time    	`json:"SubmitTime"`
+    Username string				`json:"Username"`
+    Password string             `json:"Password"`
+    SubmitTime time.Time    	`json:"SubmitTime"`
 }
 
 // ErrCampaignNameNotSpecified indicates there was no template given by the user
@@ -492,31 +492,31 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             emailscanner := bufio.NewScanner(emailfile)
             for emailscanner.Scan() {
                 sent := MyResult{}
-				if err := json.Unmarshal(emailscanner.Bytes(), &sent); err != nil {
-					fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
-					continue
-				}
-				prefix := strings.Split(strings.ToLower(email), "@")[0]
-				er, _ := regexp.Compile(prefix)
-				ematch := er.FindAllString(emailscanner.Text(), -1)
-				//fmt.Printf("Prefix: %s line: %s\n", prefix, emailscanner.Text())
-				if len(ematch) != 0 {                 
+                if err := json.Unmarshal(emailscanner.Bytes(), &sent); err != nil {
+                    fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
+                    continue
+                }
+                prefix := strings.Split(strings.ToLower(email), "@")[0]
+                er, _ := regexp.Compile(prefix)
+                ematch := er.FindAllString(emailscanner.Text(), -1)
+                //fmt.Printf("Prefix: %s line: %s\n", prefix, emailscanner.Text())
+                if len(ematch) != 0 {                 
                     rid = sent.RId
-					//fmt.Printf("[+] Match for: %s RId: %s\n", sent.Email, rid)
+                    //fmt.Printf("[+] Match for: %s RId: %s\n", sent.Email, rid)
                 } else {
                     //fmt.Printf("[-] No match for this event! %s\n", strings.ToLower(sent.Email))
                     continue
                 }
             }
 
-			//fmt.Printf("RID: %s\n", rid)
+            //fmt.Printf("RID: %s\n", rid)
 
-			conf, err := config.LoadConfig("config.json")
-			if err != nil {
-				fmt.Printf("[-] Failed to load config.json from default path! Skipping clicked link check for: %s", email)
-				continue
-			}
-			apache_log := conf.ApacheLogPath
+            conf, err := config.LoadConfig("config.json")
+            if err != nil {
+                fmt.Printf("[-] Failed to load config.json from default path! Skipping clicked link check for: %s", email)
+                continue
+            }
+            apache_log := conf.ApacheLogPath
             lfile, err := os.Open(apache_log)
             if err != nil {
                 fmt.Printf("[-] %s does not exist! Setup is incorrect! Skipping clicked link check for: %s", apache_log, email)
@@ -526,15 +526,15 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             scanner := bufio.NewScanner(lfile)
             for scanner.Scan() {
                 rr, _ := regexp.Compile(rid)
-				rmatch := rr.FindAllString(scanner.Text(), -1)
-				//fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
-				if len(rmatch) != 0 {
+                rmatch := rr.FindAllString(scanner.Text(), -1)
+                //fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
+                if len(rmatch) != 0 {
                     logsplit := strings.Split(scanner.Text(), "\"")
                     ip := logsplit[0]
                     useragent := logsplit[5]
                     // Debug
                     /*fmt.Printf("[+] Rid %s is in evilginx2 access log! %s clicked link!\n", rid, event.Email)									                    
-					fmt.Println("IP test: ", ip)
+                    fmt.Println("IP test: ", ip)
                     fmt.Println("User agent test: ", useragent)*/
                     clickpath := filepath.Join(".", "campaigns", scid, "clicked-links.json")
                     clicklog, err := os.Open(clickpath)
@@ -543,8 +543,8 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     } else {
                         clickscanner := bufio.NewScanner(clicklog)
                         for clickscanner.Scan() {
-							cmatch := rr.FindAllString(clickscanner.Text(), -1)
-							if len(cmatch) != 0 {
+                            cmatch := rr.FindAllString(clickscanner.Text(), -1)
+                            if len(cmatch) != 0 {
                                 duplicate = true
                                 break
                             }
@@ -564,7 +564,7 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     emailscanner2 := bufio.NewScanner(emailfile2)
                     for emailscanner2.Scan() {
                         rmatch2 := rr.FindAllString(emailscanner2.Text(), -1)
-						if len(rmatch2) != 0 {                                                      
+                        if len(rmatch2) != 0 {                                                      
                             /*Debug
                             fmt.Println("Match!")*/
                             payload := map[string][]string{"client_id": []string{rid}}
@@ -573,12 +573,12 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                             ed.Browser = browser
                             // Debug
                             //fmt.Println("Event details:", ed)
-							clicked := MyResult{}
-							if err := json.Unmarshal(emailscanner2.Bytes(), &clicked); err != nil {
-								fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
-								continue
-							}
-							
+                            clicked := MyResult{}
+                            if err := json.Unmarshal(emailscanner2.Bytes(), &clicked); err != nil {
+                                fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
+                                continue
+                            }
+                            
                             res := Result{}
                             res.CampaignId = cid
                             res.Id = clicked.Id
@@ -631,10 +631,10 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             } else {
                 dupcredscanner := bufio.NewScanner(credlog)
                 for dupcredscanner.Scan() {
-					rr, _ := regexp.Compile(rid)
-					rmatch := rr.FindAllString(dupcredscanner.Text(), -1)
-					//fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
-					if len(rmatch) != 0 {
+                    rr, _ := regexp.Compile(rid)
+                    rmatch := rr.FindAllString(dupcredscanner.Text(), -1)
+                    //fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
+                    if len(rmatch) != 0 {
                         duplicate = true
                         break
                     }
@@ -646,25 +646,25 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             }
 
             usr, err := user.Current()
-		    if err != nil {
-			    fmt.Printf("[-] Getting current user context failed! Skipping clicked link check for: %s", email)
-				continue
-		    }
-		    cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
-			ecredsfile, err := os.Open(filepath.Join(cfg_dir, "creds.json"))
+            if err != nil {
+                fmt.Printf("[-] Getting current user context failed! Skipping clicked link check for: %s", email)
+                continue
+            }
+            cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
+            ecredsfile, err := os.Open(filepath.Join(cfg_dir, "creds.json"))
 
-	        if err != nil {
-		        fmt.Println("[*] No evilginx2 credentials yet")
-	        } else {
+            if err != nil {
+                fmt.Println("[*] No evilginx2 credentials yet")
+            } else {
                 ecredscanner := bufio.NewScanner(ecredsfile)
                 for ecredscanner.Scan() {
                     creds := Creds{}
-					if err := json.Unmarshal(ecredscanner.Bytes(), &creds); err != nil {
-						fmt.Printf("[-] Failed reading JSON bytes from creds file: %s\n", err)
-						continue
-					}
+                    if err := json.Unmarshal(ecredscanner.Bytes(), &creds); err != nil {
+                        fmt.Printf("[-] Failed reading JSON bytes from creds file: %s\n", err)
+                        continue
+                    }
 
-					fmt.Printf("[+] evilginx2 credential data: Username: %s Password: %s\n", creds.Username, creds.Password)
+                    fmt.Printf("[+] evilginx2 credential data: Username: %s Password: %s\n", creds.Username, creds.Password)
                     clickfile, err := os.Open(clickspath)
                     if err != nil {
                         fmt.Printf("[-] %s does not exist! Skipping cred check for %s\n", clickspath, creds.Username)
@@ -678,18 +678,18 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     } else {
                         clickscanner := bufio.NewScanner(clickfile)
                         for clickscanner.Scan() {
-							rr, _ := regexp.Compile(rid)
-							ur, _ := regexp.Compile(strings.Split(strings.ToLower(creds.Username), "@")[0])
-							cmatch := rr.FindAllString(clickscanner.Text(), -1)
-							umatch := ur.FindAllString(clickscanner.Text(), -1)
+                            rr, _ := regexp.Compile(rid)
+                            ur, _ := regexp.Compile(strings.Split(strings.ToLower(creds.Username), "@")[0])
+                            cmatch := rr.FindAllString(clickscanner.Text(), -1)
+                            umatch := ur.FindAllString(clickscanner.Text(), -1)
                             if len(cmatch) != 0 && len(umatch) != 0 {
                                 //fmt.Printf("Creds match! Email: %s cid: %d rid: %s\n", email, cid, rid)                          
                                 
-								submitted := MyResult{}
-								if err := json.Unmarshal(clickscanner.Bytes(), &submitted); err != nil {
-									fmt.Printf("[-] Failed reading JSON bytes from clicked link file: %s\n", err)
-									continue
-								}
+                                submitted := MyResult{}
+                                if err := json.Unmarshal(clickscanner.Bytes(), &submitted); err != nil {
+                                    fmt.Printf("[-] Failed reading JSON bytes from clicked link file: %s\n", err)
+                                    continue
+                                }
                             
                                 res := Result{}
                                 res.CampaignId = cid

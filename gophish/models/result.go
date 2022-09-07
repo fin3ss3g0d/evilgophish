@@ -44,18 +44,18 @@ type Result struct {
 
 // Custom structs for JSON logging
 type MyResult struct {
-	Id           int64     `json:"Id"`
-	UserId       int64     `json:"UserId"`
-	RId          string    `json:"RId"`
-	BaseRecipient
+    Id           int64     `json:"Id"`
+    UserId       int64     `json:"UserId"`
+    RId          string    `json:"RId"`
+    BaseRecipient
 }
 
 type Submitted struct {
-	Id           int64     `json:"Id"`
-	UserId       int64     `json:"UserId"`
-	RId          string    `json:"RId"`
-	BaseRecipient
-	Details      EventDetails
+    Id           int64     `json:"Id"`
+    UserId       int64     `json:"UserId"`
+    RId          string    `json:"RId"`
+    BaseRecipient
+    Details      EventDetails
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
@@ -105,18 +105,18 @@ func (r *Result) HandleEmailSent() error {
     r.Status = EventSent
     r.ModifiedDate = event.Time
 
-	sent := MyResult{}
-	sent.Email = r.Email
-	sent.Id = r.Id
-	sent.UserId = r.UserId
-	sent.RId = r.RId
+    sent := MyResult{}
+    sent.Email = r.Email
+    sent.Id = r.Id
+    sent.UserId = r.UserId
+    sent.RId = r.RId
 
-	data, err := json.Marshal(sent)
-	if err != nil {
-		fmt.Println(err)
-	}
-	sentfile.Write(data)
-	sentfile.Write([]byte("\n"))
+    data, err := json.Marshal(sent)
+    if err != nil {
+        fmt.Println(err)
+    }
+    sentfile.Write(data)
+    sentfile.Write([]byte("\n"))
 
     return db.Save(r).Error
 }
@@ -187,18 +187,18 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
     r.Status = EventClicked
     r.ModifiedDate = event.Time
 
-	clicked := MyResult{}
-	clicked.Email = r.Email
-	clicked.Id = r.Id
-	clicked.UserId = r.UserId
-	clicked.RId = r.RId
+    clicked := MyResult{}
+    clicked.Email = r.Email
+    clicked.Id = r.Id
+    clicked.UserId = r.UserId
+    clicked.RId = r.RId
 
-	data, err := json.Marshal(clicked)
-	if err != nil {
-		fmt.Println(err)
-	}
-	clickfile.Write(data)
-	clickfile.Write([]byte("\n"))
+    data, err := json.Marshal(clicked)
+    if err != nil {
+        fmt.Println(err)
+    }
+    clickfile.Write(data)
+    clickfile.Write([]byte("\n"))
 
     return db.Save(r).Error
 }
@@ -215,26 +215,26 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
         log.Fatal(err)
     }
 
-	event, err := r.createEvent(EventDataSubmit, details)
+    event, err := r.createEvent(EventDataSubmit, details)
     if err != nil {
         return err
     }
     r.Status = EventDataSubmit
     r.ModifiedDate = event.Time
 
-	submitted := Submitted{}
-	submitted.Email = r.Email
-	submitted.Id = r.Id
-	submitted.UserId = r.UserId
-	submitted.RId = r.RId
-	submitted.Details = details
+    submitted := Submitted{}
+    submitted.Email = r.Email
+    submitted.Id = r.Id
+    submitted.UserId = r.UserId
+    submitted.RId = r.RId
+    submitted.Details = details
 
-	data, err := json.Marshal(submitted)
-	if err != nil {
-		fmt.Println(err)
-	}
-	credfile.Write(data)
-	credfile.Write([]byte("\n"))
+    data, err := json.Marshal(submitted)
+    if err != nil {
+        fmt.Println(err)
+    }
+    credfile.Write(data)
+    credfile.Write([]byte("\n"))
 
     return db.Save(r).Error
 }
