@@ -1,0 +1,36 @@
+{
+  "name": "gophish",
+  "version": "0.4.0-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gophish/gophish.git"
+  },
+  "author": "Jordan Wright",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gophish/gophish/issues"
+  },
+  "homepage": "https://getgophish.com",
+  "devDependencies": {
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "babel-loader": "^8.0.6",
+    "clean-css": "^4.2.1",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-clean-css": "^4.0.0",
+    "gulp-cli": "^2.2.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-jshint": "^2.1.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify-es": "^3.0.0",
+    "gulp-wrap": "^0.15.0",
+    "jshint": "^2.13.4",
+    "jshint-stylish": "^2.2.1",
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
+  },
+  "dependencies": {
+    "zxcvbn": "^4.4.2"
+  }
+}

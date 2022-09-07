@@ -1,0 +1,33 @@
+.mycolumn {
+    float: right;
+    width: 45.00%;
+    padding: 15px;
+    margin-left: 6px;
+    margin-top: 50px;
+    margin-bottom: -1px;
+  }
+  
+.mycolumn2 {
+    float: left;
+    width: 45.00%;
+    margin-top: 90px;
+    margin-left: 7px;
+    margin-bottom: 5px;
+}
+
+/* Clear floats after image containers */
+.row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.testimg {
+    margin-top: 10px;
+}
+
+.shrink {
+    height: 10%;
+    width: 10%;
+    padding: 10px;
+}

