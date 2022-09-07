@@ -69,9 +69,9 @@ You **CANNOT** use the default `Add Tracking Image` button when creating your em
 
 Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
 
-1. `O3652` - modified/updated version of the original `o365`
+1. `O3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online
-3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single factor campaigns, have not fully tested MFA)
+3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
 
 ## Limitations 
 
