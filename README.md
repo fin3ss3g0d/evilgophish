@@ -23,7 +23,7 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## General Background
 
-In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing link sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. The operator will also be informed of a submitted data event in realtime. This should ensure the operator won't not run out of time to use captured cookies, or at least be informed as soon as possible. The operator will still need to bounce over to the `evilginx2` terminal to fetch the full `JSON` string of captured tokens/cookies.
+This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing link sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. The operator will also be informed of a submitted data event in realtime. This should ensure the operator won't not run out of time to use captured cookies, or at least be informed as soon as possible. The operator will still need to bounce over to the `evilginx2` terminal to fetch the full `JSON` string of captured tokens/cookies.
 
 ## Infrastructure Layout
 
@@ -31,10 +31,6 @@ In this setup, `GoPhish` is used to send emails, track opened emails, and provid
 - `GoPhish` will listen locally on port `8080`
 - `Apache2` will listen on port `443` externally and proxy to either local `GoPhish/evilginx2` depending on the subdomain name requested. `Apache2` access log file is created for both `GoPhish/evilginx2` servers
   - Requests will be filtered at `Apache2` layer based on redirect rules and IP blacklist configuration
-
-## How Does It Work?
-
-This project is based off of this [blog](https://outpost24.com/blog/Better-proxy-than-story), so please read it before getting started. To provide the tracking part, there is a function that runs every minute inside of `GoPhish` that keeps refreshing the dashboard with results for a campaign. This function was modified to loop all sent email events and for each, loop the `Apache2` access log for `evilginx2` looking for a regular expression match for the `RId` associated with that sent email event. If a match is found, this indicates a user clicked their link and a clicked link event for that user is created inside `GoPhish`. From there, all clicked link events are looped and a custom credential log from `evilginx2` is looped looking for a regular expression match for the username inside of `GoPhish`. If there is a match here, we know the user submitted data and a submitted data event is created inside `GoPhish` containing the username/password combination from `evilginx2`.
 
 ## Getting Setup
 
