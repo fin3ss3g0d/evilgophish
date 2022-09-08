@@ -63,6 +63,18 @@ You **CANNOT** use the default `Add Tracking Image` button when creating your em
 
 `<img src="https://download.example.org/login/track?client_id={{.RId}}"/>`
 
+## **Important Notes**
+
+You **MUST** make sure `Apache2` is logging to the file defined in `gophish/config.json` for the `evilginx2` server, the default path is `/var/log/apache2/access_evilginx2.log` unless you change it. For example, if `Apache2` is logging to `/var/log/apache2/access_evilginx2.log.1` and you have `/var/log/apache2/access_evilginx2.log` defined in `gophish/config.json`, you will lose tracking statistics. All credentials ever captured by `evilginx2` will log to `~/.evilginx/creds.json`. If you use your server for multiple campaigns that may end up targeting the same victims, you will want to make a backup of it and then delete it to prevent previous credentials from logging into current campaigns.
+
+## Phishlets Surprise
+
+Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
+
+1. `O3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
+2. `google` - updated from previous examples online
+3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
+
 ## Changes To evilginx2
 
 1. All IP whitelisting functionality removed, new proxy session is established for every new visitor that triggers a lure path regardless of remote IP
@@ -82,22 +94,10 @@ You **CANNOT** use the default `Add Tracking Image` button when creating your em
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
 
-## Phishlets Surprise
-
-Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
-
-1. `O3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
-2. `google` - updated from previous examples online
-3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
-
 ## Limitations 
 
 - All events will only be submitted once into `GoPhish`
 - If you do multiple campaigns targeting the same victims without deleting `~/.evilginx/creds.json`, credentials from a previous campaign will take presedence in `GoPhish`
-
-## **Important Notes**
-
-You **MUST** make sure `Apache2` is logging to the file defined in `gophish/config.json` for the `evilginx2` server, the default path is `/var/log/apache2/access_evilginx2.log` unless you change it. For example, if `Apache2` is logging to `/var/log/apache2/access_evilginx2.log.1` and you have `/var/log/apache2/access_evilginx2.log` defined in `gophish/config.json`, you will lose tracking statistics. All credentials ever captured by `evilginx2` will log to `~/.evilginx/creds.json`. If you use your server for multiple campaigns that may end up targeting the same victims, you will want to make a backup of it and then delete it to prevent previous credentials from logging into current campaigns.
 
 ## Issues and Support
 
