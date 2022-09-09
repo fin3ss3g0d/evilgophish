@@ -21,9 +21,9 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 1. Lack of tracking - `evilginx2` does not provide unique tracking statistics per victim (e.g. opened email, clicked link, etc.), this is problematic for clients who want/need/pay for these statistics when signing up for a social engineering engagement.
 2. Session overwriting with NAT and proxying - `evilginx2` bases a lot of logic off of remote IP address and will whitelist an IP for 10 minutes after the victim triggers a lure path. `evilginx2` will then skip creating a new session for the IP address if it triggers the lure path again (if still in the 10 minute window). This presents issues for us if our victims are behind a firewall all sharing the same public IP address, as the same session within `evilginx2` will continue to overwrite with multiple victim's data, leading to missed and lost data. This also presents an issue for our proxy setup, since `localhost` is the only IP address requesting `evilginx2`.
 
-## General Background
+## Background
 
-This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing link sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. The operator will also be informed of a submitted data event in realtime. This should ensure the operator won't run out of time to use captured cookies, or at least be informed as soon as possible. The operator will still need to bounce over to the `evilginx2` terminal to fetch the full `JSON` string of captured tokens/cookies.
+This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. The operator will also be informed of a submitted data event in realtime. This should ensure the operator won't run out of time to use captured cookies, or at least be informed as soon as possible. The operator will still need to bounce over to the `evilginx2` terminal to fetch the full `JSON` string of captured tokens/cookies.
 
 ## Infrastructure Layout
 
@@ -56,8 +56,9 @@ Once the setup script is run, the next steps are:
 1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
 2. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, fake landing page, and groups
 3. Start `evilginx2` and configure phishlet and lure
-4. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
-5. **PROFIT**
+4. Ensure `Apache2` server is started
+5. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
+6. **PROFIT**
 
 ## Ensuring Email Opened Tracking
 
@@ -76,6 +77,10 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 1. `O3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online
 3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
+
+## A Word About Phishlets
+
+I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Send me your phishlets at `fin3ss3g0d@pm.me` for a chance to end up in `evilginx2/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
 
 ## Changes To evilginx2
 
@@ -107,9 +112,13 @@ I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and w
 
 ## Future Goals
 
-- `Microsoft Teams` notifications to a channel upon submitted credentials (this will most likely happen, stay tuned!)
+- Campaign event notifications via some `API`
+  - `Microsoft Teams`?
+  - `Slack`?
+  - `Telegram`?
 - Additions to IP blacklist and redirect rules
+- Add more phishlets
 
 ## Contributing
 
-I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, or suggestions, please email me at: `fin3ss3g0d@pm.me`.
+I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, phishlets, or suggestions, please email me at: `fin3ss3g0d@pm.me`.
