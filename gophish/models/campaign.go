@@ -109,7 +109,7 @@ type EventError struct {
 type Creds struct {
     Username string				`json:"Username"`
     Password string             `json:"Password"`
-	RId string					`json:"RId"`
+    RId string					`json:"RId"`
     SubmitTime time.Time    	`json:"SubmitTime"`
 }
 
@@ -680,9 +680,9 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                         clickscanner := bufio.NewScanner(clickfile)
                         for clickscanner.Scan() {
                             rr, _ := regexp.Compile(rid)
-							urr, _ := regexp.Compile(creds.RId)
+                            urr, _ := regexp.Compile(creds.RId)
                             cmatch := rr.FindAllString(clickscanner.Text(), -1)
-							rmatch := urr.FindAllString(clickscanner.Text(), -1)
+                            rmatch := urr.FindAllString(clickscanner.Text(), -1)
                             if len(cmatch) != 0 && len(rmatch) != 0 {
                                 //fmt.Printf("Creds match by RId! Email: %s cid: %d rid: %s\n", email, cid, rid)                          
                                 

