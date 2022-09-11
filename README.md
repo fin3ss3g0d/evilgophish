@@ -70,7 +70,7 @@ You **CANNOT** use the default `Add Tracking Image` button when creating your em
 
 ## **Important Notes**
 
-You **MUST** make sure `Apache2` is logging to the file defined in `gophish/config.json` for the `evilginx2` server, the default path is `/var/log/apache2/access_evilginx2.log` unless you change it. For example, if `Apache2` is logging to `/var/log/apache2/access_evilginx2.log.1` and you have `/var/log/apache2/access_evilginx2.log` defined in `gophish/config.json`, you will lose tracking statistics. All credentials ever captured by `evilginx2` will log to `~/.evilginx/creds.json`. If you use your server for multiple campaigns that may end up targeting the same victims, you will want to make a backup of it and then delete it to prevent previous credentials from logging into current campaigns.
+You **MUST** make sure `Apache2` is logging to the file defined in `gophish/config.json` for the `evilginx2` server, the default path is `/var/log/apache2/access_evilginx2.log` unless you change it. For example, if `Apache2` is logging to `/var/log/apache2/access_evilginx2.log.1` and you have `/var/log/apache2/access_evilginx2.log` defined in `gophish/config.json`, you will lose tracking statistics.
 
 ## Phishlets Surprise
 
@@ -103,10 +103,13 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
 
+## Updates 
+
+Inside `evilginx2`, `RIds` are now searched for in incoming requests and will be added to each new session/credential submission log. This ensures all submitted data events will be completely unique, and if you targeted the same email address in a previous campaign it will no longer log into current campaigns.
+
 ## Limitations 
 
 - All events will only be submitted once into `GoPhish`
-- If you do multiple campaigns targeting the same victims without deleting `~/.evilginx/creds.json`, credentials from a previous campaign will take presedence in `GoPhish`
 
 ## Issues and Support
 
@@ -120,6 +123,7 @@ I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and w
   - `Telegram`?
 - Additions to IP blacklist and redirect rules
 - Add more phishlets
+- Add SMS campaign support with `Twilio`
 
 ## Contributing
 

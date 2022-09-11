@@ -18,6 +18,7 @@ type Session struct {
 	IsForwarded   bool
 	RedirectCount int
 	PhishLure     *Lure
+	RId           string
 }
 
 func NewSession(name string) (*Session, error) {
