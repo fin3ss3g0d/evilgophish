@@ -40,13 +40,15 @@ Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-s
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <gophish subdomain(s)> <redirect url>
- - root domain             - the root domain to be used for the campaign
- - evilginx2 subdomains    - a space separated list of evilginx2 subdomains, can be one if only one
- - gophish subdomains      - a space separated list of gophish subdomains, can be one if only one
- - redirect url            - URL to redirect unauthorized Apache requests
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url>
+ - root domain                     - the root domain to be used for the campaign
+ - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
+ - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
+ - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one
+ - gophish root domain bool        - true or false to proxy root domain to gophish
+ - redirect url                    - URL to redirect unauthorized Apache requests
 Example:
-  ./setup.sh example.com "training login" "download www" https://redirect.com/
+  ./setup.sh example.com login false "download www" false https://redirect.com/
 ```
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 

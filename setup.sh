@@ -26,16 +26,18 @@ function print_info () {
     echo -e "[${script_name}] \x1B[01;34m[*]\x1B[0m $1"
 }
 
-if [[ $# -ne 4 ]]; then
+if [[ $# -ne 6 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <gophish subdomain(s)> <redirect url>'
-    print_error " - root domain             - the root domain to be used for the campaign"
-    print_error " - evilginx2 subdomains    - a space separated list of evilginx2 subdomains, can be one if only one"
-    print_error " - gophish subdomains      - a space separated list of gophish subdomains, can be one if only one"
-    print_error " - redirect url            - URL to redirect unauthorized Apache requests"
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url>'
+    print_error " - root domain                     - the root domain to be used for the campaign"
+    print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
+    print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
+    print_error " - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one"
+    print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
+    print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
     print_error "Example:"
-    print_error '  ./setup.sh example.com "training login" "download www" https://redirect.com/'
+    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/'
 
     exit 2
 fi
@@ -43,8 +45,10 @@ fi
 # Set variables from parameters
 root_domain="${1}"
 evilginx2_subs="${2}"
-gophish_subs="${3}"
-redirect_url="${4}"
+e_root_bool="${3}"
+gophish_subs="${4}"
+g_root_bool="${5}"
+redirect_url="${6}"
 evilginx_dir=$HOME/.evilginx
 
 # Get path to certificates
@@ -89,11 +93,17 @@ function setup_apache () {
         evilginx2_cstring+=${esub}.${root_domain}
         evilginx2_cstring+=" "
     done
+    if [[ $(echo "${e_root_bool}" | grep -ci "true") -gt 0 ]]; then
+        evilginx2_cstring+=${root_domain}
+    fi
     gophish_cstring=""
     for gsub in ${gophish_subs} ; do
         gophish_cstring+=${gsub}.${root_domain}
         gophish_cstring+=" "
     done
+    if  [[ $(echo "${g_root_bool}" | grep -ci "true") -gt 0 ]]; then
+        gophish_cstring+=${root_domain}
+    fi
     # Replace template values with user input
     sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" 000-default.conf.template > 000-default.conf
     sed -i "s/ServerAlias gophish.template/ServerAlias ${gophish_cstring}/g" 000-default.conf
@@ -117,6 +127,7 @@ function setup_apache () {
 
 # Configure and install evilginx2
 function setup_evilginx2 () {
+    # Copy over certs for phishlets
     print_info "Configuring evilginx2"
     mkdir -p "${evilginx_dir}/crt/${root_domain}"
     for i in evilginx2/phishlets/*.yaml; do
@@ -124,6 +135,24 @@ function setup_evilginx2 () {
         cp ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
         cp ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
     done
+    # Prepare DNS for evilginx2
+    evilginx2_cstring=""
+    for esub in ${evilginx2_subs} ; do
+        evilginx2_cstring+=${esub}.${root_domain}
+        evilginx2_cstring+=" "
+    done
+    gophish_cstring=""
+    for gsub in ${gophish_subs} ; do
+        gophish_cstring+=${gsub}.${root_domain}
+        gophish_cstring+=" "
+    done
+    cp /etc/hosts /etc/hosts.bak
+    sed -i "s|127.0.0.1.*|127.0.0.1 localhost ${evilginx2_cstring}${gophish_cstring}${root_domain}|g" /etc/hosts
+    cp /etc/resolv.conf /etc/resolv.conf.bak
+    rm /etc/resolv.conf
+    ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+    systemctl stop systemd-resolved
+    # Build evilginx2
     cd evilginx2 || exit 1
     go build
     cd ..
