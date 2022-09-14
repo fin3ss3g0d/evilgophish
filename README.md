@@ -78,7 +78,7 @@ This feature will send campaign events as messages to a `Microsoft Teams` channe
 
 4. Give the webhook a name, copy the `URL` and **DON'T LOSE IT**
 5. When running `setup.sh`, set `Teams messages bool` to `true` and paste the webhook URL into the script when prompted
-6. Get `Microsoft Teams` messages to a channel for your campaigns, you will see the messages start to come through like below:
+6. Setup complete! You will now receive `Microsoft Teams` messages to a channel notifying you of events for your campaigns, you will see the messages start to come through like below:
 
 ![teams-demo.png](images/teams-demo.png)
 
@@ -122,6 +122,7 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 5. Default server name has been changed to `IGNORE`
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
+8. Transparency endpoint and messages completely removed
 
 ## Changelog 
 

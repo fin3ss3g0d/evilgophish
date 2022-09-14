@@ -5,3 +5,7 @@ Made updates to credential logging so that it is completely unique. This was don
 # 09/13/2022
 
 Added the option to send campaign events as messages to a channel via `Microsoft Teams`.
+
+# 09/14/2022
+
+Removed transparency endpoint and messages from `GoPhish` altogether and increased the length of `RIds` to `10`.

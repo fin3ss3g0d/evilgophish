@@ -116,14 +116,13 @@ function setup_apache () {
     sed -i "s|Listen 80||g" /etc/apache2/ports.conf
     # Input redirect information
     sed "s|https://en.wikipedia.org/|${redirect_url}|g" redirect.rules.template > redirect.rules
-    # Copy over blacklist file
+    # Copy over Apache config file
     cp 000-default.conf /etc/apache2/sites-enabled/
+    # Copy over blacklist file
     cp blacklist.conf /etc/apache2/
-    chown www-data.www-data /etc/apache2/blacklist.conf
     # Copy over redirect rules file
     cp redirect.rules /etc/apache2/
     rm redirect.rules 000-default.conf
-    chown www-data.www-data /etc/apache2/redirect.rules
     print_good "Apache configured!"
 }
 

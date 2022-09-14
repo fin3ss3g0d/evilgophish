@@ -61,7 +61,7 @@ type Submitted struct {
     Details      EventDetails
 }
 
-func (r *Result) teamsNotifyEmailSent(webhook_url string) {
+func (r *Result) TeamsNotifyEmailSent(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Email Sent"
@@ -73,38 +73,38 @@ func (r *Result) teamsNotifyEmailSent(webhook_url string) {
     }
 }
 
-func (r *Result) teamsNotifyEmailOpened(webhook_url string) {
+func (r *Result) TeamsNotifyEmailOpened(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Email Opened"
     msgCard.Text = "Email has been opened by target: **" + r.Email + "**"
-    msgCard.ThemeColor = "##FFFF00"
+    msgCard.ThemeColor = "#FFFF00"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
         log.Error("failed to send teams message: %v", err)
     }
 }
 
-func (r *Result) teamsNotifyClickedLink(webhook_url string) {
+func (r *Result) TeamsNotifyClickedLink(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Clicked Link"
     msgCard.Text = "Link has been clicked by target: **" + r.Email + "**"
-    msgCard.ThemeColor = "##FF9900"
+    msgCard.ThemeColor = "#FF9900"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
         log.Error("failed to send teams message: %v", err)
     }
 }
 
-func (r *Result) teamsNotifySubmittedData(webhook_url string, details EventDetails) {
+func (r *Result) TeamsNotifySubmittedData(webhook_url string, details EventDetails) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Submitted Data"
     username := details.Payload.Get("Username")
     password := details.Payload.Get("Password")
     msgCard.Text = "Target has submitted data! Details:<br>**Username**: " + username + "<br>**Password**: " + password
-    msgCard.ThemeColor = "##FF0000"
+    msgCard.ThemeColor = "#FF0000"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
         log.Error("failed to send teams message: %v", err)
@@ -178,7 +178,7 @@ func (r *Result) HandleEmailSent() error {
 
     teams_webhook := conf.TeamsWebhookURL
     if len(teams_webhook) != 0 {
-        r.teamsNotifyEmailSent(teams_webhook)
+        r.TeamsNotifyEmailSent(teams_webhook)
     }
 
     return db.Save(r).Error
@@ -231,7 +231,7 @@ func (r *Result) HandleEmailOpened(details EventDetails) error {
 
     teams_webhook := conf.TeamsWebhookURL
     if len(teams_webhook) != 0 {
-        r.teamsNotifyEmailOpened(teams_webhook)
+        r.TeamsNotifyEmailOpened(teams_webhook)
     }
 
     return db.Save(r).Error
@@ -281,7 +281,7 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 
     teams_webhook := conf.TeamsWebhookURL
     if len(teams_webhook) != 0 {
-        r.teamsNotifyClickedLink(teams_webhook)
+        r.TeamsNotifyClickedLink(teams_webhook)
     }
 
     return db.Save(r).Error
@@ -327,7 +327,7 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
 
     teams_webhook := conf.TeamsWebhookURL
     if len(teams_webhook) != 0 {
-        r.teamsNotifySubmittedData(teams_webhook, details)
+        r.TeamsNotifySubmittedData(teams_webhook, details)
     }
 
     return db.Save(r).Error
@@ -370,7 +370,8 @@ func (r *Result) UpdateGeo(addr string) error {
 
 func generateResultId() (string, error) {
     const alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    k := make([]byte, 7)
+    // Increase length of RIds
+    k := make([]byte, 10)
     for i := range k {
         idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphaNum))))
         if err != nil {
