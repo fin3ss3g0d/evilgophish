@@ -29,14 +29,14 @@ function print_info () {
 if [[ $# -ne 7 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams notifications bool>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
     print_error " - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one"
     print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
-    print_error " - Teams notifications bool        - true or false to setup Microsoft Teams notifications"
+    print_error " - Teams messages bool             - true or false to setup Microsoft Teams messages"
     print_error "Example:"
     print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true'
 
