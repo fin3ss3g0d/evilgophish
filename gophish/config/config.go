@@ -27,16 +27,17 @@ type PhishServer struct {
 
 // Config represents the configuration information.
 type Config struct {
-    AdminConf      AdminServer `json:"admin_server"`
-    PhishConf      PhishServer `json:"phish_server"`
-    DBName         string      `json:"db_name"`
-    DBPath         string      `json:"db_path"`
-    DBSSLCaPath    string      `json:"db_sslca_path"`
-    MigrationsPath string      `json:"migrations_prefix"`
-    TestFlag       bool        `json:"test_flag"`
-    ContactAddress string      `json:"contact_address"`
-    Logging        *log.Config `json:"logging"`
-    ApacheLogPath  string      `json:"apache_log"`
+    AdminConf          AdminServer `json:"admin_server"`
+    PhishConf          PhishServer `json:"phish_server"`
+    DBName             string      `json:"db_name"`
+    DBPath             string      `json:"db_path"`
+    DBSSLCaPath        string      `json:"db_sslca_path"`
+    MigrationsPath     string      `json:"migrations_prefix"`
+    TestFlag           bool        `json:"test_flag"`
+    ContactAddress     string      `json:"contact_address"`
+    Logging            *log.Config `json:"logging"`
+    ApacheLogPath      string      `json:"apache_log"`
+    TeamsWebhookURL    string      `json:"teams_webhook_url"`
 }
 
 // Version contains the current gophish version

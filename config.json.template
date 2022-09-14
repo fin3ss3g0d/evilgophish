@@ -1,23 +1,24 @@
 {
-	"admin_server": {
-		"listen_url": "127.0.0.1:3333",
-		"use_tls": true,
-		"cert_path": "gophish_admin.crt",
-		"key_path": "gophish_admin.key"
-	},
-	"phish_server": {
-		"listen_url": "127.0.0.1:8080",
-		"use_tls": true,
-		"cert_path": "gophish_template.crt",
-		"key_path": "gophish_template.key"
-	},
-	"apache_log": "/var/log/apache2/access_evilginx2.log",
-	"db_name": "sqlite3",
-	"db_path": "gophish.db",
-	"migrations_prefix": "db/db_",
-	"contact_address": "",
-	"logging": {
-		"filename": "",
-		"level": ""
-	}
+    "admin_server": {
+        "listen_url": "127.0.0.1:3333",
+        "use_tls": true,
+        "cert_path": "gophish_admin.crt",
+        "key_path": "gophish_admin.key"
+    },
+    "phish_server": {
+        "listen_url": "127.0.0.1:8080",
+        "use_tls": true,
+        "cert_path": "gophish_template.crt",
+        "key_path": "gophish_template.key"
+    },
+    "teams_webhook_url": "",
+    "apache_log": "/var/log/apache2/access_evilginx2.log",
+    "db_name": "sqlite3",
+    "db_path": "gophish.db",
+    "migrations_prefix": "db/db_",
+    "contact_address": "",
+    "logging": {
+        "filename": "",
+        "level": ""
+    }
 }

@@ -40,15 +40,16 @@ Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-s
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url>
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> 
  - root domain                     - the root domain to be used for the campaign
  - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
  - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
  - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one
  - gophish root domain bool        - true or false to proxy root domain to gophish
  - redirect url                    - URL to redirect unauthorized Apache requests
+ - Teams messages bool        - true or false to setup Microsoft Teams messages
 Example:
-  ./setup.sh example.com login false "download www" false https://redirect.com/
+  ./setup.sh example.com login false "download www" false https://redirect.com/ true
 ```
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 
@@ -61,6 +62,25 @@ Once the setup script is run, the next steps are:
 4. Ensure `Apache2` server is started
 5. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 6. **PROFIT**
+
+## Microsoft Teams Setup
+
+This feature will send campaign events as messages to a `Microsoft Teams` channel. This setup is optional and you do not have to receive campaign events via `Microsoft Teams`. If you *would* like to, this setup will guide you.
+
+1. Create a new channel for the campaign
+2. Within the web version of `Microsoft Teams` (I experienced a bug with the Desktop version), select the three dots next to the channel and click on `Connectors`:
+
+![teams-connectors](images/teams-connectors.png)
+
+3. Within this menu, search for `Incoming Webhooks`, you should see the following:
+
+![teams-webhook](images/teams-webhook.png)
+
+4. Give the webhook a name, copy the `URL` and **DON'T LOSE IT**
+5. When running `setup.sh`, set `Teams messages bool` to `true` and paste the webhook URL into the script when prompted
+6. Get `Microsoft Teams` messages to a channel for your campaigns, you will see the messages start to come through like below:
+
+![teams-demo.png](images/teams-demo.png)
 
 ## Ensuring Email Opened Tracking
 
@@ -103,9 +123,9 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
 
-## Updates 
+## Changelog 
 
-Inside `evilginx2`, `RIds` are now searched for in incoming requests and will be added to each new session/credential submission log. This ensures all submitted data events will be completely unique, and if you targeted the same email address in a previous campaign it will no longer log into current campaigns.
+See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Limitations 
 
@@ -117,10 +137,6 @@ I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and w
 
 ## Future Goals
 
-- Campaign event notifications via some `API`
-  - `Microsoft Teams`?
-  - `Slack`?
-  - `Telegram`?
 - Additions to IP blacklist and redirect rules
 - Add more phishlets
 - Add SMS campaign support with `Twilio`

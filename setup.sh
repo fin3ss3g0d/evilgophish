@@ -26,18 +26,19 @@ function print_info () {
     echo -e "[${script_name}] \x1B[01;34m[*]\x1B[0m $1"
 }
 
-if [[ $# -ne 6 ]]; then
+if [[ $# -ne 7 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams notifications bool>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
     print_error " - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one"
     print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
+    print_error " - Teams notifications bool        - true or false to setup Microsoft Teams notifications"
     print_error "Example:"
-    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/'
+    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true'
 
     exit 2
 fi
@@ -49,6 +50,7 @@ e_root_bool="${3}"
 gophish_subs="${4}"
 g_root_bool="${5}"
 redirect_url="${6}"
+teams_bool="${7}"
 evilginx_dir=$HOME/.evilginx
 
 # Get path to certificates
@@ -164,6 +166,11 @@ function setup_gophish () {
     print_info "Configuring gophish"
     sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" config.json.template > gophish/config.json
     sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
+    if [[ $(echo "${teams_bool}" | grep -ci "true") -gt 0 ]]; then
+        print_info "Enter Microsoft Teams Webhook URL:"
+        read -r webhook_url
+        sed -i "s|\"teams_webhook_url\": \"\"|\"teams_webhook_url\": \"${webhook_url}\"|g" gophish/config.json
+    fi
     cd gophish || exit 1
     go build
     cd ..

