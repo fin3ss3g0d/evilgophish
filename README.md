@@ -47,7 +47,7 @@ Usage:
  - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one
  - gophish root domain bool        - true or false to proxy root domain to gophish
  - redirect url                    - URL to redirect unauthorized Apache requests
- - Teams messages bool        - true or false to setup Microsoft Teams messages
+ - Teams messages bool             - true or false to setup Microsoft Teams messages
 Example:
   ./setup.sh example.com login false "download www" false https://redirect.com/ true
 ```
