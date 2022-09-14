@@ -72,7 +72,7 @@ This feature will send campaign events as messages to a `Microsoft Teams` channe
 
 ![teams-connectors](images/teams-connectors.png)
 
-3. Within this menu, search for `Incoming Webhooks`, you should see the following:
+3. Within this menu, search for `Incoming Webhook`, you should see the following:
 
 ![teams-webhook](images/teams-webhook.png)
 
