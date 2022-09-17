@@ -17,6 +17,8 @@ import (
     "github.com/gophish/gophish/config"
     goteamsnotify "github.com/atc0005/go-teams-notify/v2"
     "github.com/atc0005/go-teams-notify/v2/messagecard"
+	"github.com/twilio/twilio-go"
+	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
 type mmCity struct {
@@ -66,6 +68,18 @@ func (r *Result) TeamsNotifyEmailSent(webhook_url string) {
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Email Sent"
     msgCard.Text = "Email has been sent to target: **" + r.Email + "**"
+    msgCard.ThemeColor = "#00FF00"
+
+    if err := mstClient.Send(webhook_url, msgCard); err != nil {
+        log.Error("failed to send teams message: %v", err)
+    }
+}
+
+func (r *Result) TeamsNotifySMSSent(webhook_url string) {
+    mstClient := goteamsnotify.NewTeamsClient()
+    msgCard := messagecard.NewMessageCard()
+    msgCard.Title = "SMS Sent"
+    msgCard.Text = "SMS has been sent to target: **" + r.Email + "**"
     msgCard.ThemeColor = "#00FF00"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
@@ -136,6 +150,58 @@ func (r *Result) createEvent(status string, details interface{}) (*Event, error)
     }
     AddEvent(e, r.CampaignId)
     return e, nil
+}
+
+func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token string, message string, sms_from string, target string) error {
+	client := twilio.NewRestClientWithParams(twilio.ClientParams{
+		Username: twilio_account_sid,
+		Password: twilio_auth_token,
+	})
+	params := &openapi.CreateMessageParams{}
+	params.SetTo(target)
+	params.SetFrom(sms_from)
+	params.SetBody(message)
+
+	_, err := client.Api.CreateMessage(params)
+	if err != nil {
+		fmt.Printf("Error sending message: %s\n", err)
+		return err
+	} else {
+		//response, _ := json.Marshal(*resp)
+		//fmt.Println("Response: " + string(response))
+		event, err := r.createEvent(EventSent, nil)
+		if err != nil {
+			return err
+		}
+		r.SendDate = event.Time
+		r.Status = EventSent
+		r.ModifiedDate = event.Time
+		teams_webhook := conf.TeamsWebhookURL
+    	if len(teams_webhook) != 0 {
+	        r.TeamsNotifySMSSent(teams_webhook)
+	    }
+		sent := MyResult{}
+    	sent.Email = target
+    	sent.Id = r.Id
+    	sent.UserId = r.UserId
+    	sent.RId = r.RId
+
+    	data, err := json.Marshal(sent)
+    	if err != nil {
+        	fmt.Println(err)
+    	}
+		cid := strconv.FormatInt(r.CampaignId, 10)
+    	cdir := filepath.Join(".", "campaigns", cid)
+    	os.MkdirAll(cdir, os.ModePerm)
+    	epath := filepath.Join(cdir, "sent-emails.json")
+    	sentfile, err := os.OpenFile(epath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+    	if err != nil {
+	        log.Fatal(err)
+	    }
+    	sentfile.Write(data)
+    	sentfile.Write([]byte("\n"))
+		return db.Save(r).Error
+	}
 }
 
 // HandleEmailSent updates a Result to indicate that the email has been

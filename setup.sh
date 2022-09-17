@@ -68,7 +68,7 @@ function get_certs_path () {
 function install_depends () {
     print_info "Installing dependencies with apt"
     apt-get update
-    apt-get install apache2 build-essential letsencrypt wget git tmux -y > /dev/null
+    apt-get install apache2 build-essential letsencrypt wget git net-tools tmux -y > /dev/null
     print_good "Installed dependencies with apt!"
     print_info "Installing Go from source"
     wget https://go.dev/dl/go1.19.linux-amd64.tar.gz > /dev/null

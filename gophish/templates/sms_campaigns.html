@@ -9,7 +9,7 @@
     <div class="row">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-target="#modal"
             onclick="edit('new')">
-            <i class="fa fa-plus"></i> New Email Campaign</button>
+            <i class="fa fa-plus"></i> New SMS Campaign</button>
     </div>
     &nbsp;
 
@@ -80,7 +80,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="dismiss()">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="campaignModalLabel">New Email Campaign</h4>
+                <h4 class="modal-title" id="campaignModalLabel">New SMS Campaign</h4>
             </div>
             <div class="modal-body" id="modal_body">
                 <div class="row" id="modal.flashes"></div>
@@ -99,28 +99,11 @@
                         <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Location of Gophish listener (must be reachable by targets!)"></i>
                     </label>
                     <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url" />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="control-label" for="url">Launch Date </label>
-                            <input type="text" class="form-control" id="launch_date" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="control-label" for="delay">Send Emails By (Optional)
-                                <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
-                            </label>
-                            <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
-                        </div>
-                    </div>
-                    <label class="control-label" for="profile">Sending Profile:</label>
+                    <label class="control-label" for="profile">SMS Sending Profile:</label>
                     <div class="input-group">
                         <select class="form-control" placeholder="Sending Profile" id="profile" />
                         <option></option>
-                        </select>
-                        <span class="input-group-btn">
-                            <button type="button" data-toggle="modal" data-backdrop="static" data-target="#sendTestEmailModal"
-                                class="btn btn-primary button">
-                                <i class="fa fa-envelope"></i> Send Test Email</button>
-                        </span>
+                        </select>                       
                     </div>
                     <label class="control-label" for="users">Groups:</label>
                     <select class="form-control" id="users" multiple="multiple"></select>
@@ -134,46 +117,6 @@
         </div>
     </div>
 </div>
-<!-- Send Test Email Modal -->
-<div class="modal" id="sendTestEmailModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <!-- New Email Modal -->
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="sendTestEmailModalTitle">Send Test Email</h4>
-            </div>
-            <div class="modal-body">
-                <div class="row" id="sendTestEmailModal.flashes"></div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <label class="control-label" for="to">Send Test Email to:</label>
-                    </div>
-                    <br>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="First Name" name="to_first_name">
-                    </div>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" placeholder="Last Name" name="to_last_name">
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="email" class="form-control" placeholder="Email" name="to_email" required>
-                    </div>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" placeholder="Position" name="to_position">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button type="button" class="btn btn-primary" id="sendTestModalSubmit" onclick="sendTestEmail()">
-                    <i class="fa fa-envelope"></i> Send</button>
-            </div>
-        </div>
-    </div>
-</div>
 {{end}} {{define "scripts"}}
-<script src="/js/dist/app/campaigns.min.js"></script>
+<script src="/js/dist/app/sms_campaigns.min.js"></script>
 {{end}}

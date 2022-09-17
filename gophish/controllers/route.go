@@ -129,10 +129,13 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/reset_password", mid.Use(as.ResetPassword, mid.RequireLogin))
 	router.HandleFunc("/campaigns", mid.Use(as.Campaigns, mid.RequireLogin))
 	router.HandleFunc("/campaigns/{id:[0-9]+}", mid.Use(as.CampaignID, mid.RequireLogin))
+	router.HandleFunc("/sms_campaigns", mid.Use(as.SMSCampaigns, mid.RequireLogin))
+	router.HandleFunc("/sms_campaigns/{id:[0-9]+}", mid.Use(as.SMSCampaignID, mid.RequireLogin))
 	router.HandleFunc("/templates", mid.Use(as.Templates, mid.RequireLogin))
 	router.HandleFunc("/groups", mid.Use(as.Groups, mid.RequireLogin))
 	router.HandleFunc("/landing_pages", mid.Use(as.LandingPages, mid.RequireLogin))
-	router.HandleFunc("/sending_profiles", mid.Use(as.SendingProfiles, mid.RequireLogin))
+	router.HandleFunc("/sending_profiles", mid.Use(as.EmailSendingProfiles, mid.RequireLogin))
+	router.HandleFunc("/sms_sending_profiles", mid.Use(as.SMSSendingProfiles, mid.RequireLogin))
 	router.HandleFunc("/settings", mid.Use(as.Settings, mid.RequireLogin))
 	router.HandleFunc("/users", mid.Use(as.UserManagement, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
 	router.HandleFunc("/webhooks", mid.Use(as.Webhooks, mid.RequirePermission(models.PermissionModifySystem), mid.RequireLogin))
@@ -216,6 +219,20 @@ func (as *AdminServer) CampaignID(w http.ResponseWriter, r *http.Request) {
 	getTemplate(w, "campaign_results").ExecuteTemplate(w, "base", params)
 }
 
+// Campaigns handles the default path and template execution
+func (as *AdminServer) SMSCampaigns(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "SMS Campaigns"
+	getTemplate(w, "sms_campaigns").ExecuteTemplate(w, "base", params)
+}
+
+// CampaignID handles the default path and template execution
+func (as *AdminServer) SMSCampaignID(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "SMS Campaign Results"
+	getTemplate(w, "sms_campaign_results").ExecuteTemplate(w, "base", params)
+}
+
 // Templates handles the default path and template execution
 func (as *AdminServer) Templates(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
@@ -237,11 +254,17 @@ func (as *AdminServer) LandingPages(w http.ResponseWriter, r *http.Request) {
 	getTemplate(w, "landing_pages").ExecuteTemplate(w, "base", params)
 }
 
-// SendingProfiles handles the default path and template execution
-func (as *AdminServer) SendingProfiles(w http.ResponseWriter, r *http.Request) {
+// EmailSendingProfiles handles the default path and template execution
+func (as *AdminServer) EmailSendingProfiles(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "Sending Profiles"
 	getTemplate(w, "sending_profiles").ExecuteTemplate(w, "base", params)
+}
+
+func (as *AdminServer) SMSSendingProfiles(w http.ResponseWriter, r *http.Request) {
+	params := newTemplateParams(r)
+	params.Title = "Sending Profiles"
+	getTemplate(w, "sms_sending_profiles").ExecuteTemplate(w, "base", params)
 }
 
 // Settings handles the changing of settings

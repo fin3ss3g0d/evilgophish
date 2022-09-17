@@ -34,7 +34,7 @@ This project is based on this [blog](https://outpost24.com/blog/Better-proxy-tha
     - `404` functionality for unauthorized requests is still baked into `GoPhish` if a request hits the `GoPhish` server
     - Redirect functionality for unauthorized requests is still baked into `evilginx2` if a request hits the `evilginx2` server
 
-## Getting Setup
+## setup.sh
 
 Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-story) and understand how the setup works, `setup.sh` has been provided to automate the needed configurations for you. Once this script is run and you've fed it the right values, you should be ready to get started. Below is the setup help (note that certificate setup is based on `letsencrypt` filenames):
 
@@ -54,7 +54,9 @@ Example:
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 
 
-Once the setup script is run, the next steps are: 
+## Email Campaign Setup
+
+Once `setup.sh` is run, the next steps are: 
 
 1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
 2. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, fake landing page, and groups
@@ -62,6 +64,33 @@ Once the setup script is run, the next steps are:
 4. Ensure `Apache2` server is started
 5. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 6. **PROFIT**
+
+## SMS Campaign Setup
+
+An entire reworking of `GoPhish` was performed in order to provide `SMS` campaign support with `Twilio`. Your new `evilgophish` dashboard will look like below:
+
+![new-dashboard](images/new-dashboard.png)
+
+Once you have run `setup.sh`, the next steps are:
+
+1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
+2. Configure `SMS` message template. You will use `Text` only when creating an `SMS` message template, and you should not include a tracking link as it will appear in the `SMS` message. Leave `Envelope Sender` and `Subject` blank like below:
+
+![sms-message-template](images/sms-message-template.png)
+
+3. Configure `SMS Sending Profile`. Enter your `Twilio` `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profile` page:
+
+![sms-sending-profile](images/sms-sending-profile.png)
+
+4. Import groups. The `CSV` template values have been kept the same for compatibility, so keep the `CSV` column names the same and place your target phone numbers into the `Email` column. Note that `Twilio` accepts the following phone number formats, so they must be in one of these three:
+
+![twilio-number-formats](images/twilio-number-formats.png)
+
+5. Create a fake landing page in `GoPhish`
+6. Start `evilginx2` and configure phishlet and lure
+7. Ensure `Apache2` server is started
+8. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
+9. **PROFIT**
 
 ## Microsoft Teams Setup
 
@@ -123,6 +152,7 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
 7. `rid=` is now `client_id=` in phishing URLs
 8. Transparency endpoint and messages completely removed
+9. Added `SMS` Campaign Support
 
 ## Changelog 
 
@@ -140,8 +170,7 @@ I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and w
 
 - Additions to IP blacklist and redirect rules
 - Add more phishlets
-- Add SMS campaign support with `Twilio`
 
 ## Contributing
 
-I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, phishlets, or suggestions, please email me at: `fin3ss3g0d@pm.me`.
+I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, phishlets, or suggestions, please email me at: `fin3ss3g0d@pm.me` or open a pull request.

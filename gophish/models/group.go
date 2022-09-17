@@ -317,25 +317,25 @@ func insertTargetIntoGroup(tx *gorm.DB, t Target, gid int64) error {
 		log.WithFields(logrus.Fields{
 			"email": t.Email,
 		}).Error("Invalid email")
-		return err
+		//return err
 	}
 	err := tx.Where(t).FirstOrCreate(&t).Error
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"email": t.Email,
 		}).Error(err)
-		return err
+		//return err
 	}
 	err = tx.Save(&GroupTarget{GroupId: gid, TargetId: t.Id}).Error
 	if err != nil {
 		log.Error(err)
-		return err
+		//return err
 	}
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"email": t.Email,
 		}).Error("Error adding many-many mapping")
-		return err
+		//return err
 	}
 	return nil
 }

@@ -2,6 +2,10 @@ package worker
 
 import (
 	"context"
+	//"fmt"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/gophish/gophish/logger"
@@ -14,6 +18,7 @@ import (
 type Worker interface {
 	Start()
 	LaunchCampaign(c models.Campaign)
+	LaunchSMSCampaign(c models.Campaign)
 	SendTestEmail(s *models.EmailRequest) error
 }
 
@@ -145,6 +150,46 @@ func (w *DefaultWorker) LaunchCampaign(c models.Campaign) {
 		mailEntries = append(mailEntries, m)
 	}
 	w.mailer.Queue(mailEntries)
+}
+
+func (w *DefaultWorker) LaunchSMSCampaign(c models.Campaign) {
+	delay, _ := strconv.Atoi(c.SMS.Delay)
+
+	ms, err := models.GetMailLogsByCampaign(c.Id)
+	if err != nil {
+		log.Error(err)
+		return 
+	}
+	
+	campaignSMSCtx, err := models.GetCampaignSMSContext(c.Id, c.UserId)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	for _, m := range ms {
+		r, err := models.GetResult(m.RId)
+		if err != nil {
+			return
+		}
+		if strings.HasSuffix(c.URL, "/") {
+			c.URL = strings.TrimSuffix(c.URL, "/")
+		}
+		url := c.URL + "?client_id=" + m.RId
+		ur := regexp.MustCompile(`{{.URL}}`)
+		rr := regexp.MustCompile(`{{.RId}}`)
+		fnr := regexp.MustCompile(`{{.FirstName}}`)
+		lnr := regexp.MustCompile(`{{.LastName}}`)
+		pr := regexp.MustCompile(`{{.Position}}`)
+		s1 := ur.ReplaceAllString(c.Template.Text, url)
+		s2 := rr.ReplaceAllString(s1, m.RId)
+		s3 := fnr.ReplaceAllString(s2, r.BaseRecipient.FirstName)
+		s4 := lnr.ReplaceAllString(s3, r.BaseRecipient.LastName)
+		s5 := pr.ReplaceAllString(s4, r.BaseRecipient.Position)
+		log.Info("Sending SMS to ", m.Target)
+		r.HandleSMSSent(campaignSMSCtx.SMS.TwilioAccountSid, campaignSMSCtx.SMS.TwilioAuthToken, s5, c.SMS.SMSFrom, m.Target)
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
 }
 
 // SendTestEmail sends a test email

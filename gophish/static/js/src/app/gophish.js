@@ -191,6 +191,27 @@ var api = {
             return query("/pages/" + id, "DELETE", {}, false)
         }
     },
+    SMS: {
+        get: function () {
+            return query("/sms/", "GET", {}, false)
+        },
+        post: function (sms) {
+            return query("/sms/", "POST", sms, false)
+        }
+    },
+    SMSId: {
+        get: function (id) {
+            return query("/sms/" + id, "GET", {}, false)
+        },
+        // put() - Puts a SMS to PUT /smtp/:id
+        put: function (sms) {
+            return query("/sms/" + smtp.id, "PUT", sms, false)
+        },
+        // delete() - Deletes a SMS at DELETE /smtp/:id
+        delete: function (id) {
+            return query("/sms/" + id, "DELETE", {}, false)
+        }
+    },
     // SMTP contains the endpoints for /smtp
     SMTP: {
         // get() - Queries the API for GET /smtp

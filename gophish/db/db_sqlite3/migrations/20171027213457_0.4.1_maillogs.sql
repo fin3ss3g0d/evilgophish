@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS "mail_logs" (
     "send_date" datetime,
     "send_attempt" integer,
     "r_id" varchar(255),
-    "processing" boolean);
+    "processing" boolean,
+    "target" varchar(255));
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back

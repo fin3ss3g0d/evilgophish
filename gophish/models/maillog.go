@@ -40,6 +40,7 @@ type MailLog struct {
 	SendDate    time.Time `json:"send_date"`
 	SendAttempt int       `json:"send_attempt"`
 	Processing  bool      `json:"-"`
+	Target      string    `json:"target"`
 
 	cachedCampaign *Campaign
 }

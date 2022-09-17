@@ -101,23 +101,26 @@ func ParseCSV(r *http.Request) ([]models.Target, error) {
 				ln = record[li]
 			}
 			if ei != -1 && len(record) > ei {
-				csvEmail, err := mail.ParseAddress(record[ei])
+				csvEmail := record[ei]
 				if err != nil {
 					continue
 				}
-				ea = csvEmail.Address
+				ea = csvEmail
 			}
 			if pi != -1 && len(record) > pi {
 				ps = record[pi]
 			}
+			sr := regexp.MustCompile(" ")
+			stripped := sr.ReplaceAllString(ea, "")
 			t := models.Target{
 				BaseRecipient: models.BaseRecipient{
 					FirstName: fn,
 					LastName:  ln,
-					Email:     ea,
+					Email:     stripped,
 					Position:  ps,
 				},
 			}
+			fmt.Printf("[+] Parsed target: %s\n", t.Email)
 			ts = append(ts, t)
 		}
 	}

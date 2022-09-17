@@ -39,7 +39,9 @@ type Campaign struct {
     Groups        []Group   `json:"groups,omitempty"`
     Events        []Event   `json:"timeline,omitempty"`
     SMTPId        int64     `json:"-"`
+	SMSId         int64     `json:"-"`
     SMTP          SMTP      `json:"smtp"`
+	SMS           SMS       `json:"sms"`
     URL           string    `json:"url"`
 }
 
@@ -128,6 +130,8 @@ var ErrPageNotSpecified = errors.New("No landing page specified")
 // ErrSMTPNotSpecified indicates a sending profile was not provided for the campaign
 var ErrSMTPNotSpecified = errors.New("No sending profile specified")
 
+var ErrSMSNotSpecified = errors.New("No SMS sending profile specified")
+
 // ErrTemplateNotFound indicates the template specified does not exist in the database
 var ErrTemplateNotFound = errors.New("Template not found")
 
@@ -160,6 +164,24 @@ func (c *Campaign) Validate() error {
         return ErrPageNotSpecified
     case c.SMTP.Name == "":
         return ErrSMTPNotSpecified
+    case !c.SendByDate.IsZero() && !c.LaunchDate.IsZero() && c.SendByDate.Before(c.LaunchDate):
+        return ErrInvalidSendByDate
+    }
+    return nil
+}
+
+func (c *Campaign) ValidateSMS() error {
+    switch {
+    case c.Name == "":
+        return ErrCampaignNameNotSpecified
+    case len(c.Groups) == 0:
+        return ErrGroupNotSpecified
+    case c.Template.Name == "":
+        return ErrTemplateNotSpecified
+    case c.Page.Name == "":
+        return ErrPageNotSpecified
+    case c.SMS.Name == "":
+        return ErrSMSNotSpecified
     case !c.SendByDate.IsZero() && !c.LaunchDate.IsZero() && c.SendByDate.Before(c.LaunchDate):
         return ErrInvalidSendByDate
     }
@@ -422,6 +444,27 @@ func GetCampaignMailContext(id int64, uid int64) (Campaign, error) {
     return c, nil
 }
 
+func GetCampaignSMSContext(id int64, uid int64) (Campaign, error) {
+    c := Campaign{}
+    err := db.Where("id = ?", id).Where("user_id = ?", uid).Find(&c).Error
+    if err != nil {
+        return c, err
+    }
+    err = db.Table("sms").Where("id=?", c.SMSId).Find(&c.SMS).Error
+    if err != nil {
+        return c, err
+    }
+    err = db.Table("templates").Where("id=?", c.TemplateId).Find(&c.Template).Error
+    if err != nil {
+        return c, err
+    }
+    err = db.Where("template_id=?", c.Template.Id).Find(&c.Template.Attachments).Error
+    if err != nil && err != gorm.ErrRecordNotFound {
+        return c, err
+    }
+    return c, nil
+}
+
 // GetCampaign returns the campaign, if it exists, specified by the given id and user_id.
 func GetCampaign(id int64, uid int64) (Campaign, error) {
     c := Campaign{}
@@ -497,8 +540,13 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
                     continue
                 }
-                prefix := strings.Split(strings.ToLower(email), "@")[0]
-                er, _ := regexp.Compile(prefix)
+				plr := regexp.MustCompile(`[\+]`)
+				plus_match := plr.FindAllString(email, -1)
+				if len(plus_match) != 0 {
+					email = plr.ReplaceAllString(email, "")
+				}
+
+                er, _ := regexp.Compile(email)
                 ematch := er.FindAllString(emailscanner.Text(), -1)
                 //fmt.Printf("Prefix: %s line: %s\n", prefix, emailscanner.Text())
                 if len(ematch) != 0 {                 
@@ -735,6 +783,179 @@ func GetQueuedCampaigns(t time.Time) ([]Campaign, error) {
         }
     }
     return cs, err
+}
+
+func PostSMSCampaign(c *Campaign, uid int64) error {
+	err := c.ValidateSMS()
+    if err != nil {
+        return err
+    }
+    // Fill in the details
+    c.UserId = uid
+    c.CreatedDate = time.Now().UTC()
+    c.CompletedDate = time.Time{}
+    c.Status = CampaignQueued
+    if c.LaunchDate.IsZero() {
+        c.LaunchDate = c.CreatedDate
+    } else {
+        c.LaunchDate = c.LaunchDate.UTC()
+    }
+    if !c.SendByDate.IsZero() {
+        c.SendByDate = c.SendByDate.UTC()
+    }
+    if c.LaunchDate.Before(c.CreatedDate) || c.LaunchDate.Equal(c.CreatedDate) {
+        c.Status = CampaignInProgress
+    }
+    // Check to make sure all the groups already exist
+    // Also, later we'll need to know the total number of recipients (counting
+    // duplicates is ok for now), so we'll do that here to save a loop.
+    totalRecipients := 0
+    for i, g := range c.Groups {
+        c.Groups[i], err = GetGroupByName(g.Name, uid)
+        if err == gorm.ErrRecordNotFound {
+            log.WithFields(logrus.Fields{
+                "group": g.Name,
+            }).Error("Group does not exist")
+            return ErrGroupNotFound
+        } else if err != nil {
+            log.Error(err)
+            return err
+        }
+        totalRecipients += len(c.Groups[i].Targets)
+    }
+    // Check to make sure the template exists
+    t, err := GetTemplateByName(c.Template.Name, uid)
+    if err == gorm.ErrRecordNotFound {
+        log.WithFields(logrus.Fields{
+            "template": c.Template.Name,
+        }).Error("Template does not exist")
+        return ErrTemplateNotFound
+    } else if err != nil {
+        log.Error(err)
+        return err
+    }
+    c.Template = t
+    c.TemplateId = t.Id
+    // Check to make sure the page exists
+    p, err := GetPageByName(c.Page.Name, uid)
+    if err == gorm.ErrRecordNotFound {
+        log.WithFields(logrus.Fields{
+            "page": c.Page.Name,
+        }).Error("Page does not exist")
+        return ErrPageNotFound
+    } else if err != nil {
+        log.Error(err)
+        return err
+    }
+    c.Page = p
+    c.PageId = p.Id
+    // Check to make sure the sending profile exists
+    s, err := GetSMSByName(c.SMS.Name, uid)
+    if err == gorm.ErrRecordNotFound {
+        log.WithFields(logrus.Fields{
+            "sms": c.SMS.Name,
+        }).Error("Sending profile does not exist")
+        return ErrSMTPNotFound
+    } else if err != nil {
+        log.Error(err)
+        return err
+    }
+	c.SMS = s
+    c.SMSId = s.Id
+    // Insert into the DB
+    err = db.Save(c).Error
+    if err != nil {
+        log.Error(err)
+        return err
+    }
+    err = AddEvent(&Event{Message: "Campaign Created"}, c.Id)
+    if err != nil {
+        log.Error(err)
+    }
+    // Insert all the results
+    resultMap := make(map[string]bool)
+    recipientIndex := 0
+    tx := db.Begin()
+    for _, g := range c.Groups {
+        // Insert a result for each target in the group
+        for _, t := range g.Targets {
+            // Remove duplicate results - we should only
+            // send emails to unique email addresses.
+            if _, ok := resultMap[t.Email]; ok {
+                continue
+            }
+            resultMap[t.Email] = true
+            sendDate := c.generateSendDate(recipientIndex, totalRecipients)
+            r := &Result{
+                BaseRecipient: BaseRecipient{
+                    Email:     t.Email,
+                    Position:  t.Position,
+                    FirstName: t.FirstName,
+                    LastName:  t.LastName,
+                },
+                Status:       StatusScheduled,
+                CampaignId:   c.Id,
+                UserId:       c.UserId,
+                SendDate:     sendDate,
+                Reported:     false,
+                ModifiedDate: c.CreatedDate,
+            }
+            err = r.GenerateId(tx)
+            if err != nil {
+                log.Error(err)
+                tx.Rollback()
+                return err
+            }
+            processing := false
+            if r.SendDate.Before(c.CreatedDate) || r.SendDate.Equal(c.CreatedDate) {
+                r.Status = StatusSending
+                processing = true
+            }
+            err = tx.Save(r).Error
+            if err != nil {
+                log.WithFields(logrus.Fields{
+                    "email": t.Email,
+                }).Errorf("error creating result: %v", err)
+                tx.Rollback()
+                return err
+            }
+            c.Results = append(c.Results, *r)
+            log.WithFields(logrus.Fields{
+                "email":     r.Email,
+                "send_date": sendDate,
+            }).Debug("creating maillog")
+            m := &MailLog{
+                UserId:     c.UserId,
+                CampaignId: c.Id,
+                RId:        r.RId,
+                SendDate:   sendDate,
+                Processing: processing,
+				Target:     t.Email,
+            }
+            err = tx.Save(m).Error
+            if err != nil {
+                log.WithFields(logrus.Fields{
+                    "email": t.Email,
+                }).Errorf("error creating maillog entry: %v", err)
+                tx.Rollback()
+                return err
+            }
+
+            recipientIndex++
+        }
+    }
+    // Write campaign name to file at start
+    cid := strconv.FormatInt(c.Id, 10)
+    cdir := filepath.Join(".", "campaigns", cid)
+    os.MkdirAll(cdir, os.ModePerm)
+    npath := filepath.Join(cdir, "campaign-name.txt")
+    nfile, ferr := os.OpenFile(npath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+    if ferr != nil {
+        log.Fatal(ferr)
+    }
+    nfile.WriteString(c.Name)
+
+    return tx.Commit().Error
 }
 
 // PostCampaign inserts a campaign and all associated records into the database.
