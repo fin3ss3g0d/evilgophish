@@ -74,7 +74,7 @@ An entire reworking of `GoPhish` was performed in order to provide `SMS` campaig
 Once you have run `setup.sh`, the next steps are:
 
 1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
-2. Configure `SMS` message template. You will use `Text` only when creating an `SMS` message template, and you should not include a tracking link as it will appear in the `SMS` message. Leave `Envelope Sender` and `Subject` blank like below:
+2. Configure `SMS` message template. You will use `Text` only when creating a `SMS` message template, and you should not include a tracking link as it will appear in the `SMS` message. Leave `Envelope Sender` and `Subject` blank like below:
 
 ![sms-message-template](images/sms-message-template.png)
 
