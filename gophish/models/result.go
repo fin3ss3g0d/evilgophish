@@ -164,8 +164,14 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
 
     _, err := client.Api.CreateMessage(params)
     if err != nil {
-        fmt.Printf("Error sending message: %s\n", err)
-        return err
+        fmt.Printf("Error sending SMS message: %s\n", err)
+        event, err := r.createEvent(EventSendingError, EventError{Error: err.Error()})
+        if err != nil {
+            return err
+        }
+        r.Status = Error
+        r.ModifiedDate = event.Time
+        return db.Save(r).Error
     } else {
         //response, _ := json.Marshal(*resp)
         //fmt.Println("Response: " + string(response))

@@ -55,7 +55,7 @@ var statuses = {
         icon: "fa-times",
         point: "ct-point-error"
     },
-    "Error Sending Email": {
+    "Error Sending Email/SMS": {
         color: "#6c7a89",
         label: "label-default",
         icon: "fa-times",

@@ -46,7 +46,7 @@ const (
 	CampaignEmailsSent string = "Emails Sent"
 	CampaignComplete   string = "Completed"
 	EventSent          string = "Email/SMS Sent"
-	EventSendingError  string = "Error Sending Email"
+	EventSendingError  string = "Error Sending Email/SMS"
 	EventOpened        string = "Email/SMS Opened"
 	EventClicked       string = "Clicked Link"
 	EventDataSubmit    string = "Submitted Data"
