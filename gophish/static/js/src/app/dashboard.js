@@ -1,7 +1,7 @@
 var campaigns = []
 // statuses is a helper map to point result statuses to ui classes
 var statuses = {
-    "Email Sent": {
+    "Email/SMS Sent": {
         color: "#1abc9c",
         label: "label-success",
         icon: "fa-envelope",
@@ -22,7 +22,7 @@ var statuses = {
     "Completed": {
         label: "label-success"
     },
-    "Email Opened": {
+    "Email/SMS Opened": {
         color: "#f9bf3b",
         label: "label-warning",
         icon: "fa-envelope",
@@ -83,8 +83,8 @@ var statuses = {
 }
 
 var statsMapping = {
-    "sent": "Email Sent",
-    "opened": "Email Opened",
+    "sent": "Email/SMS Sent",
+    "opened": "Email/SMS Opened",
     "email_reported": "Email Reported",
     "clicked": "Clicked Link",
     "submitted_data": "Submitted Data",

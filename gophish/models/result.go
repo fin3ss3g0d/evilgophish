@@ -66,7 +66,7 @@ type Submitted struct {
 func (r *Result) TeamsNotifyEmailSent(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email Sent"
+    msgCard.Title = "Email/SMS Sent"
     msgCard.Text = "Email has been sent to target: **" + r.Email + "**"
     msgCard.ThemeColor = "#00FF00"
 
@@ -90,7 +90,7 @@ func (r *Result) TeamsNotifySMSSent(webhook_url string) {
 func (r *Result) TeamsNotifyEmailOpened(webhook_url string) {
     mstClient := goteamsnotify.NewTeamsClient()
     msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email Opened"
+    msgCard.Title = "Email/SMS Opened"
     msgCard.Text = "Email has been opened by target: **" + r.Email + "**"
     msgCard.ThemeColor = "#FFFF00"
 

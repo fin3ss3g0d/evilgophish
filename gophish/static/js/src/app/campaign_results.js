@@ -24,7 +24,7 @@ var statuses = {
     "Completed": {
         label: "label-success"
     },
-    "Email Opened": {
+    "Email/SMS Opened": {
         color: "#f9bf3b",
         label: "label-warning",
         icon: "fa-envelope-open",
@@ -99,7 +99,7 @@ var statuses = {
 
 var statusMapping = {
     "Email/SMS Sent": "sent",
-    "Email Opened": "opened",
+    "Email/SMS Opened": "opened",
     "Clicked Link": "clicked",
     "Submitted Data": "submitted_data",
     "Email Reported": "reported",
@@ -109,7 +109,7 @@ var statusMapping = {
 // until I have time to refactor this appropriately.
 var progressListing = [
     "Email/SMS Sent",
-    "Email Opened",
+    "Email/SMS Opened",
     "Clicked Link",
     "Submitted Data"
 ]

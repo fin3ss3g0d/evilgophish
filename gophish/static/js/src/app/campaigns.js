@@ -104,7 +104,7 @@ function sendTestEmail() {
     api.send_test_email(test_email_request)
         .success(function (data) {
             $("#sendTestEmailModal\\.flashes").empty().append("<div style=\"text-align:center\" class=\"alert alert-success\">\
-            <i class=\"fa fa-check-circle\"></i> Email Sent!</div>")
+            <i class=\"fa fa-check-circle\"></i> Email/SMS Sent!</div>")
             $("#sendTestModalSubmit").html(btnHtml)
         })
         .error(function (data) {

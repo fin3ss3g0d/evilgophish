@@ -514,7 +514,7 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
         
         // Debug
         //fmt.Println(event.Message)
-        if event.Message == "Email Sent" {
+        if event.Message == "Email/SMS Sent" {
             var ed EventDetails
             var cid = event.CampaignId
             var email = event.Email

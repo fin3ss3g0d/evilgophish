@@ -78,7 +78,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ![sms-message-template](images/sms-message-template.png)
 
-3. Configure `SMS Sending Profile`. Enter your `Twilio` `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profile` page:
+3. Configure `SMS Sending Profile`. Enter your phone number from `Twilio`, `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profiles` page:
 
 ![sms-sending-profile](images/sms-sending-profile.png)
 

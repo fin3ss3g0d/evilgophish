@@ -130,5 +130,5 @@ func (as *Server) SendTestEmail(w http.ResponseWriter, r *http.Request) {
 		JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusInternalServerError)
 		return
 	}
-	JSONResponse(w, models.Response{Success: true, Message: "Email Sent"}, http.StatusOK)
+	JSONResponse(w, models.Response{Success: true, Message: "Email/SMS Sent"}, http.StatusOK)
 }
