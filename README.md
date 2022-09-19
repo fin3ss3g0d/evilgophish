@@ -40,7 +40,7 @@ Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-s
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> 
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> <rid replacement>
  - root domain                     - the root domain to be used for the campaign
  - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
  - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
@@ -48,8 +48,9 @@ Usage:
  - gophish root domain bool        - true or false to proxy root domain to gophish
  - redirect url                    - URL to redirect unauthorized Apache requests
  - Teams messages bool             - true or false to setup Microsoft Teams messages
+ - rid replacement                 - replace the gophish default "rid" in phishing URLs with this value
 Example:
-  ./setup.sh example.com login false "download www" false https://redirect.com/ true
+  ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id
 ```
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 
@@ -113,7 +114,7 @@ This feature will send campaign events as messages to a `Microsoft Teams` channe
 
 ## Ensuring Email Opened Tracking
 
-You **CANNOT** use the default `Add Tracking Image` button when creating your email template. You **MUST** include your own image tag that points at the `GoPhish` server with the tracking URL scheme. This is also explained/shown in the [blog](https://outpost24.com/blog/Better-proxy-than-story). For example, if your `GoPhish` subdomain is `download.example.org`, and your `evilginx2` lure path is `https://login.example.org/login`, you would include the following tag in your email `.html` which will provide email opened tracking in `GoPhish`:
+You **CANNOT** use the default `Add Tracking Image` button when creating your email template. You **MUST** include your own image tag that points at the `GoPhish` server with the tracking URL scheme. This is also explained/shown in the [blog](https://outpost24.com/blog/Better-proxy-than-story). For example, if your `GoPhish` subdomain is `download.example.org`, your `evilginx2` lure path is `https://login.example.org/login`, and your `RId` value is `client_id`, you would include the following tag in your email `.html` which will provide email opened tracking in `GoPhish`:
 
 `<img src="https://download.example.org/login/track?client_id={{.RId}}"/>`
 
@@ -125,7 +126,7 @@ You **MUST** make sure `Apache2` is logging to the file defined in `gophish/conf
 
 Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
 
-1. `O3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
+1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online
 3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
 
@@ -150,7 +151,7 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 4. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
 5. Default server name has been changed to `IGNORE`
 6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
-7. `rid=` is now `client_id=` in phishing URLs
+7. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
 8. Transparency endpoint and messages completely removed
 9. Added `SMS` Campaign Support
 

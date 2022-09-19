@@ -26,10 +26,10 @@ function print_info () {
     echo -e "[${script_name}] \x1B[01;34m[*]\x1B[0m $1"
 }
 
-if [[ $# -ne 7 ]]; then
+if [[ $# -ne 8 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> <rid replacement>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
@@ -37,8 +37,9 @@ if [[ $# -ne 7 ]]; then
     print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
     print_error " - Teams messages bool             - true or false to setup Microsoft Teams messages"
+    print_error " - rid replacement                 - replace the gophish default \"rid\" in phishing URLs with this value"
     print_error "Example:"
-    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true'
+    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id'
 
     exit 2
 fi
@@ -51,6 +52,7 @@ gophish_subs="${4}"
 g_root_bool="${5}"
 redirect_url="${6}"
 teams_bool="${7}"
+rid_replacement="${8}"
 evilginx_dir=$HOME/.evilginx
 
 # Get path to certificates
@@ -170,6 +172,8 @@ function setup_gophish () {
         read -r webhook_url
         sed -i "s|\"teams_webhook_url\": \"\"|\"teams_webhook_url\": \"${webhook_url}\"|g" gophish/config.json
     fi
+    # Replace rid with user input
+    find . -type f -exec sed -i "s|client_id|${rid_replacement}|g" {} \;
     cd gophish || exit 1
     go build
     cd ..

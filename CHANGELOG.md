@@ -17,3 +17,7 @@ Added `SMS` campaign support with `Twilio`! Enjoy!
 # 09/18/2022
 
 Added error handling of failed `SMS` messages into the dashboard/database. If the sending of an `SMS` message fails, the error will now display right in the `GUI`. Updates to the dashboard were also made so that when viewing campaign results, statistic names now match `SMS` updates. For example, `Email Sent` now displays as `Email/SMS Sent` in the dashboard, etc.
+
+# 09/19/2022
+
+Added the option for operators to set their own `RId` value to use in phishing URLs to combat fingerprinting links.
