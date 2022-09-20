@@ -26,10 +26,11 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.19 // indirect
 	github.com/oschwald/maxminddb-golang v1.6.0
+	github.com/pusher/pusher-http-go/v5 v5.0.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/twilio/twilio-go v0.26.0
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	golang.org/x/crypto v0.0.0-20200128174031-69ecbb4d6d5d
+	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f

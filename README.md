@@ -40,14 +40,14 @@ Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-s
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Teams messages bool> <rid replacement>
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Pusher messages bool> <rid replacement>
  - root domain                     - the root domain to be used for the campaign
  - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
  - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
  - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one
  - gophish root domain bool        - true or false to proxy root domain to gophish
  - redirect url                    - URL to redirect unauthorized Apache requests
- - Teams messages bool             - true or false to setup Microsoft Teams messages
+ - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel
  - rid replacement                 - replace the gophish default "rid" in phishing URLs with this value
 Example:
   ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id
@@ -93,24 +93,25 @@ Once you have run `setup.sh`, the next steps are:
 8. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 9. **PROFIT**
 
-## Microsoft Teams Setup
+## Pusher Setup
 
-This feature will send campaign events as messages to a `Microsoft Teams` channel. This setup is optional and you do not have to receive campaign events via `Microsoft Teams`. If you *would* like to, this setup will guide you.
+`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). You might also like to hear that you have a `200k` message limit per day with a `FREE` account. Not even `Pusher` is capable of viewing/decrypting the contents of messages, as operators will set their own encryption key for their local instance of a `Pusher` feed server I have created. This key is never shared with `Pusher`. To get setup:
 
-1. Create a new channel for the campaign
-2. Within the web version of `Microsoft Teams` (I experienced a bug with the Desktop version), select the three dots next to the channel and click on `Connectors`:
+1. Create a new channel in `Pusher`, the channel **MUST** be prefixed with `private-encrypted-`. For example:
 
-![teams-connectors](images/teams-connectors.png)
+![pusher-channel](images/pusher-channel.png)
 
-3. Within this menu, search for `Incoming Webhook`, you should see the following:
+2. Select `true` for `Pusher messages bool` when running `setup.sh`. Feed your `app_id`, `key`, `secret`, `cluster`, channel name, and server encryption key into `setup.sh` when prompted.
+3. `cd` into the pusher directory and start the server with `./pusher`. For example:
 
-![teams-webhook](images/teams-webhook.png)
+![starting-pusher](images/starting-pusher.png)
 
-4. Give the webhook a name, copy the `URL` and **DON'T LOSE IT**
-5. When running `setup.sh`, set `Teams messages bool` to `true` and paste the webhook URL into the script when prompted
-6. Setup complete! You will now receive `Microsoft Teams` messages to a channel notifying you of events for your campaigns, you will see the messages start to come through like below:
+4. You can begin viewing the live feed at: `http://localhost:8000/`
 
-![teams-demo.png](images/teams-demo.png)
+**IMPORTANT NOTES**
+
+- The live feed page hooks the channel for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point. 
+- If you are running the server over `SSH`, you need to forward both ports `1400` and `8000` locally. Serving the servers locally and using `SSH` tunnels is intended for further security.
 
 ## Ensuring Email Opened Tracking
 
