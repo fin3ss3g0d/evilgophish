@@ -95,14 +95,14 @@ Once you have run `setup.sh`, the next steps are:
 
 ## Pusher Setup
 
-`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of viewing/decrypting the contents of messages, as operators will set their own encryption key for their local instance of a `Pusher` feed server I have created. This key is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account. To get setup:
+`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of decrypting the contents of these requests, as operators will set their own encryption key for their own local instance of a `Pusher` feed server I have created. Data going out to `Pusher` gets encrypted with this key before going out, and data coming in from `Pusher` gets decrypted with this key before displaying locally. This key is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account. To get setup:
 
 1. Create a new channel in `Pusher`, the channel **MUST** be prefixed with `private-encrypted-`. For example:
 
 ![pusher-channel](images/pusher-channel.png)
 
-2. Select `true` for `Pusher messages bool` when running `setup.sh`. Feed your `app_id`, `key`, `secret`, `cluster`, channel name, and server encryption key into `setup.sh` when prompted.
-3. `cd` into the pusher directory and start the server with `./pusher`. For example:
+2. Select `true` for `Pusher messages bool` when running `setup.sh`. Input your `app_id`, `key`, `secret`, `cluster`, channel name, and server encryption key into `setup.sh` when prompted.
+3. `cd` into the `pusher` directory and start the server with `./pusher`. For example:
 
 ![starting-pusher](images/starting-pusher.png)
 

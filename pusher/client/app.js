@@ -74,7 +74,7 @@
       channel.bind("event", (data) => {
         const parsed = JSON.parse(data);
         console.log("event found!");
-        const opened_temp = `
+        const templ = `
         <div class="box">
           <article class="media">
             <div class="media-content">
@@ -89,8 +89,8 @@
           </article>
         </div>
   `;
-        const opened_template = Handlebars.compile(opened_temp);
-        const html = opened_template(data);
+        const template = Handlebars.compile(templ);
+        const html = template(data);
 
         const divElement = document.createElement('div');
         divElement.innerHTML = html;
