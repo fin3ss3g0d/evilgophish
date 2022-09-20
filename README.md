@@ -95,7 +95,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ## Pusher Setup
 
-`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). You might also like to hear that you have a `200k` message limit per day with a `FREE` account. Not even `Pusher` is capable of viewing/decrypting the contents of messages, as operators will set their own encryption key for their local instance of a `Pusher` feed server I have created. This key is never shared with `Pusher`. To get setup:
+`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of viewing/decrypting the contents of messages, as operators will set their own encryption key for their local instance of a `Pusher` feed server I have created. This key is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account. To get setup:
 
 1. Create a new channel in `Pusher`, the channel **MUST** be prefixed with `private-encrypted-`. For example:
 
@@ -106,7 +106,9 @@ Once you have run `setup.sh`, the next steps are:
 
 ![starting-pusher](images/starting-pusher.png)
 
-4. You can begin viewing the live feed at: `http://localhost:8000/`
+4. You can begin viewing the live feed at: `http://localhost:8000/`. The feed dashboard will look like below:
+
+![pusher-dashboard](images/pusher-dashboard.png)
 
 **IMPORTANT NOTES**
 
