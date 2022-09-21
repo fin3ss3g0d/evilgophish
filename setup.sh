@@ -109,7 +109,7 @@ function setup_apache () {
         gophish_cstring+=${root_domain}
     fi
     # Replace template values with user input
-    sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" 000-default.conf.template > 000-default.conf
+    sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" conf/000-default.conf.template > 000-default.conf
     sed -i "s/ServerAlias gophish.template/ServerAlias ${gophish_cstring}/g" 000-default.conf
     sed -i "s|SSLCertificateFile|SSLCertificateFile ${certs_path}cert.pem|g" 000-default.conf
     sed -i "s|SSLCertificateChainFile|SSLCertificateChainFile ${certs_path}fullchain.pem|g" 000-default.conf
@@ -117,11 +117,11 @@ function setup_apache () {
     # Don't listen on port 80
     sed -i "s|Listen 80||g" /etc/apache2/ports.conf
     # Input redirect information
-    sed "s|https://en.wikipedia.org/|${redirect_url}|g" redirect.rules.template > redirect.rules
+    sed "s|https://en.wikipedia.org/|${redirect_url}|g" conf/redirect.rules.template > redirect.rules
     # Copy over Apache config file
     cp 000-default.conf /etc/apache2/sites-enabled/
     # Copy over blacklist file
-    cp blacklist.conf /etc/apache2/
+    cp conf/blacklist.conf /etc/apache2/
     # Copy over redirect rules file
     cp redirect.rules /etc/apache2/
     rm redirect.rules 000-default.conf
@@ -165,7 +165,7 @@ function setup_evilginx2 () {
 # Configure and install gophish
 function setup_gophish () {
     print_info "Configuring gophish"
-    sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" config.json.template > gophish/config.json
+    sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" conf/config.json.template > gophish/config.json
     sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
     # Setup Pusher if selected
     if [[ $(echo "${pusher_bool}" | grep -ci "true") -gt 0 ]]; then
@@ -188,12 +188,12 @@ function setup_gophish () {
         sed -i "s|\"pusher_encrypt_key\": \"\",|\"pusher_encrypt_key\": \"${encrypt_key}\",|g" gophish/config.json
         sed -i "s|\"pusher_channel_name\": \"\",|\"pusher_channel_name\": \"${channel_name}\",|g" gophish/config.json
         sed -i "s|\"enable_pusher\": false,|\"enable_pusher\": true,|g" gophish/config.json
-        sed -i "s|PUSHER_APP_ID=\"\"|PUSHER_APP_ID=\"${app_id}\"|g" pusher/.env
+        sed "s|PUSHER_APP_ID=\"\"|PUSHER_APP_ID=\"${app_id}\"|g" conf/env.template > pusher/.env
         sed -i "s|PUSHER_APP_KEY=\"\"|PUSHER_APP_KEY=\"${key}\"|g" pusher/.env
         sed -i "s|PUSHER_APP_SECRET=\"\"|PUSHER_APP_SECRET=\"${secret}\"|g" pusher/.env
         sed -i "s|PUSHER_APP_CLUSTER=\"\"|PUSHER_APP_CLUSTER=\"${cluster}\"|g" pusher/.env
         sed -i "s|PUSHER_CHANNELS_ENCRYPTION_KEY=\"\"|PUSHER_CHANNELS_ENCRYPTION_KEY=\"${encrypt_key}\"|g" pusher/.env
-        sed -i "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" pusher/client/app.js
+        sed "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" conf/app.js.template > pusher/client/app.js
         sed -i "s|const APP_CLUSTER = '';|const APP_CLUSTER = '${cluster}';|g" pusher/client/app.js
         sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
         cd pusher || exit 1

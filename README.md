@@ -55,6 +55,19 @@ Example:
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 
 
+## replace_rid.sh
+
+In case you ran `setup.sh` once and already replaced the default `RId` value throughout the project, `replace_rid.sh` was created to replace the `RId` value again.
+
+```
+Usage:
+./replace_rid <previous rid> <new rid>
+ - previous rid      - the previous rid value that was replaced
+ - new rid           - the new rid value to replace the previous
+Example:
+   ./replace_rid.sh user_id client_id
+```
+
 ## Email Campaign Setup
 
 Once `setup.sh` is run, the next steps are: 
@@ -106,14 +119,14 @@ Once you have run `setup.sh`, the next steps are:
 
 ![starting-pusher](images/starting-pusher.png)
 
-4. You can begin viewing the live feed at: `http://localhost:8000/`. The feed dashboard will look like below:
+4. You can begin viewing the live feed at: `http://localhost:1400/`. The feed dashboard will look like below:
 
 ![pusher-dashboard](images/pusher-dashboard.png)
 
 **IMPORTANT NOTES**
 
-- The live feed page hooks the channel for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point. 
-- If you are running the server over `SSH`, you need to forward both ports `1400` and `8000` locally. Serving the servers locally and using `SSH` tunnels is intended for further security.
+- The live feed page hooks the channel for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
+- If you are running the server over SSH, you need to forward both ports 1400 and 8000 locally. Serving the servers locally and using SSH tunnels is intended for further security.
 
 ## Ensuring Email Opened Tracking
 
