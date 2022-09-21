@@ -65,7 +65,7 @@ Usage:
  - previous rid      - the previous rid value that was replaced
  - new rid           - the new rid value to replace the previous
 Example:
-   ./replace_rid.sh user_id client_id
+  ./replace_rid.sh user_id client_id
 ```
 
 ## Email Campaign Setup
@@ -119,7 +119,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ![starting-pusher](images/starting-pusher.png)
 
-4. You can begin viewing the live feed at: `http://localhost:1400/`. The feed dashboard will look like below:
+4. You can begin viewing the live feed at: `http://localhost:8000/`. The feed dashboard will look like below:
 
 ![pusher-dashboard](images/pusher-dashboard.png)
 
