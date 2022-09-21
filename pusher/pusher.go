@@ -49,10 +49,6 @@ func main() {
 		},
 	}
 
-	wg := new(sync.WaitGroup)
-	wg.Add(2)
-
-	client_mux := http.NewServeMux()
 	mux := http.NewServeMux()
 
 	f := &feed{
@@ -62,22 +58,11 @@ func main() {
 
 	mux.Handle("/feed", createFeedTitle(client, f))
 	mux.Handle("/pusher/auth", authenticateUsers(client))
-	client_mux.Handle("/", http.FileServer(http.Dir("./client")))
+	mux.Handle("/", http.FileServer(http.Dir("./client")))
 
-	go func() {
-		log.Println("Starting local Pusher Auth HTTP server on port 1400")
-		log.Fatal(http.ListenAndServe("127.0.0.1:1400", mux))
-		wg.Done()
-	}()
-
-	go func() {
-		log.Println("Starting local Pusher Feed HTTP server on port 8000")
-		log.Println("Start viewing the live feed at: http://localhost:8000/")
-		log.Fatal(http.ListenAndServe("127.0.0.1:8000", client_mux))
-		wg.Done()
-	}()
-	
-	wg.Wait()
+	log.Println("Starting local Pusher HTTP server on port 1400")
+	log.Println("Start viewing the live feed at: http://localhost:1400/")
+	log.Fatal(http.ListenAndServe("127.0.0.1:1400", mux))
 }
 
 type feed struct {
