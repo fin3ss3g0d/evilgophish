@@ -1,0 +1,9 @@
+#audio-control {
+    cursor:pointer;
+    padding: 10px 20px;
+    background:#00ff00;
+    color: #000;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 30px;
+}

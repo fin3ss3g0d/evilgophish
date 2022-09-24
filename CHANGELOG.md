@@ -25,3 +25,7 @@ Added the option for operators to set their own `RId` value to use in phishing U
 # 09/20/2022
 
 Removed `Microsoft Teams` messages to a channel and replaced with `Pusher` end-to-end encrypted channels for security reasons.
+
+# 09/24/2022
+
+Added notification count to `Pusher` feed app as well as sound option for events. Color changes were also made to the app :)

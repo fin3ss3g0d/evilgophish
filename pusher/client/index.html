@@ -7,11 +7,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
         <base href="/" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
+        <link rel="stylesheet" href="/css/bulma.min.css">
+        <link rel="stylesheet" href="/css/button.css">
       <body>
           <section class="section">
               <div class="container">
-           <h1 class="notification is-info">evilgophish Pusher feed</h1>
+           <h1 class="notification is-info">evilgophish Pusher feed<div id="audio-control" class="muted">Unmute</div></h1>   
     <div class="columns">
       <div class="column is-7">
         <div id="feed">
@@ -23,5 +24,6 @@
       </body>
       <script src="https://js.pusher.com/4.3/pusher.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.0/handlebars.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
       <script src="app.js"></script>
     </html>
