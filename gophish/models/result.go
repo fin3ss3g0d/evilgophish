@@ -192,7 +192,7 @@ func (r *Result) PusherNotifyCapturedSession(app_id string, app_key string, secr
         Cluster: cluster,
         EncryptionMasterKeyBase64: encrypt_key,
     }
-    data := map[string]string{"event": "Captured Session", "time": r.ModifiedDate.String(), "message": "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dasboard!"}
+    data := map[string]string{"event": "Captured Session", "time": r.ModifiedDate.String(), "message": "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"}
     err := pusherClient.Trigger(channel_name, "event", data)
     if err != nil {
         fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
