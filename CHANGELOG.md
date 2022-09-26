@@ -29,3 +29,7 @@ Removed `Microsoft Teams` messages to a channel and replaced with `Pusher` end-t
 # 09/24/2022
 
 Added notification count to `Pusher` feed app as well as sound option for events. Color changes were also made to the app :)
+
+# 09/26/2022
+
+Added the ability to view full token `JSON` strings from `evilginx` directly in `GoPhish` dashboard :)

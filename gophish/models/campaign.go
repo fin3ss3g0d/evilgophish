@@ -39,9 +39,9 @@ type Campaign struct {
     Groups        []Group   `json:"groups,omitempty"`
     Events        []Event   `json:"timeline,omitempty"`
     SMTPId        int64     `json:"-"`
-	SMSId         int64     `json:"-"`
+    SMSId         int64     `json:"-"`
     SMTP          SMTP      `json:"smtp"`
-	SMS           SMS       `json:"sms"`
+    SMS           SMS       `json:"sms"`
     URL           string    `json:"url"`
 }
 
@@ -74,13 +74,14 @@ type CampaignSummary struct {
 
 // CampaignStats is a struct representing the statistics for a single campaign
 type CampaignStats struct {
-    Total         int64 `json:"total"`
-    EmailsSent    int64 `json:"sent"`
-    OpenedEmail   int64 `json:"opened"`
-    ClickedLink   int64 `json:"clicked"`
-    SubmittedData int64 `json:"submitted_data"`
-    EmailReported int64 `json:"email_reported"`
-    Error         int64 `json:"error"`
+    Total           int64 `json:"total"`
+    EmailsSent      int64 `json:"sent"`
+    OpenedEmail     int64 `json:"opened"`
+    ClickedLink     int64 `json:"clicked"`
+    SubmittedData   int64 `json:"submitted_data"`
+    CapturedSession int64 `json:"captured_session"`
+    EmailReported   int64 `json:"email_reported"`
+    Error           int64 `json:"error"`
 }
 
 // Event contains the fields for an event
@@ -313,6 +314,11 @@ func getCampaignStats(cid int64) (CampaignStats, error) {
     if err != nil {
         return s, err
     }
+    query.Where("status=?", EventCapturedSession).Count(&s.CapturedSession)
+    if err != nil {
+        fmt.Printf("[-] Error: %s\n", err)
+        return s, err
+    }
     query.Where("status=?", EventDataSubmit).Count(&s.SubmittedData)
     if err != nil {
         return s, err
@@ -322,6 +328,12 @@ func getCampaignStats(cid int64) (CampaignStats, error) {
         return s, err
     }
     query.Where("reported=?", true).Count(&s.EmailReported)
+    if err != nil {
+        return s, err
+    }
+    // Every captured session event implies they submitted data
+    s.SubmittedData += s.CapturedSession
+    err = query.Where("status=?", EventClicked).Count(&s.ClickedLink).Error
     if err != nil {
         return s, err
     }
@@ -540,11 +552,11 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
                     continue
                 }
-				plr := regexp.MustCompile(`[\+]`)
-				plus_match := plr.FindAllString(email, -1)
-				if len(plus_match) != 0 {
-					email = plr.ReplaceAllString(email, "")
-				}
+                plr := regexp.MustCompile(`[\+]`)
+                plus_match := plr.FindAllString(email, -1)
+                if len(plus_match) != 0 {
+                    email = plr.ReplaceAllString(email, "")
+                }
 
                 er, _ := regexp.Compile(email)
                 ematch := er.FindAllString(emailscanner.Text(), -1)
@@ -762,8 +774,102 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
                     }                
                 }
             }
+        } else if event.Message == "Submitted Data" {
+            var ed EventDetails
+            var cid = event.CampaignId
+            var email = event.Email
+            rid := ""
+            json.Unmarshal([]byte(event.Details), &ed)
+
+            scid := strconv.FormatInt(id, 10)
+            epath := filepath.Join(".", "campaigns", scid, "sent-emails.json")
+            spath := filepath.Join(".", "campaigns", scid, "sessions.json")
+            emailfile, err := os.Open(epath)
+            if err != nil {
+                fmt.Printf("[-] %s does not exist! Skipping session check for: %s\n", epath, email)
+                continue
+            }
+            emailscanner := bufio.NewScanner(emailfile)
+            for emailscanner.Scan() {
+                sent := MyResult{}
+                if err := json.Unmarshal(emailscanner.Bytes(), &sent); err != nil {
+                    fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
+                    continue
+                }
+
+                er, _ := regexp.Compile(email)
+                ematch := er.FindAllString(emailscanner.Text(), -1)
+                if len(ematch) != 0 {                 
+                    rid = sent.RId
+                    //fmt.Printf("[+] Found RId for session check! %s\n", rid)
+                } else {
+                    continue
+                }
+
+                sessions_log, err := os.Open(spath)
+                if err != nil {
+                    fmt.Printf("[-] %s does not exist! Skipping duplicate session check for: %s\n", spath, email)
+                }
+
+                dupsessionscanner := bufio.NewScanner(sessions_log)
+                for dupsessionscanner.Scan() {
+                    dupsessioncheck := CapturedSession{}
+                    if err := json.Unmarshal(dupsessionscanner.Bytes(), &dupsessioncheck); err != nil {
+                        fmt.Printf("[-] Failed reading JSON bytes from sessions file: %s\n", err)
+                        continue
+                    }
+                    if rid == dupsessioncheck.RId {
+                        //fmt.Printf("[+] Found duplicate session! Skipping!\n")
+                        duplicate = true
+                    }
+                }
+
+                if (duplicate) {
+                    continue
+                }
+
+                usr, err := user.Current()
+                if err != nil {
+                    fmt.Printf("[-] Getting current user context failed! Skipping session check for: %s", email)
+                    continue
+                }
+                cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
+                sessions_file, err := os.Open(filepath.Join(cfg_dir, "sessions.json"))
+
+                if err != nil {
+                    fmt.Println("[*] No evilginx2 sessions yet")
+                } else {
+                    sessionscanner := bufio.NewScanner(sessions_file)
+                    for sessionscanner.Scan() {
+                        session := CapturedSession{}
+                        if err := json.Unmarshal(sessionscanner.Bytes(), &session); err != nil {
+                            fmt.Printf("[-] Failed reading JSON bytes from sessions file: %s\n", err)
+                            continue
+                        }
+                        if rid == session.RId {
+                            //fmt.Printf("[*] RId match!\n")
+                            res := Result{}
+                            res.CampaignId = cid
+                            res.Id = sent.Id
+                            res.UserId = sent.UserId
+                            res.IP = "127.0.0.1"
+                            res.RId = rid
+                            res.Latitude = 0.000000
+                            res.Longitude = 0.000000
+                            res.Reported = false
+                            res.Email = email
+                            json_tokens := tokensToJSON(session.Tokens)
+                            ed.Payload = map[string][]string{"Tokens": {json_tokens}}
+                            err = res.HandleCapturedSession(ed, session)
+                            if err != nil {
+                                log.Error(err)
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
+    } 
     return cr, err
 }
 
@@ -786,7 +892,7 @@ func GetQueuedCampaigns(t time.Time) ([]Campaign, error) {
 }
 
 func PostSMSCampaign(c *Campaign, uid int64) error {
-	err := c.ValidateSMS()
+    err := c.ValidateSMS()
     if err != nil {
         return err
     }
@@ -860,7 +966,7 @@ func PostSMSCampaign(c *Campaign, uid int64) error {
         log.Error(err)
         return err
     }
-	c.SMS = s
+    c.SMS = s
     c.SMSId = s.Id
     // Insert into the DB
     err = db.Save(c).Error
@@ -930,7 +1036,7 @@ func PostSMSCampaign(c *Campaign, uid int64) error {
                 RId:        r.RId,
                 SendDate:   sendDate,
                 Processing: processing,
-				Target:     t.Email,
+                Target:     t.Email,
             }
             err = tx.Save(m).Error
             if err != nil {

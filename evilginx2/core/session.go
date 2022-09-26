@@ -21,6 +21,11 @@ type Session struct {
     RId           string
 }
 
+type CapturedSession struct {
+    RId         string `json:"RId"`
+    Tokens      map[string]map[string]*database.Token
+}
+
 func NewSession(name string) (*Session, error) {
     s := &Session{
         Id:            GenRandomToken(),

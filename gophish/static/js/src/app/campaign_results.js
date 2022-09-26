@@ -67,6 +67,12 @@ var statuses = {
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
+    "Captured Session": {
+        color: "f05b4f",
+        label: "label-danger",
+        icon: "fa-exclamation",
+        point: "ct-point-clicked"
+    },
     "Unknown": {
         color: "#6c7a89",
         label: "label-default",
@@ -102,6 +108,7 @@ var statusMapping = {
     "Email/SMS Opened": "opened",
     "Clicked Link": "clicked",
     "Submitted Data": "submitted_data",
+    "Captured Session": "submitted_data",
     "Email Reported": "reported",
 }
 
@@ -111,7 +118,8 @@ var progressListing = [
     "Email/SMS Sent",
     "Email/SMS Opened",
     "Clicked Link",
-    "Submitted Data"
+    "Submitted Data",
+    "Captured Session"
 ]
 
 var campaign = {}
@@ -915,7 +923,7 @@ function refresh() {
     $("#refresh_btn").hide()
     poll()
     clearTimeout(setRefresh)
-    setRefresh = setTimeout(refresh, 60000)
+    setRefresh = setTimeout(refresh, 10000)
 };
 
 function report_mail(rid, cid) {
@@ -957,5 +965,5 @@ $(document).ready(function () {
     load();
 
     // Start the polling loop
-    setRefresh = setTimeout(refresh, 60000)
+    setRefresh = setTimeout(refresh, 10000)
 })

