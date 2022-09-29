@@ -135,8 +135,8 @@ function setup_evilginx2 () {
     mkdir -p "${evilginx_dir}/crt/${root_domain}"
     for i in evilginx2/phishlets/*.yaml; do
         phishlet=$(echo "${i}" | awk -F "/" '{print $3}' | sed 's/.yaml//g')
-        cp ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
-        cp ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
+        ln -s ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
+        ln -s ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
     done
     # Prepare DNS for evilginx2
     evilginx2_cstring=""
