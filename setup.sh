@@ -158,6 +158,7 @@ function setup_evilginx2 () {
     # Build evilginx2
     cd evilginx2 || exit 1
     go build
+    sleep 3
     cd ..
     print_good "Configured evilginx2!"
 }
@@ -198,6 +199,7 @@ function setup_gophish () {
         sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
         cd pusher || exit 1
         go build
+        sleep 3
         cd ..
         print_good "Pusher configured! cd into pusher then launch binary with ./pusher to start!"
     fi
@@ -205,6 +207,7 @@ function setup_gophish () {
     find . -type f -exec sed -i "s|client_id|${rid_replacement}|g" {} \;
     cd gophish || exit 1
     go build
+    sleep 3
     cd ..
     print_good "Configured gophish!"
 }
