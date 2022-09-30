@@ -21,7 +21,6 @@ type EmailRequest struct {
 	Id          int64        `json:"-"`
 	Template    Template     `json:"template"`
 	TemplateId  int64        `json:"-"`
-	Page        Page         `json:"page"`
 	PageId      int64        `json:"-"`
 	SMTP        SMTP         `json:"smtp"`
 	URL         string       `json:"url"`

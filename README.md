@@ -101,7 +101,7 @@ Example:
 Once `setup.sh` is run, the next steps are: 
 
 1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
-2. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, fake landing page, and groups
+2. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, and groups
 3. Start `evilginx2` and configure phishlet and lure
 4. Ensure `Apache2` server is started
 5. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
@@ -128,11 +128,10 @@ Once you have run `setup.sh`, the next steps are:
 
 ![twilio-number-formats](images/twilio-number-formats.png)
 
-5. Create a fake landing page in `GoPhish`
-6. Start `evilginx2` and configure phishlet and lure
-7. Ensure `Apache2` server is started
-8. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
-9. **PROFIT**
+5. Start `evilginx2` and configure phishlet and lure
+6. Ensure `Apache2` server is started
+7. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
+8. **PROFIT**
 
 ## Pusher Setup
 
@@ -157,7 +156,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ## Ensuring Email Opened Tracking
 
-You **CANNOT** use the default `Add Tracking Image` button when creating your email template. You **MUST** include your own image tag that points at the `GoPhish` server with the tracking URL scheme. This is also explained/shown in the [blog](https://outpost24.com/blog/Better-proxy-than-story). For example, if your `GoPhish` subdomain is `download.example.org`, your `evilginx2` lure path is `https://login.example.org/login`, and your `RId` value is `client_id`, you would include the following tag in your email `.html` which will provide email opened tracking in `GoPhish`:
+You **MUST** include your own image tag that points at the `GoPhish` server with the tracking URL scheme. This is also explained/shown in the [blog](https://outpost24.com/blog/Better-proxy-than-story). For example, if your `GoPhish` subdomain is `download.example.org`, your `evilginx2` lure path is `https://login.example.org/login`, and your `RId` value is `client_id`, you would include the following tag in your email `.html` which will provide email opened tracking in `GoPhish`:
 
 `<img src="https://download.example.org/login/track?client_id={{.RId}}"/>`
 

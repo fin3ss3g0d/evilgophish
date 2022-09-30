@@ -33,3 +33,7 @@ Added notification count to `Pusher` feed app as well as sound option for events
 # 09/26/2022
 
 Added the ability to view full token `JSON` strings from `evilginx` directly in `GoPhish` dashboard :)
+
+# 09/30/2022
+
+Removed the need to create a fake landing inside `GoPhish` as part of a campaign setup. Removed `Add Tracking Image` button to avoid mistakes being made with operators using this button. This forces the manual insertion of image tags into email templates as it is needed for tracking to properly work.

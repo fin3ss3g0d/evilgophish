@@ -65,22 +65,6 @@ func (as *Server) SendTestEmail(w http.ResponseWriter, r *http.Request) {
 		storeRequest = true
 	}
 
-	if s.Page.Name != "" {
-		s.Page, err = models.GetPageByName(s.Page.Name, s.UserId)
-		if err == gorm.ErrRecordNotFound {
-			log.WithFields(logrus.Fields{
-				"page": s.Page.Name,
-			}).Error("Page does not exist")
-			JSONResponse(w, models.Response{Success: false, Message: models.ErrPageNotFound.Error()}, http.StatusBadRequest)
-			return
-		} else if err != nil {
-			log.Error(err)
-			JSONResponse(w, models.Response{Success: false, Message: err.Error()}, http.StatusBadRequest)
-			return
-		}
-		s.PageId = s.Page.Id
-	}
-
 	// If a complete sending profile is provided use it
 	if err := s.SMTP.Validate(); err != nil {
 		// Otherwise get the SMTP requested by name

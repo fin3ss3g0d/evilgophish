@@ -133,7 +133,6 @@ func (as *AdminServer) registerRoutes() {
 	router.HandleFunc("/sms_campaigns/{id:[0-9]+}", mid.Use(as.SMSCampaignID, mid.RequireLogin))
 	router.HandleFunc("/templates", mid.Use(as.Templates, mid.RequireLogin))
 	router.HandleFunc("/groups", mid.Use(as.Groups, mid.RequireLogin))
-	router.HandleFunc("/landing_pages", mid.Use(as.LandingPages, mid.RequireLogin))
 	router.HandleFunc("/sending_profiles", mid.Use(as.EmailSendingProfiles, mid.RequireLogin))
 	router.HandleFunc("/sms_sending_profiles", mid.Use(as.SMSSendingProfiles, mid.RequireLogin))
 	router.HandleFunc("/settings", mid.Use(as.Settings, mid.RequireLogin))
@@ -245,13 +244,6 @@ func (as *AdminServer) Groups(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "Users & Groups"
 	getTemplate(w, "groups").ExecuteTemplate(w, "base", params)
-}
-
-// LandingPages handles the default path and template execution
-func (as *AdminServer) LandingPages(w http.ResponseWriter, r *http.Request) {
-	params := newTemplateParams(r)
-	params.Title = "Landing Pages"
-	getTemplate(w, "landing_pages").ExecuteTemplate(w, "base", params)
 }
 
 // EmailSendingProfiles handles the default path and template execution

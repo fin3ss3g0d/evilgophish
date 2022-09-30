@@ -109,17 +109,6 @@ func DeleteUser(id int64) error {
 		}
 	}
 	log.Infof("Deleting pages for user ID %d", id)
-	// Delete the landing pages
-	pages, err := GetPages(id)
-	if err != nil {
-		return err
-	}
-	for _, page := range pages {
-		err = DeletePage(page.Id, id)
-		if err != nil {
-			return err
-		}
-	}
 	// Delete the templates
 	log.Infof("Deleting templates for user ID %d", id)
 	templates, err := GetTemplates(id)
