@@ -73,8 +73,8 @@ function install_depends () {
     apt-get install apache2 build-essential letsencrypt wget git net-tools tmux openssl -y > /dev/null
     print_good "Installed dependencies with apt!"
     print_info "Installing Go from source"
-    wget https://go.dev/dl/go1.19.linux-amd64.tar.gz > /dev/null
-    tar -C /usr/local -xzf go1.19.linux-amd64.tar.gz
+    wget https://go.dev/dl/go1.19.1.linux-amd64.tar.gz
+    tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz
     ln -sf /usr/local/go/bin/go /usr/bin/go
     rm go1.19.linux-amd64.tar.gz
     print_good "Installed Go from source!"
@@ -135,8 +135,8 @@ function setup_evilginx2 () {
     mkdir -p "${evilginx_dir}/crt/${root_domain}"
     for i in evilginx2/phishlets/*.yaml; do
         phishlet=$(echo "${i}" | awk -F "/" '{print $3}' | sed 's/.yaml//g')
-        cp ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
-        cp ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
+        ln -sf ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
+        ln -sf ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
     done
     # Prepare DNS for evilginx2
     evilginx2_cstring=""
@@ -158,7 +158,6 @@ function setup_evilginx2 () {
     # Build evilginx2
     cd evilginx2 || exit 1
     go build
-    sleep 3
     cd ..
     print_good "Configured evilginx2!"
 }
@@ -199,7 +198,6 @@ function setup_gophish () {
         sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
         cd pusher || exit 1
         go build
-        sleep 3
         cd ..
         print_good "Pusher configured! cd into pusher then launch binary with ./pusher to start!"
     fi
@@ -207,7 +205,6 @@ function setup_gophish () {
     find . -type f -exec sed -i "s|client_id|${rid_replacement}|g" {} \;
     cd gophish || exit 1
     go build
-    sleep 3
     cd ..
     print_good "Configured gophish!"
 }
@@ -217,8 +214,8 @@ function main () {
     install_depends
     get_certs_path
     setup_apache
-    setup_evilginx2
     setup_gophish
+    setup_evilginx2
     print_good "Installation complete! When ready start apache with: systemctl start apache2"
     print_info "It is recommended to run both servers inside a tmux session to avoid losing them over SSH!"
 }
