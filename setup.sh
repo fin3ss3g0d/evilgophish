@@ -76,7 +76,7 @@ function install_depends () {
     wget https://go.dev/dl/go1.19.1.linux-amd64.tar.gz
     tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz
     ln -sf /usr/local/go/bin/go /usr/bin/go
-    rm go1.19.linux-amd64.tar.gz
+    rm go1.19.1.linux-amd64.tar.gz
     print_good "Installed Go from source!"
 }
 
