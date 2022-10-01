@@ -13,7 +13,6 @@
   * [SMS Campaign Setup](#sms-campaign-setup)
   * [Pusher Setup](#pusher-setup)
   * [Ensuring Email Opened Tracking](#ensuring-email-opened-tracking)
-  * [**Important Notes**](#important-notes)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [Changes To evilginx2](#changes-to-evilginx2)
