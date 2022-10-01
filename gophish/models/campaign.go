@@ -1,24 +1,16 @@
 package models
 
 import (
-    "bufio"
-    "encoding/json"
-    "errors"
-    "fmt"
-    "net/url"
-    "os"
-    "os/user"
-    "path/filepath"
-    "strings"
-    "time"
-    "strconv"
-    "regexp"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/url"
+	"time"
 
-    "github.com/gophish/gophish/config"
-    log "github.com/gophish/gophish/logger"
-    "github.com/gophish/gophish/webhook"
-    "github.com/jinzhu/gorm"
-    "github.com/sirupsen/logrus"
+	log "github.com/gophish/gophish/logger"
+	"github.com/gophish/gophish/webhook"
+	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 // Campaign is a struct representing a created campaign
@@ -475,6 +467,39 @@ func GetCampaign(id int64, uid int64) (Campaign, error) {
     return c, err
 }
 
+func (r *Result) FindClickedResult() (ClickedResults, error) {
+    clickedResult := ClickedResults{}
+    query := egp_db.Table("clicked_results").Where("r_id=?", r.RId)
+    err := query.Scan(&clickedResult).Error
+    if err != nil {
+        log.Error(err)
+        return clickedResult, err
+    }
+    return clickedResult, err
+}
+
+func (r *Result) FindSubmittedResult() (SubmittedResults, error) {
+    submittedResult := SubmittedResults{}
+    query := egp_db.Table("submitted_results").Where("r_id=?", r.RId)
+    err := query.Scan(&submittedResult).Error
+    if err != nil {
+        log.Error(err)
+        return submittedResult, err
+    }
+    return submittedResult, err
+}
+
+func (r *Result) FindCapturedResult() (CapturedResults, error) {
+    capturedResult := CapturedResults{}
+    query := egp_db.Table("captured_results").Where("r_id=?", r.RId)
+    err := query.Scan(&capturedResult).Error
+    if err != nil {
+        log.Error(err)
+        return capturedResult, err
+    }
+    return capturedResult, err
+}
+
 // GetCampaignResults returns just the campaign results for the given campaign
 func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
     cr := CampaignResults{}
@@ -497,363 +522,89 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
         return cr, err
     }
 
-    // Debug
-    //fmt.Println("GetCampaignResults function called!")
-    /*campaign, err := GetCampaign(id, uid)
-    if err != nil {
-        log.Errorf("%s: error getting campaign", err)
-    }
-    fmt.Println("Campaign name: ", campaign.Name)*/
-
-    for _, event := range cr.Events {
-        duplicate := false
-        
-        // Debug
-        //fmt.Println(event.Message)
-        if event.Message == "Email/SMS Sent" {
-            var ed EventDetails
-            var cid = event.CampaignId
-            var email = event.Email
-            rid := ""
-            json.Unmarshal([]byte(event.Details), &ed)
-            // Debug
-            //fmt.Printf("Email sent to: %s\n", email)
-            //fmt.Println(event.Details)
-            //fmt.Printf("RID: %s\n", ed.Payload.Get("client_id"))
-            //rid := ed.Payload.Get("client_id")
-
-            scid := strconv.FormatInt(id, 10)
-            epath := filepath.Join(".", "campaigns", scid, "sent-emails.json")           
-            emailfile, err := os.Open(epath)
+    for _, r := range cr.Results {   
+        if r.Status == "Email/SMS Sent" || r.Status == "Email/SMS Opened" {
+            clickedResult, err := r.FindClickedResult()
             if err != nil {
-                fmt.Printf("[-] %s does not exist! Skipping clicked link check for: %s\n", epath, email)
+                continue
+            } else if clickedResult.RId == "" {
                 continue
             }
-            emailscanner := bufio.NewScanner(emailfile)
-            for emailscanner.Scan() {
-                sent := MyResult{}
-                if err := json.Unmarshal(emailscanner.Bytes(), &sent); err != nil {
-                    fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
-                    continue
-                }
-                plr := regexp.MustCompile(`[\+]`)
-                plus_match := plr.FindAllString(email, -1)
-                if len(plus_match) != 0 {
-                    email = plr.ReplaceAllString(email, "")
-                }
-
-                er, _ := regexp.Compile(email)
-                ematch := er.FindAllString(emailscanner.Text(), -1)
-                //fmt.Printf("Prefix: %s line: %s\n", prefix, emailscanner.Text())
-                if len(ematch) != 0 {                 
-                    rid = sent.RId
-                    //fmt.Printf("[+] Match for: %s RId: %s\n", sent.Email, rid)
-                } else {
-                    //fmt.Printf("[-] No match for this event! %s\n", strings.ToLower(sent.Email))
-                    continue
-                }
-            }
-
-            //fmt.Printf("RID: %s\n", rid)
-
-            conf, err := config.LoadConfig("config.json")
+            res := Result{}
+            ed := EventDetails{}
+            payload := map[string][]string{"client_id": []string{r.RId}}
+            json.Unmarshal([]byte(clickedResult.Browser), &ed.Browser)
+            ed.Payload = payload
+            res.CampaignId = id
+            res.Id = r.Id
+            res.RId = r.RId
+            res.UserId = r.UserId
+            res.IP = "127.0.0.1"
+            res.Latitude = 0.000000
+            res.Longitude = 0.000000
+            res.Reported = false
+            res.Email = r.BaseRecipient.Email
+            err = res.HandleClickedLink(ed)
             if err != nil {
-                fmt.Printf("[-] Failed to load config.json from default path! Skipping clicked link check for: %s", email)
+                log.Error(err)
+            } 
+        } else if r.Status == "Clicked Link" {
+            submittedResult, err := r.FindSubmittedResult()
+            if err != nil {
+                continue
+            } else if submittedResult.RId == "" {
                 continue
             }
-            apache_log := conf.ApacheLogPath
-            lfile, err := os.Open(apache_log)
+            res := Result{}
+            ed := EventDetails{}
+            res.CampaignId = id
+            res.Id = r.Id
+            res.RId = r.RId
+            res.UserId = r.UserId
+            res.IP = "127.0.0.1"
+            res.Latitude = 0.000000
+            res.Longitude = 0.000000
+            res.Reported = false
+            payload := map[string][]string{"Username": []string{submittedResult.Username}, "Password": []string{submittedResult.Password}}
+            ed.Payload = payload
+            err = json.Unmarshal([]byte(submittedResult.Browser), &ed.Browser)
             if err != nil {
-                fmt.Printf("[-] %s does not exist! Setup is incorrect! Skipping clicked link check for: %s", apache_log, email)
+                log.Error(err)
+            }
+            res.Email = r.BaseRecipient.Email
+            err = res.HandleFormSubmit(ed)
+            if err != nil {
+                log.Error(err)
+            }
+        } else if r.Status == "Submitted Data" {
+            capturedResult, err := r.FindCapturedResult()
+            if err != nil {
+                continue
+            } else if capturedResult.RId == "" {
                 continue
             }
-
-            scanner := bufio.NewScanner(lfile)
-            for scanner.Scan() {
-                rr, _ := regexp.Compile(rid)
-                rmatch := rr.FindAllString(scanner.Text(), -1)
-                //fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
-                if len(rmatch) != 0 {
-                    logsplit := strings.Split(scanner.Text(), "\"")
-                    ip := logsplit[0]
-                    useragent := logsplit[5]
-                    // Debug
-                    /*fmt.Printf("[+] Rid %s is in evilginx2 access log! %s clicked link!\n", rid, event.Email)									                    
-                    fmt.Println("IP test: ", ip)
-                    fmt.Println("User agent test: ", useragent)*/
-                    clickpath := filepath.Join(".", "campaigns", scid, "clicked-links.json")
-                    clicklog, err := os.Open(clickpath)
-                    if err != nil {
-                        fmt.Printf("%s does not exist yet, skipping check\n", clickpath)
-                    } else {
-                        clickscanner := bufio.NewScanner(clicklog)
-                        for clickscanner.Scan() {
-                            cmatch := rr.FindAllString(clickscanner.Text(), -1)
-                            if len(cmatch) != 0 {
-                                duplicate = true
-                                break
-                            }
-                        }
-                    }
-
-                    if duplicate {
-                        continue
-                    }
-
-                    emailfile2, err := os.Open(epath)
-                    if err != nil {
-                        fmt.Printf("%s does not exist! Skipping clicked link check for: %s\n", epath, email)
-                        continue
-                    }
-
-                    emailscanner2 := bufio.NewScanner(emailfile2)
-                    for emailscanner2.Scan() {
-                        rmatch2 := rr.FindAllString(emailscanner2.Text(), -1)
-                        if len(rmatch2) != 0 {                                                      
-                            /*Debug
-                            fmt.Println("Match!")*/
-                            payload := map[string][]string{"client_id": []string{rid}}
-                            browser := map[string]string{"address": ip, "user-agent": useragent}
-                            ed.Payload = payload
-                            ed.Browser = browser
-                            // Debug
-                            //fmt.Println("Event details:", ed)
-                            clicked := MyResult{}
-                            if err := json.Unmarshal(emailscanner2.Bytes(), &clicked); err != nil {
-                                fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
-                                continue
-                            }
-                            
-                            res := Result{}
-                            res.CampaignId = cid
-                            res.Id = clicked.Id
-                            res.UserId = clicked.UserId
-                            res.IP = ip
-                            res.RId = clicked.RId
-                            res.Latitude = 0.000000
-                            res.Longitude = 0.000000
-                            //res.SendDate = time.Now()
-                            res.Reported = false					
-                            res.Email = email
-                            
-                            err = res.HandleClickedLink(ed)
-                            if err != nil {
-                                log.Error(err)
-                            }                
-
-                            /* Debug
-                            fmt.Println("[*] Added event!")
-                            fmt.Printf("Result Id: %d\n", res.Id)
-                            fmt.Printf("Result CampaignId: %d\n", res.CampaignId)
-                            fmt.P`rintf("Result UserId: %d\n", res.UserId)
-                            fmt.Printf("Result RId: %s\n", res.RId)
-                            fmt.Printf("Result Status: %s\n", res.Status)
-                            fmt.Printf("Result IP: %s\n", res.IP)
-                            fmt.Printf("Result Latitude: %f\n", res.Latitude)
-                            fmt.Printf("Result Longitude: %f\n", res.Longitude)
-                            fmt.Printf("Result SendDate: %s\n", res.SendDate)
-                            fmt.Printf("Result Reported: %t\n", res.Reported)
-                            fmt.Printf("Result ModifiedDate: %s\n", res.ModifiedDate)
-                            fmt.Printf("Result Email: %s\n", res.Email)
-                            fmt.Printf("Result Name/Position: %s %s/%s", res.BaseRecipient.FirstName, res.BaseRecipient.LastName, res.BaseRecipient.Position)*/
-                        }
-                    }
-                }
-            }
-        } else if event.Message == "Clicked Link" {
-            var ed EventDetails
-            var cid = event.CampaignId
-            var email = event.Email
-            scid := strconv.FormatInt(id, 10)
-            json.Unmarshal([]byte(event.Details), &ed)
-            rid := ed.Payload.Get("client_id")
-            credspath := filepath.Join(".", "campaigns", scid, "creds.json")
-            clickspath := filepath.Join(".", "campaigns", scid, "clicked-links.json")
-
-            credlog, err := os.Open(credspath)
+            res := Result{}
+            ed := EventDetails{}
+            res.CampaignId = id
+            res.Id = r.Id
+            res.RId = r.RId
+            res.UserId = r.UserId
+            res.IP = "127.0.0.1"
+            res.Latitude = 0.000000
+            res.Longitude = 0.000000
+            res.Reported = false
+            res.Email = r.BaseRecipient.Email
+            ed.Payload = map[string][]string{"Tokens": {capturedResult.Tokens}}
+            err = json.Unmarshal([]byte(capturedResult.Browser), &ed.Browser)
             if err != nil {
-                fmt.Printf("%s does not exist yet, skipping duplicate submitted creds check\n", credspath)
-            } else {
-                dupcredscanner := bufio.NewScanner(credlog)
-                for dupcredscanner.Scan() {
-                    rr, _ := regexp.Compile(rid)
-                    rmatch := rr.FindAllString(dupcredscanner.Text(), -1)
-                    //fmt.Printf("[*] RTest: %s RID: %s RTest len: %d\n", rmatch, rid, len(rmatch))
-                    if len(rmatch) != 0 {
-                        duplicate = true
-                        break
-                    }
-                }
+                log.Error(err)
             }
-
-            if duplicate {
-                continue
-            }
-
-            usr, err := user.Current()
+            err = res.HandleCapturedSession(ed)
             if err != nil {
-                fmt.Printf("[-] Getting current user context failed! Skipping clicked link check for: %s", email)
-                continue
-            }
-            cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
-            ecredsfile, err := os.Open(filepath.Join(cfg_dir, "creds.json"))
-
-            if err != nil {
-                fmt.Println("[*] No evilginx2 credentials yet")
-            } else {
-                ecredscanner := bufio.NewScanner(ecredsfile)
-                for ecredscanner.Scan() {
-                    creds := Creds{}
-                    if err := json.Unmarshal(ecredscanner.Bytes(), &creds); err != nil {
-                        fmt.Printf("[-] Failed reading JSON bytes from creds file: %s\n", err)
-                        continue
-                    }
-
-                    fmt.Printf("[+] evilginx2 credential data: Username: %s Password: %s\n", creds.Username, creds.Password)
-                    clickfile, err := os.Open(clickspath)
-                    if err != nil {
-                        fmt.Printf("[-] %s does not exist! Skipping cred check for %s\n", clickspath, creds.Username)
-                        continue
-                    }
-                    // Check empty usernames/passwords
-                    if len(creds.Username) == 0 || len(creds.Password) == 0 {
-                        // Debug
-                        //fmt.Printf("[*] Caught empty username/password!\n")
-                        continue
-                    } else {
-                        clickscanner := bufio.NewScanner(clickfile)
-                        for clickscanner.Scan() {
-                            rr, _ := regexp.Compile(rid)
-                            urr, _ := regexp.Compile(creds.RId)
-                            cmatch := rr.FindAllString(clickscanner.Text(), -1)
-                            rmatch := urr.FindAllString(clickscanner.Text(), -1)
-                            if len(cmatch) != 0 && len(rmatch) != 0 {
-                                //fmt.Printf("Creds match by RId! Email: %s cid: %d rid: %s\n", email, cid, rid)                          
-                                
-                                submitted := MyResult{}
-                                if err := json.Unmarshal(clickscanner.Bytes(), &submitted); err != nil {
-                                    fmt.Printf("[-] Failed reading JSON bytes from clicked link file: %s\n", err)
-                                    continue
-                                }
-                            
-                                res := Result{}
-                                res.CampaignId = cid
-                                res.Id = submitted.Id
-                                res.UserId = submitted.UserId
-                                res.IP = "127.0.0.1"
-                                res.RId = submitted.RId
-                                res.Latitude = 0.000000
-                                res.Longitude = 0.000000
-                                //res.SendDate = time.Now()
-                                res.Reported = false					
-                                res.Email = email
-                                payload := map[string][]string{"Username": []string{creds.Username}, "Password": []string{creds.Password}}
-                                ed.Payload = payload
-                                err = res.HandleFormSubmit(ed)
-                                if err != nil {
-                                    log.Error(err)
-                                }
-                            }                    
-                        }
-                    }                
-                }
-            }
-        } else if event.Message == "Submitted Data" {
-            var ed EventDetails
-            var cid = event.CampaignId
-            var email = event.Email
-            rid := ""
-            json.Unmarshal([]byte(event.Details), &ed)
-
-            scid := strconv.FormatInt(id, 10)
-            epath := filepath.Join(".", "campaigns", scid, "sent-emails.json")
-            spath := filepath.Join(".", "campaigns", scid, "sessions.json")
-            emailfile, err := os.Open(epath)
-            if err != nil {
-                fmt.Printf("[-] %s does not exist! Skipping session check for: %s\n", epath, email)
-                continue
-            }
-            emailscanner := bufio.NewScanner(emailfile)
-            for emailscanner.Scan() {
-                sent := MyResult{}
-                if err := json.Unmarshal(emailscanner.Bytes(), &sent); err != nil {
-                    fmt.Printf("[-] Failed reading JSON bytes from sent email file: %s\n", err)
-                    continue
-                }
-
-                er, _ := regexp.Compile(email)
-                ematch := er.FindAllString(emailscanner.Text(), -1)
-                if len(ematch) != 0 {                 
-                    rid = sent.RId
-                    //fmt.Printf("[+] Found RId for session check! %s\n", rid)
-                } else {
-                    continue
-                }
-
-                sessions_log, err := os.Open(spath)
-                if err != nil {
-                    fmt.Printf("[-] %s does not exist! Skipping duplicate session check for: %s\n", spath, email)
-                }
-
-                dupsessionscanner := bufio.NewScanner(sessions_log)
-                for dupsessionscanner.Scan() {
-                    dupsessioncheck := CapturedSession{}
-                    if err := json.Unmarshal(dupsessionscanner.Bytes(), &dupsessioncheck); err != nil {
-                        fmt.Printf("[-] Failed reading JSON bytes from sessions file: %s\n", err)
-                        continue
-                    }
-                    if rid == dupsessioncheck.RId {
-                        //fmt.Printf("[+] Found duplicate session! Skipping!\n")
-                        duplicate = true
-                    }
-                }
-
-                if (duplicate) {
-                    continue
-                }
-
-                usr, err := user.Current()
-                if err != nil {
-                    fmt.Printf("[-] Getting current user context failed! Skipping session check for: %s", email)
-                    continue
-                }
-                cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
-                sessions_file, err := os.Open(filepath.Join(cfg_dir, "sessions.json"))
-
-                if err != nil {
-                    fmt.Println("[*] No evilginx2 sessions yet")
-                } else {
-                    sessionscanner := bufio.NewScanner(sessions_file)
-                    for sessionscanner.Scan() {
-                        session := CapturedSession{}
-                        if err := json.Unmarshal(sessionscanner.Bytes(), &session); err != nil {
-                            fmt.Printf("[-] Failed reading JSON bytes from sessions file: %s\n", err)
-                            continue
-                        }
-                        if rid == session.RId {
-                            //fmt.Printf("[*] RId match!\n")
-                            res := Result{}
-                            res.CampaignId = cid
-                            res.Id = sent.Id
-                            res.UserId = sent.UserId
-                            res.IP = "127.0.0.1"
-                            res.RId = rid
-                            res.Latitude = 0.000000
-                            res.Longitude = 0.000000
-                            res.Reported = false
-                            res.Email = email
-                            json_tokens := tokensToJSON(session.Tokens)
-                            ed.Payload = map[string][]string{"Tokens": {json_tokens}}
-                            err = res.HandleCapturedSession(ed, session)
-                            if err != nil {
-                                log.Error(err)
-                            }
-                        }
-                    }
-                }
+                log.Error(err)
             }
         }
-    } 
+    }
     return cr, err
 }
 
@@ -1021,17 +772,6 @@ func PostSMSCampaign(c *Campaign, uid int64) error {
             recipientIndex++
         }
     }
-    // Write campaign name to file at start
-    cid := strconv.FormatInt(c.Id, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    npath := filepath.Join(cdir, "campaign-name.txt")
-    nfile, ferr := os.OpenFile(npath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if ferr != nil {
-        log.Fatal(ferr)
-    }
-    nfile.WriteString(c.Name)
-
     return tx.Commit().Error
 }
 
@@ -1180,17 +920,6 @@ func PostCampaign(c *Campaign, uid int64) error {
             recipientIndex++
         }
     }
-    // Write campaign name to file at start
-    cid := strconv.FormatInt(c.Id, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    npath := filepath.Join(cdir, "campaign-name.txt")
-    nfile, ferr := os.OpenFile(npath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if ferr != nil {
-        log.Fatal(ferr)
-    }
-    nfile.WriteString(c.Name)
-
     return tx.Commit().Error
 }
 

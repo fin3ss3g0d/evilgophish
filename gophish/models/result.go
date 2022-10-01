@@ -7,9 +7,6 @@ import (
     "net"
     "time"
     "fmt"
-    "os"
-    "strconv"
-    "path/filepath"
 
     log "github.com/gophish/gophish/logger"
     "github.com/jinzhu/gorm"
@@ -18,7 +15,6 @@ import (
     pusher "github.com/pusher/pusher-http-go/v5"
     "github.com/twilio/twilio-go"
     openapi "github.com/twilio/twilio-go/rest/api/v2010"
-    "github.com/kgretzky/evilginx2/database"
 )
 
 type mmCity struct {
@@ -45,66 +41,6 @@ type Result struct {
     Reported     bool      `json:"reported" sql:"not null"`
     ModifiedDate time.Time `json:"modified_date"`
     BaseRecipient
-}
-
-// Custom structs for JSON logging
-type MyResult struct {
-    Id           int64     `json:"Id"`
-    UserId       int64     `json:"UserId"`
-    RId          string    `json:"RId"`
-    BaseRecipient
-}
-
-type Submitted struct {
-    Id           int64     `json:"Id"`
-    UserId       int64     `json:"UserId"`
-    RId          string    `json:"RId"`
-    BaseRecipient
-    Details      EventDetails
-}
-
-type CapturedSession struct {
-    RId         string `json:"RId"`
-    Tokens      map[string]map[string]*database.Token
-}
-
-func tokensToJSON(tokens map[string]map[string]*database.Token) string {
-    type Cookie struct {
-        Path           string `json:"path"`
-        Domain         string `json:"domain"`
-        ExpirationDate int64  `json:"expirationDate"`
-        Value          string `json:"value"`
-        Name           string `json:"name"`
-        HttpOnly       bool   `json:"httpOnly,omitempty"`
-        HostOnly       bool   `json:"hostOnly,omitempty"`
-    }
-
-    var cookies []*Cookie
-    for domain, tmap := range tokens {
-        for k, v := range tmap {
-            c := &Cookie{
-                Path:           v.Path,
-                Domain:         domain,
-                ExpirationDate: time.Now().Add(365 * 24 * time.Hour).Unix(),
-                Value:          v.Value,
-                Name:           k,
-                HttpOnly:       v.HttpOnly,
-            }
-            if domain[:1] == "." {
-                c.HostOnly = false
-                c.Domain = domain[1:]
-            } else {
-                c.HostOnly = true
-            }
-            if c.Path == "" {
-                c.Path = "/"
-            }
-            cookies = append(cookies, c)
-        }
-    }
-
-    json, _ := json.Marshal(cookies)
-    return string(json)
 }
 
 func (r *Result) PusherNotifyEmailSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
@@ -200,20 +136,6 @@ func (r *Result) PusherNotifyCapturedSession(app_id string, app_key string, secr
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
-    /*fmt.Printf("Result Id: %d\n", r.Id)
-    fmt.Printf("Result CampaignId: %d\n", r.CampaignId)
-    fmt.Printf("Result UserId: %d\n", r.UserId)
-    fmt.Printf("Result RId: %s\n", r.RId)
-    fmt.Printf("Result Status: %s\n", r.Status)
-    fmt.Printf("Result IP: %s\n", r.IP)
-    fmt.Printf("Result Latitude: %f\n", r.Latitude)
-    fmt.Printf("Result Longitude: %f\n", r.Longitude)
-    fmt.Printf("Result SendDate: %s\n", r.SendDate)
-    fmt.Printf("Result Reported: %t\n", r.Reported)
-    fmt.Printf("Result ModifiedDate: %s\n", r.ModifiedDate)
-    fmt.Printf("Result Email: %s\n", r.Email)
-    fmt.Printf("Result Name/Position: %s %s %s\n", r.BaseRecipient.FirstName, r.BaseRecipient.LastName, r.BaseRecipient.Position)
-    fmt.Println("createEvent function called!")*/
     e := &Event{Email: r.Email, Message: status}
     if details != nil {
         dj, err := json.Marshal(details)
@@ -266,43 +188,24 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
             pusher_channel_name := conf.PusherChannelName
             r.PusherNotifySMSSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
         }
-
-        sent := MyResult{}
-        sent.Email = target
-        sent.Id = r.Id
-        sent.UserId = r.UserId
-        sent.RId = r.RId
-
-        data, err := json.Marshal(sent)
+        
+        err = db.Save(r).Error
         if err != nil {
-            fmt.Println(err)
+            return err
         }
-        cid := strconv.FormatInt(r.CampaignId, 10)
-        cdir := filepath.Join(".", "campaigns", cid)
-        os.MkdirAll(cdir, os.ModePerm)
-        epath := filepath.Join(cdir, "sent-emails.json")
-        sentfile, err := os.OpenFile(epath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-        if err != nil {
-            log.Fatal(err)
-        }
-        sentfile.Write(data)
-        sentfile.Write([]byte("\n"))
-        return db.Save(r).Error
+
+        sentEntry := SentResults{}
+        sentEntry.Id = r.Id
+        sentEntry.RId = r.RId
+        sentEntry.UserId = r.UserId
+        sentEntry.Victim = r.BaseRecipient.Email
+        return egp_db.Save(sentEntry).Error
     }
 }
 
 // HandleEmailSent updates a Result to indicate that the email has been
 // successfully sent to the remote SMTP server
 func (r *Result) HandleEmailSent() error {
-    cid := strconv.FormatInt(r.CampaignId, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    epath := filepath.Join(cdir, "sent-emails.json")
-    sentfile, err := os.OpenFile(epath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if err != nil {
-        log.Fatal(err)
-    }
-
     event, err := r.createEvent(EventSent, nil)
     if err != nil {
         return err
@@ -310,19 +213,6 @@ func (r *Result) HandleEmailSent() error {
     r.SendDate = event.Time
     r.Status = EventSent
     r.ModifiedDate = event.Time
-
-    sent := MyResult{}
-    sent.Email = r.Email
-    sent.Id = r.Id
-    sent.UserId = r.UserId
-    sent.RId = r.RId
-
-    data, err := json.Marshal(sent)
-    if err != nil {
-        fmt.Println(err)
-    }
-    sentfile.Write(data)
-    sentfile.Write([]byte("\n"))
 
     conf, err := config.LoadConfig("config.json")
     if err != nil {
@@ -339,7 +229,17 @@ func (r *Result) HandleEmailSent() error {
         r.PusherNotifyEmailSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
     }
 
-    return db.Save(r).Error
+    err = db.Save(r).Error
+    if err != nil {
+        return err
+    }
+
+    sentEntry := SentResults{}
+    sentEntry.Id = r.Id
+    sentEntry.RId = r.RId
+    sentEntry.UserId = r.UserId
+    sentEntry.Victim = r.BaseRecipient.Email
+    return egp_db.Save(sentEntry).Error
 }
 
 // HandleEmailError updates a Result to indicate that there was an error when
@@ -403,15 +303,6 @@ func (r *Result) HandleEmailOpened(details EventDetails) error {
 // HandleClickedLink updates a Result in the case where the recipient clicked
 // the link in an email.
 func (r *Result) HandleClickedLink(details EventDetails) error {
-    cid := strconv.FormatInt(r.CampaignId, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    epath := filepath.Join(cdir, "clicked-links.json")
-    clickfile, err := os.OpenFile(epath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if err != nil {
-        log.Fatal(err)
-    }
-
     event, err := r.createEvent(EventClicked, details)
     if err != nil {
         return err
@@ -423,19 +314,6 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
     }
     r.Status = EventClicked
     r.ModifiedDate = event.Time
-
-    clicked := MyResult{}
-    clicked.Email = r.Email
-    clicked.Id = r.Id
-    clicked.UserId = r.UserId
-    clicked.RId = r.RId
-
-    data, err := json.Marshal(clicked)
-    if err != nil {
-        fmt.Println(err)
-    }
-    clickfile.Write(data)
-    clickfile.Write([]byte("\n"))
 
     conf, err := config.LoadConfig("config.json")
     if err != nil {
@@ -458,35 +336,12 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
 // HandleFormSubmit updates a Result in the case where the recipient submitted
 // credentials to the form on a Landing Page.
 func (r *Result) HandleFormSubmit(details EventDetails) error {
-    cid := strconv.FormatInt(r.CampaignId, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    epath := filepath.Join(cdir, "creds.json")
-    credfile, err := os.OpenFile(epath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if err != nil {
-        log.Fatal(err)
-    }
-
     event, err := r.createEvent(EventDataSubmit, details)
     if err != nil {
         return err
     }
     r.Status = EventDataSubmit
     r.ModifiedDate = event.Time
-
-    submitted := Submitted{}
-    submitted.Email = r.Email
-    submitted.Id = r.Id
-    submitted.UserId = r.UserId
-    submitted.RId = r.RId
-    submitted.Details = details
-
-    data, err := json.Marshal(submitted)
-    if err != nil {
-        fmt.Println(err)
-    }
-    credfile.Write(data)
-    credfile.Write([]byte("\n"))
 
     conf, err := config.LoadConfig("config.json")
     if err != nil {
@@ -506,23 +361,7 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
     return db.Save(r).Error
 }
 
-func (r *Result) HandleCapturedSession(details EventDetails, session CapturedSession) error {
-    cid := strconv.FormatInt(r.CampaignId, 10)
-    cdir := filepath.Join(".", "campaigns", cid)
-    os.MkdirAll(cdir, os.ModePerm)
-    spath := filepath.Join(cdir, "sessions.json")
-    sessions_file, err := os.OpenFile(spath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    data, err := json.Marshal(session)
-    if err != nil {
-        fmt.Println(err)
-    }
-    sessions_file.Write(data)
-    sessions_file.Write([]byte("\n"))
-
+func (r *Result) HandleCapturedSession(details EventDetails) error {
     event, err := r.createEvent(EventCapturedSession, details)
     if err != nil {
         return err

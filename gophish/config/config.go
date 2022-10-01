@@ -36,14 +36,13 @@ type Config struct {
     TestFlag           bool        `json:"test_flag"`
     ContactAddress     string      `json:"contact_address"`
     Logging            *log.Config `json:"logging"`
-    ApacheLogPath      string      `json:"apache_log"`
     PusherAppId        string      `json:"pusher_app_id"`
-	PusherAppKey       string      `json:"pusher_app_key"`
-	PusherAppSecret    string      `json:"pusher_app_secret"`
-	PusherAppCluster   string      `json:"pusher_app_cluster"`
-	PusherEncryptKey   string      `json:"pusher_encrypt_key"`
-	PusherChannelName  string      `json:"pusher_channel_name"`
-	EnablePusher       bool        `json:"enable_pusher"`
+    PusherAppKey       string      `json:"pusher_app_key"`
+    PusherAppSecret    string      `json:"pusher_app_secret"`
+    PusherAppCluster   string      `json:"pusher_app_cluster"`
+    PusherEncryptKey   string      `json:"pusher_encrypt_key"`
+    PusherChannelName  string      `json:"pusher_channel_name"`
+    EnablePusher       bool        `json:"enable_pusher"`
 }
 
 // Version contains the current gophish version

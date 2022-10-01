@@ -108,6 +108,12 @@ func main() {
         return
     }
 
+	err = database.SetupEGP()
+	if err != nil {
+		log.Fatal("database: %v", err)
+        return
+	}
+
     bl, err := core.NewBlacklist(filepath.Join(*cfg_dir, "blacklist.txt"))
     if err != nil {
         log.Error("blacklist: %s", err)

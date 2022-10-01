@@ -8,7 +8,9 @@ import (
     "io"
     "io/ioutil"
     "os"
+    "os/user"
     "time"
+    "path/filepath"
 
     "bitbucket.org/liamstask/goose/lib/goose"
 
@@ -21,6 +23,7 @@ import (
     _ "github.com/mattn/go-sqlite3" // Blank import needed to import sqlite3
 )
 
+var egp_db *gorm.DB
 var db *gorm.DB
 var conf *config.Config
 
@@ -73,6 +76,38 @@ type Response struct {
     Message string      `json:"message"`
     Success bool        `json:"success"`
     Data    interface{} `json:"data"`
+}
+
+type SentResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Victim      string  `json:"victim"`
+}
+
+type ClickedResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Victim      string  `json:"victim"`
+    Browser     string  `json:"browser"`
+}
+
+type SubmittedResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Username    string  `json:"username"`
+    Password    string  `json:"password"`
+    Browser     string  `json:"browser"`
+}
+
+type CapturedResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Tokens      string  `json:"tokens"`
+    Browser     string  `json:"browser"`
 }
 
 // Copy of auth.GenerateSecureKey to prevent cyclic import with auth library
@@ -251,5 +286,49 @@ func Setup(c *config.Config) error {
             return err
         }
     }
+    return nil
+}
+
+func SetupEGP(c *config.Config) error {
+    // Setup the package-scoped config
+    conf = c
+
+    usr, err := user.Current()
+    if err != nil {
+        fmt.Printf("[-] Getting current user context failed!\n")
+        return err
+    }
+    cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
+    db_path := filepath.Join(cfg_dir, "evilgophish.db")
+
+    // Open our database connection
+    i := 0
+    for {
+        egp_db, err = gorm.Open(conf.DBName, db_path)
+        if err == nil {
+            break
+        }
+        if err != nil && i >= MaxDatabaseConnectionAttempts {
+            log.Error(err)
+            return err
+        }
+        i += 1
+        log.Warn("waiting for database to be up...")
+        time.Sleep(5 * time.Second)
+    }
+            
+    egp_db.LogMode(false)
+    egp_db.SetLogger(log.Logger)
+    egp_db.DB().SetMaxOpenConns(10)
+    if err != nil {
+        log.Error(err)
+        return err
+    }
+
+    egp_db.CreateTable(SentResults{})
+    egp_db.CreateTable(ClickedResults{})
+    egp_db.CreateTable(SubmittedResults{})
+    egp_db.CreateTable(CapturedResults{})
+
     return nil
 }

@@ -49,7 +49,7 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## Background
 
-This project is based on this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. To provide tracking between the two, the function resposible for providing campaign results inside `GoPhish` has been modified to instead get clicked link event details and submitted data event details from logs related to `evilginx2`. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
+This project is inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started to get an understanding of the background (this project no longer utilizes the `Apache` log method to provide tracking between the two, rather a database that is logged to by both frameworks). In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
 
 ![new-dashboard](images/tokens-gophish.png)
 
@@ -57,7 +57,7 @@ This project is based on this [blog](https://outpost24.com/blog/Better-proxy-tha
 
 - `evilginx2` will listen locally on port `8443`
 - `GoPhish` will listen locally on port `8080`
-- `Apache2` will listen on port `443` externally and proxy to either local `GoPhish/evilginx2` depending on the subdomain name requested. `Apache2` access log file is created for both `GoPhish/evilginx2` servers
+- `Apache2` will listen on port `443` externally and proxy to either local `GoPhish/evilginx2` depending on the subdomain name requested
   - Requests will be filtered at `Apache2` layer based on redirect rules and IP blacklist configuration
     - `404` functionality for unauthorized requests is still baked into `GoPhish` if a request hits the `GoPhish` server
     - Redirect functionality for unauthorized requests is still baked into `evilginx2` if a request hits the `evilginx2` server
@@ -100,12 +100,11 @@ Example:
 
 Once `setup.sh` is run, the next steps are: 
 
-1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
-2. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, and groups
-3. Start `evilginx2` and configure phishlet and lure
-4. Ensure `Apache2` server is started
-5. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
-6. **PROFIT**
+1. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, and groups
+2. Start `evilginx2` and configure phishlet and lure
+3. Ensure `Apache2` server is started
+4. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
+5. **PROFIT**
 
 ## SMS Campaign Setup
 
@@ -115,23 +114,22 @@ An entire reworking of `GoPhish` was performed in order to provide `SMS` campaig
 
 Once you have run `setup.sh`, the next steps are:
 
-1. Make sure the `Apache2` log file for `evilginx2` exists before starting `GoPhish` (starting `Apache2` will automatically do this)
-2. Configure `SMS` message template. You will use `Text` only when creating a `SMS` message template, and you should not include a tracking link as it will appear in the `SMS` message. Leave `Envelope Sender` and `Subject` blank like below:
+1. Configure `SMS` message template. You will use `Text` only when creating a `SMS` message template, and you should not include a tracking link as it will appear in the `SMS` message. Leave `Envelope Sender` and `Subject` blank like below:
 
 ![sms-message-template](images/sms-message-template.png)
 
-3. Configure `SMS Sending Profile`. Enter your phone number from `Twilio`, `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profiles` page:
+2. Configure `SMS Sending Profile`. Enter your phone number from `Twilio`, `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profiles` page:
 
 ![sms-sending-profile](images/sms-sending-profile.png)
 
-4. Import groups. The `CSV` template values have been kept the same for compatibility, so keep the `CSV` column names the same and place your target phone numbers into the `Email` column. Note that `Twilio` accepts the following phone number formats, so they must be in one of these three:
+3. Import groups. The `CSV` template values have been kept the same for compatibility, so keep the `CSV` column names the same and place your target phone numbers into the `Email` column. Note that `Twilio` accepts the following phone number formats, so they must be in one of these three:
 
 ![twilio-number-formats](images/twilio-number-formats.png)
 
-5. Start `evilginx2` and configure phishlet and lure
-6. Ensure `Apache2` server is started
-7. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
-8. **PROFIT**
+4. Start `evilginx2` and configure phishlet and lure
+5. Ensure `Apache2` server is started[]
+6. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
+7. **PROFIT**
 
 ## Pusher Setup
 
@@ -160,10 +158,6 @@ You **MUST** include your own image tag that points at the `GoPhish` server with
 
 `<img src="https://download.example.org/login/track?client_id={{.RId}}"/>`
 
-## **Important Notes**
-
-You **MUST** make sure `Apache2` is logging to the file defined in `gophish/config.json` for the `evilginx2` server, the default path is `/var/log/apache2/access_evilginx2.log` unless you change it. For example, if `Apache2` is logging to `/var/log/apache2/access_evilginx2.log.1` and you have `/var/log/apache2/access_evilginx2.log` defined in `gophish/config.json`, you will lose tracking statistics.
-
 ## Phishlets Surprise
 
 Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
@@ -179,22 +173,18 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 ## Changes To evilginx2
 
 1. All IP whitelisting functionality removed, new proxy session is established for every new visitor that triggers a lure path regardless of remote IP
-2. Custom credential logging on submitted passwords to `~/.evilginx/creds.json`
-3. Fixed issue with phishlets not extracting credentials from `JSON` requests
-4. Further *"bad"* headers have been removed from responses
-5. Added logic to check if `mime` type was failed to be retrieved from responses
-6. All `X` headers relating to `evilginx2` have been removed throughout the code (to remove IOCs)
+2. Fixed issue with phishlets not extracting credentials from `JSON` requests
+3. Further *"bad"* headers have been removed from responses
+4. Added logic to check if `mime` type was failed to be retrieved from responses
+5. All `X` headers relating to `evilginx2` have been removed throughout the code (to remove IOCs)
 
 ## Changes to GoPhish
 
-1. Custom logic inserted into `GetCampaignResults` function that handles `evilginx2` tracking from Apache2 access log
-2. Custom logging of events to `JSON` format in `HandleEvent` functions
-3. Additional config parameter added for Apache2 log path
-4. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
-5. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
-6. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
-7. Transparency endpoint and messages completely removed
-8. Added `SMS` Campaign Support
+1. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
+2. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
+3. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
+4. Transparency endpoint and messages completely removed
+5. Added `SMS` Campaign Support
 
 ## Changelog 
 

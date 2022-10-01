@@ -31,7 +31,6 @@ import (
     "net/http"
     "os"
     "os/signal"
-    "path/filepath"
 
     "gopkg.in/alecthomas/kingpin.v2"
 
@@ -59,10 +58,6 @@ var (
 )
 
 func main() {
-    // Create campaigns directory if it does not exist
-    cpath := filepath.Join(".", "campaigns")
-    os.MkdirAll(cpath, os.ModePerm)
-
     // Load the version
     version, err := ioutil.ReadFile("./VERSION")
     if err != nil {
@@ -110,6 +105,11 @@ func main() {
     // Provide the option to disable the built-in mailer
     // Setup the global variables and settings
     err = models.Setup(conf)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    err = models.SetupEGP(conf)
     if err != nil {
         log.Fatal(err)
     }

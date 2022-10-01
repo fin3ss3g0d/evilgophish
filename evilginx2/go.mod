@@ -22,4 +22,6 @@ require (
 	github.com/tidwall/rtree v0.0.0-20180113144539-6cd427091e0e // indirect
 	github.com/tidwall/tinyqueue v0.0.0-20180302190814-1e39f5511563 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+    github.com/jinzhu/gorm v1.9.12
+    github.com/mattn/go-sqlite3 v2.0.3+incompatible
 )

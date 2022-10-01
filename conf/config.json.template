@@ -18,7 +18,6 @@
     "pusher_encrypt_key": "",
     "pusher_channel_name": "",
     "enable_pusher": false,
-    "apache_log": "/var/log/apache2/access_evilginx2.log",
     "db_name": "sqlite3",
     "db_path": "gophish.db",
     "migrations_prefix": "db/db_",
