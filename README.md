@@ -125,7 +125,7 @@ Once you have run `setup.sh`, the next steps are:
 ![twilio-number-formats](images/twilio-number-formats.png)
 
 4. Start `evilginx2` and configure phishlet and lure
-5. Ensure `Apache2` server is started[]
+5. Ensure `Apache2` server is started
 6. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 7. **PROFIT**
 
