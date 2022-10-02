@@ -21,3 +21,4 @@
         Include /etc/apache2/blacklist.conf
     </RequireAll>
 </Location>
+</VirtualHost>
