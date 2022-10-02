@@ -57,7 +57,6 @@ This project was originally inspired by this [blog](https://outpost24.com/blog/B
 - `GoPhish` will listen locally on port `8080`
 - `Apache2` will listen on port `443` externally and proxy to either local `GoPhish/evilginx2` depending on the subdomain name requested
   - Requests will be filtered at `Apache2` layer based on redirect rules and IP blacklist configuration
-    - `404` functionality for unauthorized requests is still baked into `GoPhish` if a request hits the `GoPhish` server
     - Redirect functionality for unauthorized requests is still baked into `evilginx2` if a request hits the `evilginx2` server
 
 ## setup.sh
