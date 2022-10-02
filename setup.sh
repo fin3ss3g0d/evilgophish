@@ -29,17 +29,15 @@ function print_info () {
 if [[ $# -ne 8 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Pusher messages bool> <rid replacement>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <Pusher messages bool> <rid replacement>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
-    print_error " - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one"
-    print_error " - gophish root domain bool        - true or false to proxy root domain to gophish"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
     print_error " - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel"
     print_error " - rid replacement                 - replace the gophish default \"rid\" in phishing URLs with this value"
     print_error "Example:"
-    print_error '  ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id'
+    print_error '  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id'
 
     exit 2
 fi
@@ -48,11 +46,9 @@ fi
 root_domain="${1}"
 evilginx2_subs="${2}"
 e_root_bool="${3}"
-gophish_subs="${4}"
-g_root_bool="${5}"
-redirect_url="${6}"
-pusher_bool="${7}"
-rid_replacement="${8}"
+redirect_url="${4}"
+pusher_bool="${5}"
+rid_replacement="${6}"
 evilginx_dir=$HOME/.evilginx
 
 # Get path to certificates
@@ -100,17 +96,8 @@ function setup_apache () {
     if [[ $(echo "${e_root_bool}" | grep -ci "true") -gt 0 ]]; then
         evilginx2_cstring+=${root_domain}
     fi
-    gophish_cstring=""
-    for gsub in ${gophish_subs} ; do
-        gophish_cstring+=${gsub}.${root_domain}
-        gophish_cstring+=" "
-    done
-    if  [[ $(echo "${g_root_bool}" | grep -ci "true") -gt 0 ]]; then
-        gophish_cstring+=${root_domain}
-    fi
     # Replace template values with user input
     sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" conf/000-default.conf.template > 000-default.conf
-    sed -i "s/ServerAlias gophish.template/ServerAlias ${gophish_cstring}/g" 000-default.conf
     sed -i "s|SSLCertificateFile|SSLCertificateFile ${certs_path}cert.pem|g" 000-default.conf
     sed -i "s|SSLCertificateChainFile|SSLCertificateChainFile ${certs_path}fullchain.pem|g" 000-default.conf
     sed -i "s|SSLCertificateKeyFile|SSLCertificateKeyFile ${certs_path}privkey.pem|g" 000-default.conf
@@ -144,13 +131,8 @@ function setup_evilginx2 () {
         evilginx2_cstring+=${esub}.${root_domain}
         evilginx2_cstring+=" "
     done
-    gophish_cstring=""
-    for gsub in ${gophish_subs} ; do
-        gophish_cstring+=${gsub}.${root_domain}
-        gophish_cstring+=" "
-    done
     cp /etc/hosts /etc/hosts.bak
-    sed -i "s|127.0.0.1.*|127.0.0.1 localhost ${evilginx2_cstring}${gophish_cstring}${root_domain}|g" /etc/hosts
+    sed -i "s|127.0.0.1.*|127.0.0.1 localhost ${evilginx2_cstring}${root_domain}|g" /etc/hosts
     cp /etc/resolv.conf /etc/resolv.conf.bak
     rm /etc/resolv.conf
     ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf

@@ -47,7 +47,7 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## Background
 
-This project was originally inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story), however with time and source code review, different methods now provide tracking between the two frameworks and `Apache2` is only used as a hardening layer for your phishing infrastructure. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
+This project was originally inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story), however with time and source code review, different methods now provide tracking between the two frameworks and `Apache2` is only used as a hardening layer for your phishing infrastructure. In this setup, `GoPhish` is used to send emails and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
 
 ![new-dashboard](images/tokens-gophish.png)
 
@@ -66,17 +66,15 @@ This project was originally inspired by this [blog](https://outpost24.com/blog/B
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <gophish subdomain(s)> <gophish root domain bool> <redirect url> <Pusher messages bool> <rid replacement>
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <Pusher messages bool> <rid replacement>
  - root domain                     - the root domain to be used for the campaign
  - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
  - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
- - gophish subdomains              - a space separated list of gophish subdomains, can be one if only one
- - gophish root domain bool        - true or false to proxy root domain to gophish
  - redirect url                    - URL to redirect unauthorized Apache requests
  - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel
  - rid replacement                 - replace the gophish default "rid" in phishing URLs with this value
 Example:
-  ./setup.sh example.com login false "download www" false https://redirect.com/ true user_id
+  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id
 ```
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 

@@ -40,4 +40,4 @@ Removed the need to create a fake landing inside `GoPhish` as part of a campaign
 
 # 10/02/2022
 
-Added the `Add Tracking Image` button back and ability to handle email opened tracking events directly from `evilginx2`.
+Added the `Add Tracking Image` button back and ability to handle email opened tracking events directly from `evilginx2`. This removes the need to proxy to the local `GoPhish` server altogether.
