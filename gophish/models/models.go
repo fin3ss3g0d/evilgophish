@@ -83,6 +83,16 @@ type SentResults struct {
     UserId      int64   `json:"user_id"`
     RId         string  `json:"rid"`
     Victim      string  `json:"victim"`
+    SMSTarget   bool    `json:"sms_target"`
+}
+
+type OpenedResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Victim      string  `json:"victim"`
+    Browser     string  `json:"browser"`
+    SMSTarget   bool    `json:"sms_target"`
 }
 
 type ClickedResults struct {
@@ -91,6 +101,7 @@ type ClickedResults struct {
     RId         string  `json:"rid"`
     Victim      string  `json:"victim"`
     Browser     string  `json:"browser"`
+    SMSTarget   bool    `json:"sms_target"`
 }
 
 type SubmittedResults struct {
@@ -326,6 +337,7 @@ func SetupEGP(c *config.Config) error {
     }
 
     egp_db.CreateTable(SentResults{})
+    egp_db.CreateTable(OpenedResults{})
     egp_db.CreateTable(ClickedResults{})
     egp_db.CreateTable(SubmittedResults{})
     egp_db.CreateTable(CapturedResults{})

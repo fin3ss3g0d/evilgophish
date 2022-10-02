@@ -27,6 +27,16 @@ type SentResults struct {
     UserId      int64   `json:"user_id"`
     RId         string  `json:"rid"`
     Victim      string  `json:"victim"`
+    SMSTarget   bool    `json:"sms_target"`
+}
+
+type OpenedResults struct {
+    Id          int64   `json:"id"`
+    UserId      int64   `json:"user_id"`
+    RId         string  `json:"rid"`
+    Victim      string  `json:"victim"`
+    Browser		string  `json:"browser"`
+    SMSTarget   bool    `json:"sms_target"`
 }
 
 type ClickedResults struct {
@@ -35,6 +45,7 @@ type ClickedResults struct {
     RId         string  `json:"rid"`
     Victim      string  `json:"victim"`
     Browser		string  `json:"browser"`
+    SMSTarget   bool    `json:"sms_target"`
 }
 
 type SubmittedResults struct {
@@ -123,15 +134,37 @@ func moddedTokensToJSON(tokens map[string]map[string]*Token) string {
     return string(json)
 }
 
+func HandleEmailOpened (rid string, browser map[string]string) error {
+    sentResult := SentResults{}
+    query := egp_db.Table("sent_results").Where("r_id=?", rid)
+    err := query.Scan(&sentResult).Error
+    if err != nil {
+        return err
+    } else if sentResult.RId == "" {
+        return ErrRIdNotFound
+    } else {
+        openedEntry := OpenedResults{}
+        openedEntry.Id = sentResult.Id
+        openedEntry.RId = rid
+        openedEntry.UserId = sentResult.UserId
+        openedEntry.Victim = sentResult.Victim
+        openedEntry.SMSTarget = sentResult.SMSTarget
+        data, err := json.Marshal(browser)
+        if err != nil {
+            return err
+        }
+        openedEntry.Browser = string(data)
+        return egp_db.Save(openedEntry).Error
+    }
+}
+
 func HandleClickedLink (rid string, browser map[string]string) error {
     sentResult := SentResults{}
     query := egp_db.Table("sent_results").Where("r_id=?", rid)
     err := query.Scan(&sentResult).Error
     if err != nil {
-        fmt.Printf("Error scanning query from database: %s\n", err)
         return err
-    }
-    if sentResult.RId == "" {
+    } else if sentResult.RId == "" {
         return ErrRIdNotFound
     } else {
         clickedEntry := ClickedResults{}
@@ -139,6 +172,7 @@ func HandleClickedLink (rid string, browser map[string]string) error {
         clickedEntry.RId = rid
         clickedEntry.UserId = sentResult.UserId
         clickedEntry.Victim = sentResult.Victim
+        clickedEntry.SMSTarget = sentResult.SMSTarget
         data, err := json.Marshal(browser)
         if err != nil {
             return err
@@ -153,10 +187,8 @@ func HandleSubmittedData (rid string, username string, password string) error {
     query := egp_db.Table("clicked_results").Where("r_id=?", rid)
     err := query.Scan(&clickedResult).Error
     if err != nil {
-        fmt.Printf("Error scanning query from database: %s\n", err)
         return err
-    }
-    if clickedResult.RId == "" {
+    } else if clickedResult.RId == "" {
         return ErrRIdNotFound
     } else {
         submittedEntry := SubmittedResults{}
@@ -175,10 +207,8 @@ func HandleCapturedSession (rid string, tokens map[string]map[string]*Token) err
     query := egp_db.Table("clicked_results").Where("r_id=?", rid)
     err := query.Scan(&clickedResult).Error
     if err != nil {
-        fmt.Printf("Error scanning query from database: %s\n", err)
         return err
-    }
-    if clickedResult.RId == "" {
+    } else if clickedResult.RId == "" {
         return ErrRIdNotFound
     } else {
         capturedEntry := CapturedResults{}

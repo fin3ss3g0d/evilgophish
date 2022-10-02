@@ -37,3 +37,7 @@ Added the ability to view full token `JSON` strings from `evilginx` directly in 
 # 09/30/2022
 
 Removed the need to create a fake landing inside `GoPhish` as part of a campaign setup. Removed `Add Tracking Image` button to avoid mistakes being made with operators using this button. This forces the manual insertion of image tags into email templates as it is needed for tracking to properly work. Also added enhancements to the logging process.
+
+# 10/02/2022
+
+Added the `Add Tracking Image` button back and ability to handle email opened tracking events directly from `evilginx2`.

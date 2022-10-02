@@ -1,16 +1,16 @@
 package models
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/url"
-	"time"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "net/url"
+    "time"
 
-	log "github.com/gophish/gophish/logger"
-	"github.com/gophish/gophish/webhook"
-	"github.com/jinzhu/gorm"
-	"github.com/sirupsen/logrus"
+    log "github.com/gophish/gophish/logger"
+    "github.com/gophish/gophish/webhook"
+    "github.com/jinzhu/gorm"
+    "github.com/sirupsen/logrus"
 )
 
 // Campaign is a struct representing a created campaign
@@ -467,6 +467,17 @@ func GetCampaign(id int64, uid int64) (Campaign, error) {
     return c, err
 }
 
+func (r *Result) FindOpenedResult() (OpenedResults, error) {
+    openedResult := OpenedResults{}
+    query := egp_db.Table("opened_results").Where("r_id=?", r.RId)
+    err := query.Scan(&openedResult).Error
+    if err != nil {
+        log.Error(err)
+        return openedResult, err
+    }
+    return openedResult, err
+}
+
 func (r *Result) FindClickedResult() (ClickedResults, error) {
     clickedResult := ClickedResults{}
     query := egp_db.Table("clicked_results").Where("r_id=?", r.RId)
@@ -523,13 +534,75 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
     }
 
     for _, r := range cr.Results {   
-        if r.Status == "Email/SMS Sent" || r.Status == "Email/SMS Opened" {
+        if r.Status == "Email/SMS Sent" {
+            openedResult, err := r.FindOpenedResult()
+            if err != nil {
+                clickedResult, err := r.FindClickedResult()
+                if err != nil {
+                    continue
+                } else {
+                    res := Result{}
+                    ed := EventDetails{}
+                    payload := map[string][]string{"client_id": []string{r.RId}}
+                    json.Unmarshal([]byte(clickedResult.Browser), &ed.Browser)
+                    ed.Payload = payload
+                    res.CampaignId = id
+                    res.Id = r.Id
+                    res.RId = r.RId
+                    res.UserId = r.UserId
+                    res.IP = "127.0.0.1"
+                    res.Latitude = 0.000000
+                    res.Longitude = 0.000000
+                    res.Reported = false
+                    res.Email = r.BaseRecipient.Email
+                    if clickedResult.SMSTarget {
+                        err = res.HandleSMSOpened(ed)
+                        if err != nil {
+                            log.Error(err)
+                        }
+                    } else {
+                        err = res.HandleEmailOpened(ed)
+                        if err != nil {
+                            log.Error(err)
+                        }
+                    }
+                    err = res.HandleClickedLink(ed)
+                    if err != nil {
+                        log.Error(err)
+                    }
+                }
+            } else {
+                res := Result{}
+                ed := EventDetails{}
+                payload := map[string][]string{"client_id": []string{r.RId}}
+                json.Unmarshal([]byte(openedResult.Browser), &ed.Browser)
+                ed.Payload = payload
+                res.CampaignId = id
+                res.Id = r.Id
+                res.RId = r.RId
+                res.UserId = r.UserId
+                res.IP = "127.0.0.1"
+                res.Latitude = 0.000000
+                res.Longitude = 0.000000
+                res.Reported = false
+                res.Email = r.BaseRecipient.Email
+                if openedResult.SMSTarget {
+                    err = res.HandleSMSOpened(ed)
+                    if err != nil {
+                        log.Error(err)
+                    }
+                } else {
+                    err = res.HandleEmailOpened(ed)
+                    if err != nil {
+                        log.Error(err)
+                    }
+                }
+            }
+        } else if r.Status == "Email/SMS Opened" {
             clickedResult, err := r.FindClickedResult()
             if err != nil {
                 continue
-            } else if clickedResult.RId == "" {
-                continue
-            }
+            } 
             res := Result{}
             ed := EventDetails{}
             payload := map[string][]string{"client_id": []string{r.RId}}
@@ -552,9 +625,7 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             submittedResult, err := r.FindSubmittedResult()
             if err != nil {
                 continue
-            } else if submittedResult.RId == "" {
-                continue
-            }
+            } 
             res := Result{}
             ed := EventDetails{}
             res.CampaignId = id
@@ -580,9 +651,7 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
             capturedResult, err := r.FindCapturedResult()
             if err != nil {
                 continue
-            } else if capturedResult.RId == "" {
-                continue
-            }
+            } 
             res := Result{}
             ed := EventDetails{}
             res.CampaignId = id
