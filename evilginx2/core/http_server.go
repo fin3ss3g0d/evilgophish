@@ -20,7 +20,7 @@ func NewHttpServer() (*HttpServer, error) {
 	r := mux.NewRouter()
 	s.srv = &http.Server{
 		Handler:      r,
-		Addr:         ":80",
+		Addr:         "127.0.0.1:80",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
