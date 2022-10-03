@@ -100,11 +100,6 @@ func main() {
         log.Fatal(err)
     }
 
-    err = models.SetupEGP(conf)
-    if err != nil {
-        log.Fatal(err)
-    }
-
     // Unlock any maillogs that may have been locked for processing
     // when Gophish was last shutdown.
     err = models.UnlockAllMailLogs()

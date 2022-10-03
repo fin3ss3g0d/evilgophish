@@ -1,7 +1,6 @@
 package models
 
 import (
-    "encoding/json"
     "errors"
     "fmt"
     "net/url"
@@ -97,14 +96,6 @@ type EventDetails struct {
 // email to a recipient
 type EventError struct {
     Error string `json:"error"`
-}
-
-// Struct for parsing evilginx2 creds
-type Creds struct {
-    Username string				`json:"Username"`
-    Password string             `json:"Password"`
-    RId string					`json:"RId"`
-    SubmitTime time.Time    	`json:"SubmitTime"`
 }
 
 // ErrCampaignNameNotSpecified indicates there was no template given by the user
@@ -467,50 +458,6 @@ func GetCampaign(id int64, uid int64) (Campaign, error) {
     return c, err
 }
 
-func (r *Result) FindOpenedResult() (OpenedResults, error) {
-    openedResult := OpenedResults{}
-    query := egp_db.Table("opened_results").Where("r_id=?", r.RId)
-    err := query.Scan(&openedResult).Error
-    if err != nil {
-        log.Error(err)
-        return openedResult, err
-    }
-    return openedResult, err
-}
-
-func (r *Result) FindClickedResult() (ClickedResults, error) {
-    clickedResult := ClickedResults{}
-    query := egp_db.Table("clicked_results").Where("r_id=?", r.RId)
-    err := query.Scan(&clickedResult).Error
-    if err != nil {
-        log.Error(err)
-        return clickedResult, err
-    }
-    return clickedResult, err
-}
-
-func (r *Result) FindSubmittedResult() (SubmittedResults, error) {
-    submittedResult := SubmittedResults{}
-    query := egp_db.Table("submitted_results").Where("r_id=?", r.RId)
-    err := query.Scan(&submittedResult).Error
-    if err != nil {
-        log.Error(err)
-        return submittedResult, err
-    }
-    return submittedResult, err
-}
-
-func (r *Result) FindCapturedResult() (CapturedResults, error) {
-    capturedResult := CapturedResults{}
-    query := egp_db.Table("captured_results").Where("r_id=?", r.RId)
-    err := query.Scan(&capturedResult).Error
-    if err != nil {
-        log.Error(err)
-        return capturedResult, err
-    }
-    return capturedResult, err
-}
-
 // GetCampaignResults returns just the campaign results for the given campaign
 func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
     cr := CampaignResults{}
@@ -531,148 +478,6 @@ func GetCampaignResults(id int64, uid int64) (CampaignResults, error) {
     if err != nil {
         log.Errorf("%s: events not found for campaign", err)
         return cr, err
-    }
-
-    for _, r := range cr.Results {   
-        if r.Status == "Email/SMS Sent" {
-            openedResult, err := r.FindOpenedResult()
-            if err != nil {
-                clickedResult, err := r.FindClickedResult()
-                if err != nil {
-                    continue
-                } else {
-                    res := Result{}
-                    ed := EventDetails{}
-                    payload := map[string][]string{"client_id": []string{r.RId}}
-                    json.Unmarshal([]byte(clickedResult.Browser), &ed.Browser)
-                    ed.Payload = payload
-                    res.CampaignId = id
-                    res.Id = r.Id
-                    res.RId = r.RId
-                    res.UserId = r.UserId
-                    res.IP = "127.0.0.1"
-                    res.Latitude = 0.000000
-                    res.Longitude = 0.000000
-                    res.Reported = false
-                    res.Email = r.BaseRecipient.Email
-                    if clickedResult.SMSTarget {
-                        err = res.HandleSMSOpened(ed)
-                        if err != nil {
-                            log.Error(err)
-                        }
-                    } else {
-                        err = res.HandleEmailOpened(ed)
-                        if err != nil {
-                            log.Error(err)
-                        }
-                    }
-                    err = res.HandleClickedLink(ed)
-                    if err != nil {
-                        log.Error(err)
-                    }
-                }
-            } else {
-                res := Result{}
-                ed := EventDetails{}
-                payload := map[string][]string{"client_id": []string{r.RId}}
-                json.Unmarshal([]byte(openedResult.Browser), &ed.Browser)
-                ed.Payload = payload
-                res.CampaignId = id
-                res.Id = r.Id
-                res.RId = r.RId
-                res.UserId = r.UserId
-                res.IP = "127.0.0.1"
-                res.Latitude = 0.000000
-                res.Longitude = 0.000000
-                res.Reported = false
-                res.Email = r.BaseRecipient.Email
-                if openedResult.SMSTarget {
-                    err = res.HandleSMSOpened(ed)
-                    if err != nil {
-                        log.Error(err)
-                    }
-                } else {
-                    err = res.HandleEmailOpened(ed)
-                    if err != nil {
-                        log.Error(err)
-                    }
-                }
-            }
-        } else if r.Status == "Email/SMS Opened" {
-            clickedResult, err := r.FindClickedResult()
-            if err != nil {
-                continue
-            } 
-            res := Result{}
-            ed := EventDetails{}
-            payload := map[string][]string{"client_id": []string{r.RId}}
-            json.Unmarshal([]byte(clickedResult.Browser), &ed.Browser)
-            ed.Payload = payload
-            res.CampaignId = id
-            res.Id = r.Id
-            res.RId = r.RId
-            res.UserId = r.UserId
-            res.IP = "127.0.0.1"
-            res.Latitude = 0.000000
-            res.Longitude = 0.000000
-            res.Reported = false
-            res.Email = r.BaseRecipient.Email
-            err = res.HandleClickedLink(ed)
-            if err != nil {
-                log.Error(err)
-            } 
-        } else if r.Status == "Clicked Link" {
-            submittedResult, err := r.FindSubmittedResult()
-            if err != nil {
-                continue
-            } 
-            res := Result{}
-            ed := EventDetails{}
-            res.CampaignId = id
-            res.Id = r.Id
-            res.RId = r.RId
-            res.UserId = r.UserId
-            res.IP = "127.0.0.1"
-            res.Latitude = 0.000000
-            res.Longitude = 0.000000
-            res.Reported = false
-            payload := map[string][]string{"Username": []string{submittedResult.Username}, "Password": []string{submittedResult.Password}}
-            ed.Payload = payload
-            err = json.Unmarshal([]byte(submittedResult.Browser), &ed.Browser)
-            if err != nil {
-                log.Error(err)
-            }
-            res.Email = r.BaseRecipient.Email
-            err = res.HandleFormSubmit(ed)
-            if err != nil {
-                log.Error(err)
-            }
-        } else if r.Status == "Submitted Data" {
-            capturedResult, err := r.FindCapturedResult()
-            if err != nil {
-                continue
-            } 
-            res := Result{}
-            ed := EventDetails{}
-            res.CampaignId = id
-            res.Id = r.Id
-            res.RId = r.RId
-            res.UserId = r.UserId
-            res.IP = "127.0.0.1"
-            res.Latitude = 0.000000
-            res.Longitude = 0.000000
-            res.Reported = false
-            res.Email = r.BaseRecipient.Email
-            ed.Payload = map[string][]string{"Tokens": {capturedResult.Tokens}}
-            err = json.Unmarshal([]byte(capturedResult.Browser), &ed.Browser)
-            if err != nil {
-                log.Error(err)
-            }
-            err = res.HandleCapturedSession(ed)
-            if err != nil {
-                log.Error(err)
-            }
-        }
     }
     return cr, err
 }
@@ -796,6 +601,7 @@ func PostSMSCampaign(c *Campaign, uid int64) error {
                 SendDate:     sendDate,
                 Reported:     false,
                 ModifiedDate: c.CreatedDate,
+                SMSTarget: 	  true,
             }
             err = r.GenerateId(tx)
             if err != nil {
@@ -946,6 +752,7 @@ func PostCampaign(c *Campaign, uid int64) error {
                 SendDate:     sendDate,
                 Reported:     false,
                 ModifiedDate: c.CreatedDate,
+                SMSTarget: 	  false,
             }
             err = r.GenerateId(tx)
             if err != nil {

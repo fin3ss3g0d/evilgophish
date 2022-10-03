@@ -19,6 +19,7 @@ type Session struct {
     RedirectCount int
     PhishLure     *Lure
     RId           string
+    Browser       map[string]string
 }
 
 func NewSession(name string) (*Session, error) {

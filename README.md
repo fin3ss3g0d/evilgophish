@@ -96,7 +96,7 @@ Example:
 Once `setup.sh` is run, the next steps are: 
 
 1. Start `GoPhish` and configure email template, email sending profile, and groups
-2. Start `evilginx2` and configure phishlet and lure
+2. Start `evilginx2` and configure phishlet and lure (must specify full path to `GoPhish` `sqlite3` database with `-g` flag)
 3. Ensure `Apache2` server is started
 4. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 5. **PROFIT**
@@ -121,7 +121,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ![twilio-number-formats](images/twilio-number-formats.png)
 
-4. Start `evilginx2` and configure phishlet and lure
+4. Start `evilginx2` and configure phishlet and lure (must specify full path to `GoPhish` `sqlite3` database with `-g` flag)
 5. Ensure `Apache2` server is started
 6. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 7. **PROFIT**
@@ -178,10 +178,6 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 ## Changelog 
 
 See the `CHANGELOG.md` file for changes made since the initial release.
-
-## Limitations 
-
-- All events will only be submitted once into `GoPhish`
 
 ## Issues and Support
 

