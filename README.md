@@ -27,7 +27,7 @@ Combination of [evilginx2](https://github.com/kgretzky/evilginx2) and [GoPhish](
 
 ## Credits
 
-Before I begin, I would like to say that I am in no way bashing [Kuba Gretzky](https://github.com/kgretzky) and his work. I thank him personally for releasing [evilginx2](https://github.com/kgretzky/evilginx2) to the public. In fact, without his work this work would not exist. I must also thank [Jordan Wright](https://github.com/jordan-wright) for developing/maintaining the incredible [GoPhish](https://github.com/gophish/gophish) toolkit. The last thank you I must make is to [Fotios Liatsis](https://twitter.com/_wizard32?lang=en) and [Outpost24](https://outpost24.com/) for sharing their original solution to combine these two frameworks that inspired the creation of this project.
+Before I begin, I would like to say that I am in no way bashing [Kuba Gretzky](https://github.com/kgretzky) and his work. I thank him personally for releasing [evilginx2](https://github.com/kgretzky/evilginx2) to the public. In fact, without his work this work would not exist. I must also thank [Jordan Wright](https://github.com/jordan-wright) for developing/maintaining the incredible [GoPhish](https://github.com/gophish/gophish) toolkit.
 
 ## Prerequisites
 
@@ -46,14 +46,14 @@ As a penetration tester or red teamer, you may have heard of `evilginx2` as a pr
 
 ## Background
 
-This project was originally inspired by this [blog](https://outpost24.com/blog/Better-proxy-than-story), however with time and source code review, different methods now provide tracking between the two frameworks and `Apache2` is only used as a hardening layer for your phishing infrastructure. In this setup, `GoPhish` is used to send emails and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
+In this setup, `GoPhish` is used to send emails and provide a dashboard for `evilginx2` campaign statistics, but it is not used for any landing pages. Your phishing links sent from `GoPhish` will point to an `evilginx2` lure path and `evilginx2` will be used for landing pages. This provides the ability to still bypass `2FA/MFA` with `evilginx2`, without losing those precious stats. `Apache2` is simply used as a proxy to the local `evilginx2` server and an additional hardening layer for your phishing infrastructure. Realtime campaign event notifications have been provided with [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/) and full usable `JSON` strings containing tokens/cookies from `evilginx2` are displayed directly in the `GoPhish` GUI:
 
 ![new-dashboard](images/tokens-gophish.png)
 
 ## Infrastructure Layout
 
 - `evilginx2` will listen locally on port `8443`
-- `GoPhish` will listen locally on port `8080`
+- `GoPhish` will listen locally on port `8080` and `3333`
 - `Apache2` will listen on port `443` externally and proxy to local `evilginx2` server
   - Requests will be filtered at `Apache2` layer based on redirect rules and IP blacklist configuration
     - Redirect functionality for unauthorized requests is still baked into `evilginx2` if a request hits the `evilginx2` server

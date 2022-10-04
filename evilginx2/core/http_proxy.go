@@ -75,13 +75,6 @@ type HttpProxy struct {
     PusherClient      database.Pusher
 }
 
-type Creds struct {
-    Username string 		`json:"Username"`
-    Password string 		`json:"Password"`
-    RId string              `json:"RId"`
-    SubmitTime time.Time 	`json:"SubmitTime"`
-}
-
 type ProxySession struct {
     SessionId   string
     Created     bool

@@ -178,6 +178,7 @@ function setup_gophish () {
         sed "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" conf/app.js.template > pusher/client/app.js
         sed -i "s|const APP_CLUSTER = '';|const APP_CLUSTER = '${cluster}';|g" pusher/client/app.js
         sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
+        mkdir "${evilginx_dir}"
         sed "s|\"pusher_app_id\": \"\",|\"pusher_app_id\": \"${app_id}\",|g" conf/pusher.conf.template > "${evilginx_dir}/pusher.conf"
         sed -i "s|\"pusher_app_key\": \"\",|\"pusher_app_key\": \"${key}\",|g" "${evilginx_dir}/pusher.conf"
         sed -i "s|\"pusher_app_secret\": \"\",|\"pusher_app_secret\": \"${secret}\",|g" "${evilginx_dir}/pusher.conf"
