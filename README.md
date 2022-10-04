@@ -17,7 +17,6 @@
   * [Changes To evilginx2](#changes-to-evilginx2)
   * [Changes to GoPhish](#changes-to-gophish)
   * [Changelog](#changelog)
-  * [Limitations](#limitations)
   * [Issues and Support](#issues-and-support)
   * [Future Goals](#future-goals)
   * [Contributing](#contributing)
