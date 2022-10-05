@@ -24,7 +24,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 100000
+	maxMessageSize = 1000000
 )
 
 var (
