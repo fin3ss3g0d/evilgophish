@@ -169,28 +169,28 @@ func HandleEmailOpened (rid string, browser map[string]string, feed_enabled bool
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
+        event, err := res.createEvent("Email/SMS Opened", ed)
+        if err != nil {
+            return err
+        }
+        res.Status = "Email/SMS Opened"
+        res.ModifiedDate = event.Time
         if feed_enabled {
             if r.SMSTarget {
-                err = r.NotifySMSOpened()
+                err = res.NotifySMSOpened()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
                 }
             } else {
-                err = r.NotifyEmailOpened()
+                err = res.NotifyEmailOpened()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
                 }
             }
         }
-        event, err := res.createEvent("Email/SMS Opened", ed)
-        if err != nil {
-            return err
-        }
         if r.Status == "Clicked Link" || r.Status == "Submitted Data" {
             return nil
         }
-        res.Status = "Email/SMS Opened"
-        res.ModifiedDate = event.Time
         return gp_db.Save(res).Error
     }
 }
@@ -215,15 +215,21 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
+        event, err := res.createEvent("Clicked Link", ed)
+        if err != nil {
+            return err
+        } 
+        res.Status = "Clicked Link"
+        res.ModifiedDate = event.Time
         if feed_enabled {
             if r.Status == "Email/SMS Sent" {
                 HandleEmailOpened(rid, browser, true)
-                err = r.NotifyClickedLink()
+                err = res.NotifyClickedLink()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
                 }
             } else {
-                err = r.NotifyClickedLink()
+                err = res.NotifyClickedLink()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
                 }
@@ -233,15 +239,9 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
                 HandleEmailOpened(rid, browser, false)
             }
         }
-        event, err := res.createEvent("Clicked Link", ed)
-        if err != nil {
-            return err
-        } 
         if r.Status == "Submitted Data" {
             return nil
         }
-        res.Status = "Clicked Link"
-        res.ModifiedDate = event.Time
         return gp_db.Save(res).Error
     }
 }
@@ -266,21 +266,21 @@ func HandleSubmittedData (rid string, username string, password string, browser 
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        if feed_enabled {
-            err = r.NotifySubmittedData(username, password)
-            if err != nil {
-                fmt.Printf("Error sending websocket message: %s\n", err)
-            }
-        }
         event, err := res.createEvent("Submitted Data", ed)
         if err != nil {
             return err
         }
+        res.Status = "Submitted Data"
+        res.ModifiedDate = event.Time
+        if feed_enabled {
+            err = res.NotifySubmittedData(username, password)
+            if err != nil {
+                fmt.Printf("Error sending websocket message: %s\n", err)
+            }
+        }
         if r.Status == "Captured Session" {
             return nil
         }
-        res.Status = "Submitted Data"
-        res.ModifiedDate = event.Time
         return gp_db.Save(res).Error
     }
 }
@@ -306,18 +306,18 @@ func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, bro
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        if feed_enabled {
-            err = r.NotifyCapturedSession(tokens)
-            if err != nil {
-                fmt.Printf("Error sending websocket message: %s\n", err)
-            }
-        }
         event, err := res.createEvent("Captured Session", ed)
         if err != nil {
             return err
         }
         res.Status = "Captured Session"
         res.ModifiedDate = event.Time
+        if feed_enabled {
+            err = res.NotifyCapturedSession(tokens)
+            if err != nil {
+                fmt.Printf("Error sending websocket message: %s\n", err)
+            }
+        }
         return gp_db.Save(res).Error
     }
 }
