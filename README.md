@@ -11,7 +11,7 @@
   * [replace_rid.sh](#replace_ridsh)
   * [Email Campaign Setup](#email-campaign-setup)
   * [SMS Campaign Setup](#sms-campaign-setup)
-  * [Pusher Setup](#pusher-setup)
+  * [Live Feed Setup](#live-feed-setup)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [Changes To evilginx2](#changes-to-evilginx2)
@@ -64,12 +64,12 @@ In this setup, `GoPhish` is used to send emails and provide a dashboard for `evi
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <Pusher messages bool> <rid replacement>
+./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <feed bool> <rid replacement>
  - root domain                     - the root domain to be used for the campaign
  - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
  - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
  - redirect url                    - URL to redirect unauthorized Apache requests
- - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel
+ - feed bool                       - true or false if you plan to use the live feed
  - rid replacement                 - replace the gophish default "rid" in phishing URLs with this value
 Example:
   ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id
@@ -125,26 +125,25 @@ Once you have run `setup.sh`, the next steps are:
 6. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx2` phishlet
 7. **PROFIT**
 
-## Pusher Setup
+## Live Feed Setup
 
-Realtime campaign event notifications are handled by [Pusher end-to-end encrypted channels](https://pusher.com/docs/channels/using_channels/encrypted-channels/). Not even `Pusher` is capable of decrypting the contents of these requests, as operators will set their own encryption key for their own local instance of a `Pusher` feed server I have created. Before data goes out to `Pusher`, it will be encrypted by the local `Pusher` server with this key (read the linked blog for full information) and a string of ciphertext is ultimately what is sent containing the payload data. The encryption key of the local `Pusher` server is never shared with `Pusher`. You might also like to hear that you have a `200k` message limit per day with a `FREE` account! To get setup:
+Realtime campaign event notifications are handled by a local websocket/http server and live feed app. To get setup:
 
-1. Create a new channel in `Pusher`, the channel **MUST** be prefixed with `private-encrypted-`. For example:
+1. Select `true` for `feed bool` when running `setup.sh`
 
-![pusher-channel](images/pusher-channel.png)
+2. When starting `evilginx2`, supply the `-feed` flag to enable the feed. For example:
 
-2. Select `true` for `Pusher messages bool` when running `setup.sh`. Input your `app_id`, `key`, `secret`, `cluster`, channel name, and server encryption key into `setup.sh` when prompted.
-3. `cd` into the `pusher` directory and start the server with `./pusher`. For example:
+`./evilginx2 -feed -g /opt/evilgophish/gophish/gophish.db`
 
-![starting-pusher](images/starting-pusher.png)
+3. `cd` into the `evilfeed` directory and start the app with `./evilfeed`
 
-4. You can begin viewing the live feed at: `http://localhost:1400/`. The feed dashboard will look like below:
+3. You can begin viewing the live feed at: `http://localhost:1337/`. The feed dashboard will look like below:
 
-![pusher-dashboard](images/pusher-dashboard.png)
+![live-feed](images/live-feed.png)
 
 **IMPORTANT NOTES**
 
-- The live feed page hooks the channel for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
+- The live feed page hooks a websocket for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
 
 ## Phishlets Surprise
 
@@ -180,7 +179,7 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Issues and Support
 
-I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and will not help creating phishlets. There are plenty of examples of working phishlets and for you to create your own, if you open an issue for a phishlet it will be closed. I will also not consider issues with your `Apache2`, `DNS`, or certificate setup as legitimate issues and they will be closed. Please read the included [blog](https://outpost24.com/blog/Better-proxy-than-story) for how to get setup properly. However, if you encounter a legitimate failure/error with the program, I will take the issue seriously.
+I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and will not help creating phishlets. There are plenty of examples of working phishlets and for you to create your own, if you open an issue for a phishlet it will be closed. I will also not consider issues with your `Apache2`, `DNS`, or certificate setup as legitimate issues and they will be closed. However, if you encounter a legitimate failure/error with the program, I will take the issue seriously.
 
 ## Future Goals
 

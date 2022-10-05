@@ -45,3 +45,7 @@ Added the `Add Tracking Image` button back and ability to handle email opened tr
 # 10/03/2022
 
 Made further enhancements to the logging process so that if a user triggers an event more than once, every instance will now be captured. Changed `Pusher` notifications to trigger directly from `evilginx` to ensure feed is completely realtime.
+
+# 10/05/2022
+
+Removed `Pusher` messages to a channel to avoid message limit and to ease the live feed setup process. The live feed has been changed to operate completely local, without sending victim data to any remote `API`. The live feed also now has no message limits :)

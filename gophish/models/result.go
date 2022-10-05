@@ -11,8 +11,7 @@ import (
     log "github.com/gophish/gophish/logger"
     "github.com/jinzhu/gorm"
     "github.com/oschwald/maxminddb-golang"
-    "github.com/gophish/gophish/config"
-    pusher "github.com/pusher/pusher-http-go/v5"
+    "github.com/gorilla/websocket"
     "github.com/twilio/twilio-go"
     openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
@@ -41,37 +40,53 @@ type Result struct {
     Reported     bool      `json:"reported" sql:"not null"`
     ModifiedDate time.Time `json:"modified_date"`
     BaseRecipient
-	SMSTarget    bool 		`json:"sms_target"`
+    SMSTarget    bool 		`json:"sms_target"`
 }
 
-func (r *Result) PusherNotifyEmailSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "Email Sent", "time": r.ModifiedDate.String(), "message": "Email has been sent to victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
-    if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
-    }
+type FeedEvent struct {
+    Event 	string `json:"event"`
+    Time 	string `json:"time"`
+    Message string `json:"message"`
 }
 
-func (r *Result) PusherNotifySMSSent(app_id string, app_key string, secret string, cluster string, encrypt_key string, channel_name string) {
-    pusherClient := pusher.Client{
-        AppID: app_id,
-        Key: app_key,
-        Secret: secret,
-        Cluster: cluster,
-        EncryptionMasterKeyBase64: encrypt_key,
-    }
-    data := map[string]string{"event": "SMS Sent", "time": r.ModifiedDate.String(), "message": "SMS has been sent to victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(channel_name, "event", data)
+func (r *Result) NotifyEmailSent() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "Email Sent"
+    fe.Message = "Email has been sent to victim: <strong>" + r.Email + "</strong>"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+    
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
+}
+
+func (r *Result) NotifySMSSent() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
+    if err != nil {
+        return err
+    }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "SMS Sent"
+    fe.Message = "SMS has been sent to victim: <strong>" + r.Email + "</strong>"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
 func (r *Result) createEvent(status string, details interface{}) (*Event, error) {
@@ -117,16 +132,13 @@ func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token stri
         r.SendDate = event.Time
         r.Status = EventSent
         r.ModifiedDate = event.Time
-		r.SMSTarget = true
+        r.SMSTarget = true
         
-        if conf.EnablePusher {
-            pusher_app_id := conf.PusherAppId
-            pusher_app_key := conf.PusherAppKey
-            pusher_app_secret := conf.PusherAppSecret
-            pusher_app_cluster := conf.PusherAppCluster
-            pusher_encrypt_key := conf.PusherEncryptKey
-            pusher_channel_name := conf.PusherChannelName
-            r.PusherNotifySMSSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+        if conf.FeedEnabled {
+            err = r.NotifySMSSent()
+            if err != nil {
+                log.Error("Error sending websocket message: %s", err)
+            }
         }
 
         return db.Save(r).Error
@@ -143,21 +155,11 @@ func (r *Result) HandleEmailSent() error {
     r.SendDate = event.Time
     r.Status = EventSent
     r.ModifiedDate = event.Time
-	r.SMSTarget = false
+    r.SMSTarget = false
 
-    conf, err := config.LoadConfig("config.json")
+    err = r.NotifyEmailSent()
     if err != nil {
-        fmt.Printf("[-] Failed to load config.json from default path!")
-    }
-
-    if conf.EnablePusher {
-        pusher_app_id := conf.PusherAppId
-        pusher_app_key := conf.PusherAppKey
-        pusher_app_secret := conf.PusherAppSecret
-        pusher_app_cluster := conf.PusherAppCluster
-        pusher_encrypt_key := conf.PusherEncryptKey
-        pusher_channel_name := conf.PusherChannelName
-        r.PusherNotifyEmailSent(pusher_app_id, pusher_app_key, pusher_app_secret, pusher_app_cluster, pusher_encrypt_key, pusher_channel_name)
+        log.Error("Error sending websocket message: %s", err)
     }
 
     return db.Save(r).Error

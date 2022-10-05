@@ -24,5 +24,5 @@ require (
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
     github.com/jinzhu/gorm v1.9.12
     github.com/mattn/go-sqlite3 v2.0.3+incompatible
-    github.com/pusher/pusher-http-go/v5 v5.0.0 // indirect
+    github.com/gorilla/websocket v1.5.0 // indirect
 )

