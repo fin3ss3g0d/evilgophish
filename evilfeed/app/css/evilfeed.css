@@ -1,0 +1,30 @@
+#audio-control {
+    cursor:pointer;
+    padding: 10px 20px;
+    background:#00ff00;
+    color: #000;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 30px;
+}
+.token-button {
+    cursor:pointer;
+    padding: 10px 20px;
+    background:#000;
+    color: #00ff00;
+    border-radius: 4px;
+    display: inline-block;
+    border: none;
+    font-size: 15px;
+}
+.token-space {
+    white-space: -moz-pre-wrap; /* Mozilla */
+    white-space: -hp-pre-wrap; /* HP printers */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: pre-wrap; /* CSS 2.1 */
+    white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+    word-wrap: break-word; /* IE */
+    word-break: break-all;
+    display: none;
+}

