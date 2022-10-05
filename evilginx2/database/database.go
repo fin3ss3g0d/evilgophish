@@ -214,10 +214,6 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        event, err := res.createEvent("Clicked Link", ed)
-        if err != nil {
-            return err
-        }
         if feed_enabled {
             if r.Status == "Email/SMS Sent" {
                 HandleEmailOpened(rid, browser, true)
@@ -235,7 +231,11 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
             if r.Status == "Email/SMS Sent" {
                 HandleEmailOpened(rid, browser, false)
             }
-        }   
+        }
+        event, err := res.createEvent("Clicked Link", ed)
+        if err != nil {
+            return err
+        } 
         if r.Status == "Submitted Data" {
             return nil
         }
