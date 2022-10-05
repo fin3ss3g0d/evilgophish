@@ -131,13 +131,13 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 
 1. Select `true` for `feed bool` when running `setup.sh`
 
-2. When starting `evilginx2`, supply the `-feed` flag to enable the feed. For example:
+2. `cd` into the `evilfeed` directory and start the app with `./evilfeed`
+
+3. When starting `evilginx2`, supply the `-feed` flag to enable the feed. For example:
 
 `./evilginx2 -feed -g /opt/evilgophish/gophish/gophish.db`
 
-3. `cd` into the `evilfeed` directory and start the app with `./evilfeed`
-
-3. You can begin viewing the live feed at: `http://localhost:1337/`. The feed dashboard will look like below:
+4. You can begin viewing the live feed at: `http://localhost:1337/`. The feed dashboard will look like below:
 
 ![live-feed](images/live-feed.png)
 
