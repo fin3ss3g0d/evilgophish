@@ -215,20 +215,26 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
         res.Longitude = 0.000000
         res.Reported = false
         res.BaseRecipient = r.BaseRecipient
-        event, err := res.createEvent("Clicked Link", ed)
-        if err != nil {
-            return err
-        } 
-        res.Status = "Clicked Link"
-        res.ModifiedDate = event.Time
         if feed_enabled {
             if r.Status == "Email/SMS Sent" {
                 HandleEmailOpened(rid, browser, true)
+                event, err := res.createEvent("Clicked Link", ed)
+                if err != nil {
+                    return err
+                } 
+                res.Status = "Clicked Link"
+                res.ModifiedDate = event.Time
                 err = res.NotifyClickedLink()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
                 }
             } else {
+                event, err := res.createEvent("Clicked Link", ed)
+                if err != nil {
+                    return err
+                } 
+                res.Status = "Clicked Link"
+                res.ModifiedDate = event.Time
                 err = res.NotifyClickedLink()
                 if err != nil {
                     fmt.Printf("Error sending websocket message: %s\n", err)
@@ -237,6 +243,19 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
         } else {
             if r.Status == "Email/SMS Sent" {
                 HandleEmailOpened(rid, browser, false)
+                event, err := res.createEvent("Clicked Link", ed)
+                if err != nil {
+                    return err
+                } 
+                res.Status = "Clicked Link"
+                res.ModifiedDate = event.Time
+            } else {
+                event, err := res.createEvent("Clicked Link", ed)
+                if err != nil {
+                    return err
+                } 
+                res.Status = "Clicked Link"
+                res.ModifiedDate = event.Time
             }
         }
         if r.Status == "Submitted Data" {
