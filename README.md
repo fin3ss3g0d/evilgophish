@@ -150,8 +150,8 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
-2. `google` - updated from previous examples online (has issues, don't use in live campaigns)
-3. `knowbe4` - custom (don't have access to an account for testing auth URL, works for single-factor campaigns, have not fully tested MFA)
+2. `google` - updated from previous examples online (has issues since release, don't use in live campaigns)
+3. `knowbe4` - custom (fully updated and working to bypass MFA)
 
 ## A Word About Phishlets
 

