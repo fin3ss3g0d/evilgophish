@@ -188,7 +188,7 @@ func HandleEmailOpened (rid string, browser map[string]string, feed_enabled bool
                 }
             }
         }
-        if r.Status == "Clicked Link" || r.Status == "Submitted Data" {
+        if r.Status == "Clicked Link" || r.Status == "Submitted Data" || r.Status == "Captured Session" {
             return nil
         }
         return gp_db.Save(res).Error
@@ -258,7 +258,7 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
                 res.ModifiedDate = event.Time
             }
         }
-        if r.Status == "Submitted Data" {
+        if r.Status == "Submitted Data" || r.Status == "Captured Session" {
             return nil
         }
         return gp_db.Save(res).Error

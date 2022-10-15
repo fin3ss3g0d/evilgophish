@@ -14,6 +14,7 @@
   * [Live Feed Setup](#live-feed-setup)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
+  * [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)
   * [Changes To evilginx2](#changes-to-evilginx2)
   * [Changes to GoPhish](#changes-to-gophish)
   * [Changelog](#changelog)
@@ -157,6 +158,10 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 
 I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Send me your phishlets at `fin3ss3g0d@pm.me` for a chance to end up in `evilginx2/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
 
+## A Note About Campaign Testing And Tracking
+
+It is not uncommon to test the tracking for a campaign before it is launched and I encourage you to do so, I will just leave you with a warning. `evilginx2` will create a cookie and establish a session for each new victim's browser. If you continue to test multiple campaigns and multiple phishing links within the same browser, you will confuse the tracking process since the `RId` value is parsed out of requests and set at the start of a new session. If you are doing this, you are not truly simulating a victim as a victim would never have access to another phishing link besides their own and goes without saying that this will never happen during a live campaign. This is to fair warn you not to open an issue for this as you are not using the tool the way it was intended to be used. If you would like to simulate a new victim, you can test the tracking process by using a new browser/tab in incognito mode.
+
 ## Changes To evilginx2
 
 1. All IP whitelisting functionality removed, new proxy session is established for every new visitor that triggers a lure path regardless of remote IP
@@ -164,14 +169,13 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 3. Further *"bad"* headers have been removed from responses
 4. Added logic to check if `mime` type was failed to be retrieved from responses
 5. All `X` headers relating to `evilginx2` have been removed throughout the code (to remove IOCs)
+6. Added phishlets
 
 ## Changes to GoPhish
 
 1. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
-2. Custom 404 page functionality, place a `.html` file named `404.html` in `templates` folder (example has been provided)
-3. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
-4. Transparency endpoint and messages completely removed
-5. Added `SMS` Campaign Support
+2. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
+3. Added `SMS` Campaign Support
 
 ## Changelog 
 
@@ -179,10 +183,11 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Issues and Support
 
-I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and will not help creating phishlets. There are plenty of examples of working phishlets and for you to create your own, if you open an issue for a phishlet it will be closed. I will also not consider issues with your `Apache2`, `DNS`, or certificate setup as legitimate issues and they will be closed. However, if you encounter a legitimate failure/error with the program, I will take the issue seriously.
+I am mostly looking for legitimate bugs in code or enhancement opportunities and not to be a personal help desk support for struggles during your setup. You should understand the prerequisites of setting up a social engineering campaign including how `Apache`, `DNS`, SSL certificates, `evilginx2`, `gophish`, and proxies work to use and setup this tool. With that being said, issues falling into these categories will be closed. I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and will not help creating phishlets. There are plenty of examples of working phishlets and for you to create your own, if you open an issue for a phishlet it will be closed. However, I *will* maintain *certain* phishlets at will (see [A Word About Phishlets](#a-word-about-phishlets)). I will state for the record that tracking for this project works as advertised and if it does not, it is a result of a misconfiguration during `setup.sh` or you are confusing the tool by visiting multiple `RId`s within the same browser session. Do not open an issue for this or it will be closed (see [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)).
 
 ## Future Goals
 
+- Test/review/pull `evilginx3` update
 - Additions to IP blacklist and redirect rules
 - Add more phishlets
 

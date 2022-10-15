@@ -172,7 +172,7 @@ function main () {
     setup_apache
     setup_gophish
     setup_evilginx2
-    print_good "Installation complete! When ready start apache with: systemctl start apache2"
+    print_good "Installation complete! When ready start apache with: systemctl restart apache2"
     print_info "It is recommended to run all servers inside a tmux session to avoid losing them over SSH!"
 }
 
