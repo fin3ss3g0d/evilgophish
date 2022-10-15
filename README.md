@@ -15,6 +15,7 @@
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)
+  * [A Note About The Blacklist and Tracking](#a-note-about-the-blacklist-and-tracking)
   * [Changes To evilginx2](#changes-to-evilginx2)
   * [Changes to GoPhish](#changes-to-gophish)
   * [Changelog](#changelog)
@@ -152,7 +153,7 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online (has issues since release, don't use in live campaigns)
-3. `knowbe4` - custom (fully updated and working to bypass MFA)
+3. `knowbe4` - custom ([demo](https://www.youtube.com/watch?v=eMDMGNt3BWw))
 
 ## A Word About Phishlets
 
@@ -161,6 +162,10 @@ I feel like the world has been lacking some good phishlet examples lately. It wo
 ## A Note About Campaign Testing And Tracking
 
 It is not uncommon to test the tracking for a campaign before it is launched and I encourage you to do so, I will just leave you with a warning. `evilginx2` will create a cookie and establish a session for each new victim's browser. If you continue to test multiple campaigns and multiple phishing links within the same browser, you will confuse the tracking process since the `RId` value is parsed out of requests and set at the start of a new session. If you are doing this, you are not truly simulating a victim as a victim would never have access to another phishing link besides their own and goes without saying that this will never happen during a live campaign. This is to fair warn you not to open an issue for this as you are not using the tool the way it was intended to be used. If you would like to simulate a new victim, you can test the tracking process by using a new browser/tab in incognito mode.
+
+## A Note About The Blacklist and Tracking
+
+As mentioned above, there is an IP address blacklist included in this project that may cause some clients to get blocked and disrupt the tracking process. For right now, it is up to you to perform test campaigns and verify if any blocking will disrupt your campaign tracking. A blocked client will receive a `403 Forbidden` error. `/var/log/apache2/access_evilginx2.log` can be viewed for remote IP addresses accessing the phishing server. You can remove entries in the `/etc/apache2/blacklist.conf` file that are causing a tracking issue and restart Apache. Or you can remove the `Location` block in the `/etc/apache2/sites-enabled/000-default.conf` file and restart Apache to remove IP blacklisting altogether.
 
 ## Changes To evilginx2
 
