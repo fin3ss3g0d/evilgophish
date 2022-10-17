@@ -153,7 +153,7 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online (has issues since release, don't use in live campaigns)
-3. `knowbe4` - custom ([demo](https://youtu.be/iDxFpcdXddU))
+3. `knowbe4` - custom
 
 ## A Word About Phishlets
 
