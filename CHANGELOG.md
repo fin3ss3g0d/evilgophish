@@ -49,3 +49,7 @@ Made further enhancements to the logging process so that if a user triggers an e
 # 10/05/2022
 
 Removed `Pusher` messages to a channel to avoid message limit and to ease the live feed setup process. The live feed has been changed to operate completely local, without sending victim data to any remote `API`. The live feed also now has no message limits and added the ability to view full token JSON in live feed :)
+
+# 10/29/2022
+
+Made `Apache2` blacklist optional.

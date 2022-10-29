@@ -54,6 +54,8 @@ In this setup, `GoPhish` is used to send emails and provide a dashboard for `evi
 
 ## Infrastructure Layout
 
+![diagram](images/evilgophish%20diagram.png)
+
 - `evilginx2` will listen locally on port `8443`
 - `GoPhish` will listen locally on port `8080` and `3333`
 - `Apache2` will listen on port `443` externally and proxy to local `evilginx2` server
@@ -66,15 +68,16 @@ In this setup, `GoPhish` is used to send emails and provide a dashboard for `evi
 
 ```
 Usage:
-./setup <root domain> <evilginx2 subdomain(s)> <evilginx2 root domain bool> <redirect url> <feed bool> <rid replacement>
+./setup <root domain> <subdomain(s)> <root domain bool> <redirect url> <feed bool> <rid replacement> <blacklist bool>
  - root domain                     - the root domain to be used for the campaign
- - evilginx2 subdomains            - a space separated list of evilginx2 subdomains, can be one if only one
- - evilginx2 root domain bool      - true or false to proxy root domain to evilginx2
+ - subdomains                      - a space separated list of evilginx2 subdomains, can be one if only one
+ - root domain bool                - true or false to proxy root domain to evilginx2
  - redirect url                    - URL to redirect unauthorized Apache requests
  - feed bool                       - true or false if you plan to use the live feed
  - rid replacement                 - replace the gophish default "rid" in phishing URLs with this value
+ - blacklist bool                  - true or false to use Apache blacklist
 Example:
-  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id
+  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id false
 ```
 
 Redirect rules have been included to keep unwanted visitors from visiting the phishing server as well as an IP blacklist. The blacklist contains IP addresses/blocks owned by ProofPoint, Microsoft, TrendMicro, etc. Redirect rules will redirect known *"bad"* remote hostnames as well as User-Agent strings. 
@@ -153,7 +156,7 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online (has issues since release, don't use in live campaigns)
-3. `knowbe4` - custom ([demo](https://youtu.be/RG8Gy6-9CXk))
+3. `knowbe4` - custom
 
 ## A Word About Phishlets
 
@@ -165,7 +168,7 @@ It is not uncommon to test the tracking for a campaign before it is launched and
 
 ## A Note About The Blacklist and Tracking
 
-As mentioned above, there is an IP address blacklist included in this project that may cause some clients to get blocked and disrupt the tracking process. For right now, it is up to you to perform test campaigns and verify if any blocking will disrupt your campaign tracking. A blocked client will receive a `403 Forbidden` error. `/var/log/apache2/access_evilginx2.log` can be viewed for remote IP addresses accessing the phishing server. You can remove entries in the `/etc/apache2/blacklist.conf` file that are causing a tracking issue and restart Apache. Or you can remove the `Location` block in the `/etc/apache2/sites-enabled/000-default.conf` file and restart Apache to remove IP blacklisting altogether.
+The `Apache` blacklist is now optional. If you decide to use it, it may cause some clients to get blocked and disrupt the tracking process. The reason being is organizations may request links through a proxy falling in blocked ranges. It is up to you to perform test campaigns and verify if any blocking will disrupt your campaign tracking. A blocked client will receive a `403 Forbidden` error. `/var/log/apache2/access_evilginx2.log*` can be viewed for remote IP addresses accessing the phishing server. You can remove entries in the `/etc/apache2/blacklist.conf` file that are causing a tracking issue and restart Apache. Or you can remove the `Location` block in the `/etc/apache2/sites-enabled/000-default.conf` file and restart Apache to remove IP blacklisting altogether. Users have also reported issues with setting `evilginx2`'s built-in `blacklist` feature to `unauth`.
 
 ## Changes To evilginx2
 
@@ -192,7 +195,7 @@ I am mostly looking for legitimate bugs in code or enhancement opportunities and
 
 ## Future Goals
 
-- Test/review/pull `evilginx3` update
+- Test/review/pull `evilginx3` when it releases
 - Additions to IP blacklist and redirect rules
 - Add more phishlets
 
