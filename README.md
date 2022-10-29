@@ -54,7 +54,7 @@ In this setup, `GoPhish` is used to send emails and provide a dashboard for `evi
 
 ## Infrastructure Layout
 
-![diagram](images/evilgophish%20diagram.png)
+![diagram](images/diagram.png)
 
 - `evilginx2` will listen locally on port `8443`
 - `GoPhish` will listen locally on port `8080` and `3333`
