@@ -1218,7 +1218,7 @@ func (p *HttpProxy) setSessionCustom(sid string, name string, value string) {
 func (p *HttpProxy) httpsWorker() {
     var err error
 
-    p.sniListener, err = net.Listen("tcp", p.Server.Addr)
+    p.sniListener, err = net.Listen("tcp4", p.Server.Addr)
     if err != nil {
         log.Fatal("%s", err)
         return
