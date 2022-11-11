@@ -33,10 +33,10 @@ if [[ $# -ne 7 ]]; then
     print_error " - root domain                     - the root domain to be used for the campaign"
     print_error " - subdomains                      - a space separated list of subdomains to proxy to evilginx2, can be one if only one"
     print_error " - root domain bool                - true or false to proxy root domain to evilginx2"
-    print_error " - redirect url                    - URL to redirect unauthorized Apache requests"
+    print_error " - redirect url                    - URL to redirect unauthorized Nginx requests"
     print_error " - feed bool                       - true or false if you plan to use the live feed"
     print_error " - rid replacement                 - replace the gophish default \"rid\" in phishing URLs with this value"
-    print_error " - blacklist bool                  - true or false to use Apache blacklist"
+    print_error " - blacklist bool                  - true or false to use Nginx blacklist"
     print_error "Example:"
     print_error '  ./setup.sh example.com "accounts myaccount" false https://redirect.com/ true user_id false'
 
@@ -68,7 +68,7 @@ function get_certs_path () {
 function install_depends () {
     print_info "Installing dependencies with apt"
     apt-get update
-    apt-get install apache2 build-essential letsencrypt certbot wget git net-tools tmux openssl jq -y
+    apt-get install nginx build-essential letsencrypt certbot wget git net-tools tmux openssl jq -y
     print_good "Installed dependencies with apt!"
     print_info "Installing Go from source"
     v=$(curl -s https://go.dev/dl/?mode=json | jq -r '.[0].version')
@@ -79,18 +79,11 @@ function install_depends () {
     print_good "Installed Go from source!"
 }
 
-# Configure Apache
-function setup_apache () {
-    # Enable needed Apache mods
-    print_info "Configuring Apache"
-    a2enmod proxy > /dev/null 
-    a2enmod proxy_http > /dev/null
-    a2enmod proxy_balancer > /dev/null
-    a2enmod lbmethod_byrequests > /dev/null
-    a2enmod rewrite > /dev/null
-    a2enmod ssl > /dev/null
+# Configure Nginx
+function setup_nginx () {
+    print_info "Configuring Nginx"
+        # Prepare nginx default file
 
-    # Prepare Apache 000-default.conf file
     evilginx2_cstring=""
     for esub in ${evilginx2_subs} ; do
         evilginx2_cstring+=${esub}.${root_domain}
@@ -101,27 +94,22 @@ function setup_apache () {
     fi
     # Replace template values with user input
     if [[ $(echo "${bl_bool}" | grep -ci "true") -gt 0 ]]; then
-        sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" conf/000-default.conf.template > 000-default.conf
+        sed "s/server_name evilginx2.template/server_name ${evilginx2_cstring}/g" conf/default.template > default
     else 
-        sed "s/ServerAlias evilginx2.template/ServerAlias ${evilginx2_cstring}/g" conf/000-default-no-bl.conf.template > 000-default.conf
+        sed "s/server_name evilginx2.template/server_name ${evilginx2_cstring}/g" conf/default.template > default
     fi
-    sed -i "s|SSLCertificateFile|SSLCertificateFile ${certs_path}cert.pem|g" 000-default.conf
-    sed -i "s|SSLCertificateChainFile|SSLCertificateChainFile ${certs_path}fullchain.pem|g" 000-default.conf
-    sed -i "s|SSLCertificateKeyFile|SSLCertificateKeyFile ${certs_path}privkey.pem|g" 000-default.conf
-    # Don't listen on port 80
-    sed -i "s|Listen 80||g" /etc/apache2/ports.conf
-    # Input redirect information
-    sed "s|https://en.wikipedia.org/|${redirect_url}|g" conf/redirect.rules.template > redirect.rules
-    # Copy over Apache config file
-    cp 000-default.conf /etc/apache2/sites-enabled/
+    sed -i "s|ssl_trusted_certificate|ssl_trusted_certificate ${certs_path}chain.pem|g" default
+    sed -i "s|ssl_certificate_key|ssl_certificate_key ${certs_path}privkey.pem|g" default
+    sed -i "s|\<ssl_certificate\>|ssl_certificate ${cert_paths}cert.pem|g" default
+    # Copy over Nginx config file
+    cp default /etc/nginx/sites-enabled/
     # Copy over blacklist file if chosen
     if [[ $(echo "${bl_bool}" | grep -ci "true") -gt 0 ]]; then
-        cp conf/blacklist.conf /etc/apache2/
+        cp conf/blacklist.conf /etc/nginx/
     fi
     # Copy over redirect rules file
-    cp redirect.rules /etc/apache2/
-    rm redirect.rules 000-default.conf
-    print_good "Apache configured!"
+    cp redirect.rules /etc/nginx/redirect.rules
+    print_good "Nginx configured!"
 }
 
 # Configure and install evilginx2
@@ -178,7 +166,7 @@ function main () {
     check_privs
     install_depends
     get_certs_path
-    setup_apache
+    setup_nginx
     setup_gophish
     setup_evilginx2
     print_good "Installation complete! When ready start apache with: systemctl restart apache2"
