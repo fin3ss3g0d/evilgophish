@@ -158,7 +158,7 @@ function setup_gophish () {
     print_info "Configuring gophish"
     sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" conf/config.json.template > gophish/config.json
     sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
-    # Setup Pusher if selected
+    # Setup live feed if selected
     if [[ $(echo "${feed_bool}" | grep -ci "true") -gt 0 ]]; then
         sed -i "s|\"feed_enabled\": false,|\"feed_enabled\": true,|g" gophish/config.json
         cd evilfeed || exit 1

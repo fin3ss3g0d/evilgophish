@@ -170,7 +170,7 @@ Since `Apache2` is the initial proxy used in this project, all requests ever mad
 
 ## Apache2 Customization
 
-You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/000-default.conf`. You can serve content from a static directory to host payloads, configure multiple domains, etc. You can make any change `Apache2` supports.
+You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/000-default.conf`. You can serve content from a static directory to host payloads, configure multiple domains, etc. You can make any change `Apache2` supports. Restarting the server is mandatory for changes to take effect.
 
 ## A Note About Campaign Testing And Tracking
 
