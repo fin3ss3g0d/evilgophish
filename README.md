@@ -14,6 +14,8 @@
   * [Live Feed Setup](#live-feed-setup)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
+  * [Debugging](#debugging)
+  * [Apache2 Customiization](#apache2-customization)
   * [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)
   * [A Note About The Blacklist and Tracking](#a-note-about-the-blacklist-and-tracking)
   * [Changes To evilginx2](#changes-to-evilginx2)
@@ -161,6 +163,14 @@ Included in the `evilginx2/phishlets` folder are three custom phishlets not incl
 ## A Word About Phishlets
 
 I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Send me your phishlets at `fin3ss3g0d@pm.me` for a chance to end up in `evilginx2/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
+
+## Debugging
+
+Since `Apache2` is the initial proxy used in this project, all requests ever made to the phishing server will be logged to `/var/log/apache2/access_evilginx2.log*`. These logs can be viewed to show all access to the phishing server and assist in troubleshooting issues. Running `evilginx2` with the `-debug` flag will show cookies, URLs, and contents of incoming/outgoing requests.
+
+## Apache2 Customization
+
+You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/000-default.conf`. You can serve content from a static directory to host payloads, configure multiple domains, etc. You can make any change `Apache2` supports.
 
 ## A Note About Campaign Testing And Tracking
 
