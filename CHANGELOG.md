@@ -53,3 +53,7 @@ Removed `Pusher` messages to a channel to avoid message limit and to ease the li
 # 10/29/2022
 
 Made `Apache2` blacklist optional.
+
+# 01/10/2023
+
+Added `Cisco VPN` phishlet, merged pull request that allows operators to get source `IP` information for victims when generating `GoPhish` reports.
