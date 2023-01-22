@@ -154,7 +154,7 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 
 ## Phishlets Surprise
 
-Included in the `evilginx2/phishlets` folder are three custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
+Included in the `evilginx2/phishlets` folder are four custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
 
 1. `o3652` - modified/updated version of the original `o365` (stolen from [Optiv blog](https://www.optiv.com/insights/source-zero/blog/spear-phishing-modern-platforms))
 2. `google` - updated from previous examples online (has issues since release, don't use in live campaigns)
@@ -192,9 +192,10 @@ The `Apache` blacklist is now optional. If you decide to use it, it may cause so
 
 ## Changes to GoPhish
 
-1. All `X` headers relating to `GoPhish` have been removed throughout the code (to remove IOCs)
-2. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
-3. Added `SMS` Campaign Support
+`GoPhish` is never used in any of your actual phishing pages and email headers have been stripped, so there's no need to worry about IOCs within it.
+
+1. Default `rid` string in phishing URLs is chosen by the operator in `setup.sh`
+2. Added `SMS` Campaign Support
 
 ## Changelog 
 
@@ -202,7 +203,7 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Issues and Support
 
-I am mostly looking for legitimate bugs in code or enhancement opportunities and not to be a personal help desk support for struggles during your setup. You should understand the prerequisites of setting up a social engineering campaign including how `Apache`, `DNS`, SSL certificates, `evilginx2`, `gophish`, and proxies work to use and setup this tool. With that being said, issues falling into these categories will be closed. I am taking the same stance as [Kuba Gretzky](https://github.com/kgretzky) and will not help creating phishlets. There are plenty of examples of working phishlets and for you to create your own, if you open an issue for a phishlet it will be closed. However, I *will* maintain *certain* phishlets at will (see [A Word About Phishlets](#a-word-about-phishlets)). I will state for the record that tracking for this project works as advertised and if it does not, it is a result of a misconfiguration during `setup.sh` or you are confusing the tool by visiting multiple `RId`s within the same browser session. Do not open an issue for this or it will be closed (see [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)). If you open an issue, please provide as much detailed information as possible about the issue including output pertaining to the issue. Issues with lack of detail or output will be closed. 
+I left this project up for about four months with an `Issues` section and a template, detailing specific things not to open an issue for and the guidelines for submitting an issue. However, mostly everyone failed to listen or read this document so I removed it `¯\_(ツ)_/¯`. You can now ask questions among yourselves in the `Discussions` section, with no guarantee that someone will answer. If this gets abused in the future, I will also remove it.
 
 ## Future Goals
 
@@ -212,4 +213,4 @@ I am mostly looking for legitimate bugs in code or enhancement opportunities and
 
 ## Contributing
 
-I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, phishlets, or suggestions, please email me at: `fin3ss3g0d@pm.me` or open a pull request.
+I would like to see this project improve and grow over time. If you have improvement ideas, new redirect rules, new IP addresses/blocks to blacklist, phishlets, or suggestions, please open a pull request.
