@@ -203,7 +203,20 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Issues and Support
 
-I left this project up for about four months with an `Issues` section and a template, detailing specific things not to open an issue for and the guidelines for submitting an issue. However, mostly everyone failed to listen or read this document so I removed it `¯\_(ツ)_/¯`. You can now ask questions among yourselves in the `Discussions` section, with no guarantee that someone will answer. If this gets abused in the future, I will also remove it.
+**READ THIS BEFORE OPENING AN ISSUE** 
+
+Follow these rules. This is open-source software that I am providing at no cost to anyone and I am trying to help/create for people. I will not tolerate being spoken/written to in a disrespectful manner or people continuously opening issues for things I have specifically stated not to. Failure to follow these rules will result in a deletion of your opened issue(s) and a potential blocking of your account if you continue spamming. 
+
+I am mostly looking for legitimate bugs in code or enhancement opportunities. The nature of this project is that it combines two different tools related to social engineering and there is a certain level of prerequisite knowledge that is required to successfully use it. With that being said, **DO NOT OPEN ISSUES FOR**:
+
+- How to use/setup `GoPhish`, `evilginx2`, or `Apache2`
+- Phishlets
+- `SSL` certificates
+- `DNS`
+- Port forwarding
+- Setup issues with visible socket, `DNS`, or other errors in your output that aren't issues with this project
+
+If you think you've encountered a genuine bug, use `ISSUE_TEMPLATE.md` as a template for submitting an issue.
 
 ## Future Goals
 
