@@ -163,7 +163,7 @@ Included in the `evilginx2/phishlets` folder are four custom phishlets not inclu
 
 ## A Word About Phishlets
 
-I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Send me your phishlets at `fin3ss3g0d@pm.me` for a chance to end up in `evilginx2/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
+I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Submit a pull request for a chance to end up in `evilginx2/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
 
 ## Debugging
 
@@ -216,7 +216,7 @@ I am mostly looking for legitimate bugs in code or enhancement opportunities. Th
 - Port forwarding
 - Setup issues with visible socket, `DNS`, or other errors in your output that aren't issues with this project
 
-If you think you've encountered a genuine bug, use `ISSUE_TEMPLATE.md` as a template for submitting an issue.
+If you think you've encountered a genuine bug, use `ISSUE_TEMPLATE.md` as a template for submitting an issue. Issues without output are highly likely to be ignored/deleted.
 
 ## Future Goals
 

