@@ -159,7 +159,7 @@ func HandleEmailOpened (rid string, browser map[string]string, feed_enabled bool
         res := Result{}
         ed := EventDetails{}
         ed.Browser = browser
-        ed.Payload = map[string][]string{"client_id": []string{rid}}
+        ed.Payload = map[string][]string{"id": []string{rid}}
         res.Id = r.Id
         res.RId = r.RId
         res.UserId = r.UserId
@@ -205,7 +205,7 @@ func HandleClickedLink (rid string, browser map[string]string, feed_enabled bool
         res := Result{}
         ed := EventDetails{}
         ed.Browser = browser
-        ed.Payload = map[string][]string{"client_id": []string{rid}}
+        ed.Payload = map[string][]string{"id": []string{rid}}
         res.Id = r.Id
         res.RId = r.RId
         res.UserId = r.UserId
@@ -506,6 +506,14 @@ func (d *Database) DeleteSessionById(id int) error {
     }
     err = d.sessionsDelete(id)
     return err
+}
+
+func (d *Database) GetSessionBySid(sid string) (*Session, error) {
+	s, err := d.sessionsGetBySid(sid)
+	if err != nil {
+		return nil,err
+	}
+	return s, err
 }
 
 func (d *Database) Flush() {
