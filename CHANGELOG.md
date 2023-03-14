@@ -61,3 +61,7 @@ Added `Cisco VPN` phishlet, merged pull request that allows operators to get sou
 # 02/03/2023
 
 Added some improved logic for logging credentials to `GoPhish` where sometimes the username parameter of a phishlet was lost due to not checking if it was empty. This should improve the overall user experience and credential logging.
+
+# 03/14/2023
+
+Removed a "X-Evilginx" header IOC that was hidden as a XOR encrypted byte array.
