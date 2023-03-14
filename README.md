@@ -16,6 +16,7 @@
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [Debugging](#debugging)
   * [Apache2 Customiization](#apache2-customization)
+  * [Installation Notes](#installation-notes)
   * [A Note About Campaign Testing And Tracking](#a-note-about-campaign-testing-and-tracking)
   * [A Note About The Blacklist and Tracking](#a-note-about-the-blacklist-and-tracking)
   * [Changes To evilginx2](#changes-to-evilginx2)
@@ -171,7 +172,11 @@ Since `Apache2` is the initial proxy used in this project, all requests ever mad
 
 ## Apache2 Customization
 
-You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/000-default.conf`. You can serve content from a static directory to host payloads, configure multiple domains, etc. You can make any change `Apache2` supports. Restarting the server is mandatory for changes to take effect.
+You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/000-default.conf`. You can serve content from a static directory to host payloads, configure different proxies, etc. You can make any change `Apache2` supports. Restarting the server is mandatory for changes to take effect.
+
+## Installation Notes
+
+The installation script was tested on Ubuntu Focal/Jammy and installs the latest version of `Go` from source. Binaries may fail to build depending on your `Go` enironment and what you have installed i.e. installing the original versions this project combines then trying to install this version of them. It also makes changes to DNS so `evilginx2` can take it over. You should understand the implications of this and review it. A fresh environment is recommended and other operating systems haven't been tested.
 
 ## A Note About Campaign Testing And Tracking
 
