@@ -56,7 +56,7 @@ bl_bool="${7}"
 # Get path to certificates
 function get_certs_path () {
     print_info "Run the command below to generate letsencrypt certificates (will need to create two (2) DNS TXT records):"
-    print_info "letsencrypt|certbot certonly --manual --preferred-challenges=dns --email admin@${root_domain} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos -d '*.${root_domain}' -d '${root_domain}'"
+    print_info "letsencrypt||certbot certonly --manual --preferred-challenges=dns --email admin@${root_domain} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos -d '*.${root_domain}' -d '${root_domain}'"
     print_info "Once certificates are generated, enter path to certificates:"
     read -r certs_path
     if [[ ${certs_path: -1} != "/" ]]; then
