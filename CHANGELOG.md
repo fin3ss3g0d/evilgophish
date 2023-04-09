@@ -65,3 +65,7 @@ Added some improved logic for logging credentials to `GoPhish` where sometimes t
 # 03/14/2023
 
 Removed a "X-Evilginx" header IOC that was hidden as a XOR encrypted byte array.
+
+# 04/09/2023
+
+Added the option to force a Google reCAPTCHA v2 challenge before granting access to a lure. This was done to combat domain takedowns and thwart off bots.

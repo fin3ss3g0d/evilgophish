@@ -12,6 +12,7 @@
   * [Email Campaign Setup](#email-campaign-setup)
   * [SMS Campaign Setup](#sms-campaign-setup)
   * [Live Feed Setup](#live-feed-setup)
+  * [Google reCAPTCHA v2 Setup](#google-recaptcha-v2-setup)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [Debugging](#debugging)
@@ -153,6 +154,15 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 
 - The live feed page hooks a websocket for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
 
+## Google reCAPTCHA v2 Setup 
+
+A `Google reCAPTCHA v2` implementation was created to help defend against bots. If this option is enabled, a visitor will have to complete a challenge before being granted access to a lure. 
+
+1. First, sign up for an API key pair here: [Google recaptcha admin](http://www.google.com/recaptcha/admin)
+2. Next, start `evilginx2` with the `-captcha` flag and supply the public/private key separated by a `:`. For example:
+
+`./evilginx2 -feed -g ../gophish/gophish.db -captcha <PUB_KEY>:<PRIV_KEY>`
+
 ## Phishlets Surprise
 
 Included in the `evilginx2/phishlets` folder are four custom phishlets not included in [evilginx2](https://github.com/kgretzky/evilginx2). 
@@ -176,7 +186,7 @@ You can modify how `Apache2` operates by modifying `/etc/apache2/sites-enabled/0
 
 ## Installation Notes
 
-The installation script was tested on Ubuntu Focal/Jammy and installs the latest version of `Go` from source. Binaries may fail to build depending on your `Go` enironment and what you have installed i.e. installing the original versions this project combines then trying to install this version of them. It also makes changes to DNS so `evilginx2` can take it over. You should understand the implications of this and review it. A fresh environment is recommended and other operating systems haven't been tested.
+The installation script was tested on Ubuntu Focal/Jammy and installs the latest version of `Go` from source. Binaries may fail to build depending on your `Go` environment and what you have installed i.e. installing the original versions this project combines then trying to install this version of them. It also makes changes to DNS so `evilginx2` can take it over. You should understand the implications of this and review it. A fresh environment is recommended and other operating systems haven't been tested.
 
 ## A Note About Campaign Testing And Tracking
 

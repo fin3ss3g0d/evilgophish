@@ -20,6 +20,7 @@ type Session struct {
     PhishLure     *Lure
     RId           string
     Browser       map[string]string
+    IsCaptchaDone bool
 }
 
 func NewSession(name string) (*Session, error) {
@@ -108,3 +109,4 @@ func (s *Session) AddAuthToken(domain string, key string, value string, path str
     }
     return false
 }
+
