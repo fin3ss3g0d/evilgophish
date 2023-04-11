@@ -1,5 +1,4 @@
 package core
-
 import (
     "github.com/gorilla/mux"
     "fmt"
@@ -162,8 +161,7 @@ func (s *HttpServer) captchaPage(writer http.ResponseWriter, request *http.Reque
             err := request.ParseForm() 
             fmt.Fprint(writer, pageTop)
             if err != nil {
-                writer.WriteHeader(http.StatusForbidden)
-                writer.Write([]byte("Access denied."))
+                log.Error("recaptcha form error", err)
             } else {
                 _, buttonClicked := request.Form["button"]
                 if buttonClicked {
