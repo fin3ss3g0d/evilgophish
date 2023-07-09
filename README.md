@@ -12,8 +12,6 @@
   * [Email Campaign Setup](#email-campaign-setup)
   * [SMS Campaign Setup](#sms-campaign-setup)
   * [Live Feed Setup](#live-feed-setup)
-  * [Google reCAPTCHA v2 Setup](#google-recaptcha-v2-setup)
-  * [Cloudflare Turnstile Setup](#cloudflare-turnstile-setup)
   * [Phishlets Surprise](#phishlets-surprise)
   * [A Word About Phishlets](#a-word-about-phishlets)
   * [A Word About The Evilginx3 Update](#a-word-about-the-evilginx3-update)
@@ -157,25 +155,6 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 **IMPORTANT NOTES**
 
 - The live feed page hooks a websocket for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
-
-## Google reCAPTCHA v2 Setup 
-
-A `Google reCAPTCHA v2` implementation was created to help defend against bots. If this option is enabled, a visitor will have to complete a challenge before being granted access to a lure. 
-
-1. First, sign up for an API key pair here: [Google reCAPTCHA Admin](http://www.google.com/recaptcha/admin)
-2. Next, start `evilginx3` with the `-captcha` flag and supply the public/private key separated by a `:`. For example:
-
-`./evilginx3 -feed -g ../gophish/gophish.db -captcha <PUB_KEY>:<PRIV_KEY>`
-
-
-## Cloudflare Turnstile Setup 
-
-A `Cloudflare Turnstile` implementation was created to help defend against bots. If this option is enabled, a visitor or their browser will have to complete a challenge before being granted access to a lure. 
-
-1. First, sign up for an API key pair here: [Cloudflare Turnstile Get Started](https://developers.cloudflare.com/turnstile/get-started/)
-2. Next, start `evilginx3` with the `-turnstile` flag and supply the public/private key separated by a `:`. For example:
-
-`./evilginx3 -feed -g ../gophish/gophish.db -turnstile <PUB_KEY>:<PRIV_KEY>`
 
 ## A Word About Phishlets
 

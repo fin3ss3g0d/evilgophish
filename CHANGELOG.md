@@ -77,3 +77,7 @@ Added the option to force a Cloudflare Turnstile challenge before granting acces
 # 07/08/2023
 
 Upgraded `evilginx2` to `evilginx3`! :)
+
+# 07/08/2023
+
+Deprecated the `Cloudflare Turnstile` and `Google reCAPTCHA` features due to the `redirectors` feature of `evilginx3` which accomplishes the same task.

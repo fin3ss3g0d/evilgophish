@@ -10,10 +10,6 @@
     SSLCertificateChainFile
     SSLCertificateKeyFile
     ProxyPreserveHost On
-    ProxyPass /recaptcha http://127.0.0.1/recaptcha
-    ProxyPassReverse /recaptcha http://127.0.0.1/recaptcha
-    ProxyPass /verify http://127.0.0.1/verify
-    ProxyPassReverse /verify http://127.0.0.1/verify
     ProxyPass / https://127.0.0.1:8443/
     ProxyPassReverse / https://127.0.0.1:8443/
     ErrorLog ${APACHE_LOG_DIR}/error.log

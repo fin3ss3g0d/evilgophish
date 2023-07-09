@@ -27,7 +27,6 @@ type Session struct {
 	LureDirPath    string
 	RId            string
 	Browser        map[string]string
-	IsCaptchaDone  bool
 }
 
 func NewSession(name string) (*Session, error) {

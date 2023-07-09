@@ -8,7 +8,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/kgretzky/evilginx2/core"
 	"github.com/kgretzky/evilginx2/database"
@@ -25,8 +24,6 @@ var cfg_dir = flag.String("c", "", "Configuration directory path")
 var version_flag = flag.Bool("v", false, "Show version")
 var gophish_db = flag.String("g", "", "Full path to gophish database")
 var feed_enabled = flag.Bool("feed", false, "Enable live feed")
-var recaptcha = flag.String("captcha", "", "Recaptcha public/private key seperated by \":\"")
-var turnstile = flag.String("turnstile", "", "Turnstile public/private key separated by \":\"")
 
 func joinPath(base_path string, rel_path string) string {
 	var ret string
@@ -184,23 +181,7 @@ func main() {
 		return
 	}
 
-	var hs *core.HttpServer
-	var hp *core.HttpProxy
-
-	if *recaptcha != "" {
-		sep := strings.Split(*recaptcha, ":")
-		hs, _ = core.NewHttpServer(sep[0], sep[1], "", "", true, false)
-		hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, true, false)
-	} else if *turnstile != "" {
-		sep := strings.Split(*turnstile, ":")
-		hs, _ = core.NewHttpServer("", "", sep[0], sep[1], false, true)
-		hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false, true)
-	} else {
-		hs, _ = core.NewHttpServer("", "", "", "", false, false)
-		hp, _ = core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false, false)
-	}
-
-	hs.Start(hp)
+	hp, _ := core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled)
 	hp.Start()
 
 	t, err := core.NewTerminal(hp, cfg, crt_db, db, *developer_mode)
