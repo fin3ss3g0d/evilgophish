@@ -73,3 +73,7 @@ Added the option to force a Google reCAPTCHA v2 challenge before granting access
 # 04/19/2023
 
 Added the option to force a Cloudflare Turnstile challenge before granting access to lure. Again this was done to try to thwart off bots.
+
+# 07/08/2023
+
+Upgraded `evilginx2` to `evilginx3`! :)
