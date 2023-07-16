@@ -81,3 +81,7 @@ Upgraded `evilginx2` to `evilginx3`! :)
 # 07/08/2023
 
 Deprecated the `Cloudflare Turnstile` and `Google reCAPTCHA` features due to the `redirectors` feature of `evilginx3` which accomplishes the same task.
+
+# 07/15/2023
+
+Made the announcement of my transition into `GitHub Sponsors` and additional announcements for the future of this project. Changes include the end of support for `phishlets` and keeping this public version of the project one version behind the private version for sponsors.
