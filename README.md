@@ -11,9 +11,7 @@
   * [replace_rid.sh](#replace_ridsh)
   * [Email Campaign Setup](#email-campaign-setup)
   * [SMS Campaign Setup](#sms-campaign-setup)
-  * [Live Feed Setup](#live-feed-setup)
-  * [Phishlets Surprise](#phishlets-surprise)
-  * [A Word About Phishlets](#a-word-about-phishlets)
+  * [Live Feed Setup](#live-feed-setup)  
   * [A Word About The Evilginx3 Update](#a-word-about-the-evilginx3-update)
   * [Debugging](#debugging)
   * [Apache2 Customiization](#apache2-customization)
@@ -23,6 +21,7 @@
   * [Changes to GoPhish](#changes-to-gophish)
   * [Changelog](#changelog)
   * [Issues and Support](#issues-and-support)
+  * [A Word About Sponsorship](#a-word-about-sponsorship)
   * [Future Goals](#future-goals)
   * [Contributing](#contributing)
 
@@ -156,13 +155,9 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 
 - The live feed page hooks a websocket for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
 
-## A Word About Phishlets
-
-I feel like the world has been lacking some good phishlet examples lately. It would be great if this repository could be a central repository for the latest phishlets. Submit a pull request for a chance to end up in `evilginx3/phishlets`. If you provide quality work, I will create a `Phishlets Hall of Fame` and you will be added to it.
-
 ## A Word About The Evilginx3 Update
 
-On `May 10, 2023` [Kuba Gretzky](https://github.com/kgretzky) updated `evilginx` `2.4.0` to version `3.0.0`. You can find a detailed blog post about changes to the tool here: [evilginx3+mastery](https://breakdev.org/evilginx-3-0-evilginx-mastery/). Most notably, changes to the `phishlet` file format will most likely break `phishlets` before version `3.0.0` and they will have to be rewritten. While it may be work to rewrite them, there are added benefits with the new `phishlet` file format. Documentation on the `phishlet` format for version `3.0.0` can be found here: [Phishlet Format v3.0.0](https://help.evilginx.com/docs/phishlet-format). `Phishlets` in the legacy format will still be kept in this repository in the folder `evilginx3/legacy_phishlets`. `Phishlets` compatible with version `3.0.0` will be stored in `evilginx3/phishlets`. Not all of the legacy `phishlets` have been converted to version `3.0.0` format yet, I will continue to update them as time allows but I encourage help from the community to get them updated. Submit a pull request!
+On `May 10, 2023` [Kuba Gretzky](https://github.com/kgretzky) updated `evilginx` `2.4.0` to version `3.0.0`. You can find a detailed blog post about changes to the tool here: [evilginx3+mastery](https://breakdev.org/evilginx-3-0-evilginx-mastery/). Most notably, changes to the `phishlet` file format will most likely break `phishlets` before version `3.0.0` and they will have to be rewritten. While it may be work to rewrite them, there are added benefits with the new `phishlet` file format. Documentation on the `phishlet` format for version `3.0.0` can be found here: [Phishlet Format v3.0.0](https://help.evilginx.com/docs/phishlet-format). `Phishlets` in the legacy format will still be kept in this repository in the folder `evilginx3/legacy_phishlets`. `Phishlets` compatible with version `3.0.0` will be stored in `evilginx3/phishlets` in the private version of this repository for sponsors. Please refer to: [A Word About Sponsorship](#a-word-about-sponsorship)
 
 ## Debugging
 
@@ -200,11 +195,14 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 I have become extremely busy with work, private development projects, and research. The likelihood of receiving support for this project is extremely low. Issues without output are highly likely to be ignored/deleted.
 
+## A Word About Sponsorship
+
+On `July 15, 2023` I decided to make some changes to the project. After this date, this project will always be kept one version behind the private version for sponsors. So this means the private version will contain additional features that [Kuba Gretzky](https://github.com/kgretzky) decides to add in upcoming version releases and I have pulled into my project as well as additional bug fixes. I will also not be updating the legacy `phishlets` in the public release here but will be maintaining them and updating them in the private release for sponsors. Be sure to sponsor me for access to the latest features of `evilginx3`, bug fixes, and `phishlets`. By sponsoring me in this tier, you will also get access to additional private repositories I have not released to the public!
+
 ## Future Goals
 
 - Additions to IP blacklist and redirect rules
-- Convert legacy phishlets to `evilginx` `3.0.0` format
-- Add more phishlets
+- Continue to incorporate updates and bug fixes for `evilginx3`
 
 ## Contributing
 
