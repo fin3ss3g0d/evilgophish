@@ -6,9 +6,8 @@
     SSLProxyCheckPeerCN off
     SSLProxyCheckPeerName off
     SSLProxyCheckPeerExpire off
-    SSLCertificateFile
-    SSLCertificateChainFile
-    SSLCertificateKeyFile
+    SSLCertificateFile    
+    SSLCertificateKeyFile    
     ProxyPreserveHost On
     ProxyPass / https://127.0.0.1:8443/
     ProxyPassReverse / https://127.0.0.1:8443/

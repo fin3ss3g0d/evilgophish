@@ -1,4 +1,5 @@
 <!--- Provide a general summary of the issue in the Title above -->
+
 ## Expected Behavior
 <!--- Tell us what should happen -->
 
@@ -15,6 +16,18 @@
 2.
 3.
 4.
+
+## Environment
+<!--- Details about your environment. Include OS, Python version, library versions, etc. -->
+
+## Severity/Priority
+<!--- How critical is this issue? Is it blocking your work? -->
+
+## Screenshots
+<!--- If applicable, add screenshots to help explain your problem -->
+
+## Logs/Tracebacks
+<!--- If applicable, include logs/tracebacks to help diagnose your problem -->
 
 ## Detailed Description
 <!--- Provide a detailed description of the change or addition you are proposing -->

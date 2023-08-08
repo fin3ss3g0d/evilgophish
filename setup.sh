@@ -105,8 +105,7 @@ function setup_apache () {
     else 
         sed "s/ServerAlias evilginx3.template/ServerAlias ${evilginx3_cstring}/g" conf/000-default-no-bl.conf.template > 000-default.conf
     fi
-    sed -i "s|SSLCertificateFile|SSLCertificateFile ${certs_path}cert.pem|g" 000-default.conf
-    sed -i "s|SSLCertificateChainFile|SSLCertificateChainFile ${certs_path}fullchain.pem|g" 000-default.conf
+    sed -i "s|SSLCertificateFile|SSLCertificateFile ${certs_path}fullchain.pem|g" 000-default.conf    
     sed -i "s|SSLCertificateKeyFile|SSLCertificateKeyFile ${certs_path}privkey.pem|g" 000-default.conf
     # Don't listen on port 80
     sed -i "s|Listen 80||g" /etc/apache2/ports.conf
@@ -126,14 +125,6 @@ function setup_apache () {
 
 # Configure and install evilginx3
 function setup_evilginx3 () {
-    # Copy over certs for phishlets
-    print_info "Configuring evilginx3"
-    mkdir -p "${evilginx_dir}/crt/${root_domain}"
-    for i in evilginx3/phishlets/*.yaml; do
-        phishlet=$(echo "${i}" | awk -F "/" '{print $3}' | sed 's/.yaml//g')
-        ln -sf ${certs_path}fullchain.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.crt"
-        ln -sf ${certs_path}privkey.pem "${evilginx_dir}/crt/${root_domain}/${phishlet}.key"
-    done
     # Prepare DNS for evilginx3
     evilginx3_cstring=""
     for esub in ${evilginx3_subs} ; do
@@ -156,8 +147,6 @@ function setup_evilginx3 () {
 # Configure and install gophish
 function setup_gophish () {
     print_info "Configuring gophish"
-    sed "s|\"cert_path\": \"gophish_template.crt\",|\"cert_path\": \"${certs_path}fullchain.pem\",|g" conf/config.json.template > gophish/config.json
-    sed -i "s|\"key_path\": \"gophish_template.key\"|\"key_path\": \"${certs_path}privkey.pem\"|g" gophish/config.json
     # Setup live feed if selected
     if [[ $(echo "${feed_bool}" | grep -ci "true") -gt 0 ]]; then
         sed -i "s|\"feed_enabled\": false,|\"feed_enabled\": true,|g" gophish/config.json
