@@ -53,3 +53,39 @@ Removed `Pusher` messages to a channel to avoid message limit and to ease the li
 # 10/29/2022
 
 Made `Apache2` blacklist optional.
+
+# 01/10/2023
+
+Added `Cisco VPN` phishlet, merged pull request that allows operators to get source `IP` information for victims when generating `GoPhish` reports.
+
+# 02/03/2023
+
+Added some improved logic for logging credentials to `GoPhish` where sometimes the username parameter of a phishlet was lost due to not checking if it was empty. This should improve the overall user experience and credential logging.
+
+# 03/14/2023
+
+Removed a "X-Evilginx" header IOC that was hidden as a XOR encrypted byte array.
+
+# 04/09/2023
+
+Added the option to force a Google reCAPTCHA v2 challenge before granting access to a lure. This was done to combat domain takedowns and thwart off bots.
+
+# 04/19/2023
+
+Added the option to force a Cloudflare Turnstile challenge before granting access to lure. Again this was done to try to thwart off bots.
+
+# 07/08/2023
+
+Upgraded `evilginx2` to `evilginx3`! :)
+
+# 07/08/2023
+
+Deprecated the `Cloudflare Turnstile` and `Google reCAPTCHA` features due to the `redirectors` feature of `evilginx3` which accomplishes the same task.
+
+# 07/15/2023
+
+Made the announcement of my transition into `GitHub Sponsors` and additional announcements for the future of this project. Changes include the end of support for `phishlets` and keeping this public version of the project one version behind the private version for sponsors.
+
+# 08/08/2023
+
+Implemented the version `3.1.0` release of `evilginx3`.

