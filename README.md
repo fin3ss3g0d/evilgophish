@@ -1,3 +1,5 @@
+:warning: **ARCHIVED**: This repository is no longer actively maintained for public use. However, a maintained version may still be available exclusively for sponsors (depending on when you are reading this). [Become a sponsor](https://github.com/sponsors/fin3ss3g0d) to gain access.
+
 # Table of Contents
 
 - [evilgophish](#evilgophish)
