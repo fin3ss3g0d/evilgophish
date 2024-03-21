@@ -14,7 +14,6 @@ type SMS struct {
 	Name             string    `json:"name"`
 	TwilioAccountSid string    `json:"account_sid"`
 	TwilioAuthToken  string    `json:"auth_token"`
-	Delay			 string    `json:"delay"`
 	SMSFrom          string    `json:"sms_from"`
 	ModifiedDate     time.Time `json:"modified_date"`
 }

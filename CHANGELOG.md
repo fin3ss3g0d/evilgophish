@@ -84,8 +84,24 @@ Deprecated the `Cloudflare Turnstile` and `Google reCAPTCHA` features due to the
 
 # 07/15/2023
 
-Made the announcement of my transition into `GitHub Sponsors` and additional announcements for the future of this project. Changes include the end of support for `phishlets` and keeping this public version of the project one version behind the private version for sponsors.
+Pulled the `evilginx3` version `3.1.0` update so now all cookie tokens are captured by default. Removed the need to input a certificate path when running `setup.sh` since it is handled for users now with `evilginx3`. Removed a small bug inside of `gophish` that would attempt to post a notification to the live feed for when emails are sent despite a user specifying not to use the feed.
 
-# 08/08/2023
+# 09/23/2023
 
-Implemented the version `3.1.0` release of `evilginx3`.
+Updated `evilginx3` to version `3.2.0`. Fixed an issue with `gophish` not being able to add custom email headers.
+
+# 02/23/2024
+
+Added QR code generator feature allowing operators to deploy QR code social engineering campaigns. This was email only, SMS capability is being researched for the future.
+
+# 03/01/2024
+
+Added `evilginx3` commits [kgretzky/evilginx2@d8f7d44e1450e8673a4a78e77c8041de12a02229](https://github.com/kgretzky/evilginx2/commit/d8f7d44e1450e8673a4a78e77c8041de12a02229), [kgretzky/evilginx2@3b0f5c9971bf1041acc88d1b6ffcb9a5203f261c](https://github.com/kgretzky/evilginx2/commit/3b0f5c9971bf1041acc88d1b6ffcb9a5203f261c), [kgretzky/evilginx2@e7a68662a02a83fbf2c2c4914f46d191d3952ed1](https://github.com/kgretzky/evilginx2/commit/e7a68662a02a83fbf2c2c4914f46d191d3952ed1), & [kgretzky/evilginx2@1b9cb590fefcf30d2f6a460e17098b43182d3c4f](https://github.com/kgretzky/evilginx2/commit/1b9cb590fefcf30d2f6a460e17098b43182d3c4f) which fix various issues, introduce some code cleanup, and add new features!
+
+# 03/04/2024
+
+Added enhancements to the SMS sending process, allowing users to specify a launch date and send by date, removing the delay feature.
+
+# 03/11/2024
+
+Changed the rID generator algorithm so that not all rID values are a set character length.

@@ -19,6 +19,7 @@ import (
 	mid "github.com/gophish/gophish/middleware"
 	"github.com/gophish/gophish/middleware/ratelimit"
 	"github.com/gophish/gophish/models"
+	"github.com/gophish/gophish/smsworker"
 	"github.com/gophish/gophish/util"
 	"github.com/gophish/gophish/worker"
 	"github.com/gorilla/csrf"
@@ -35,10 +36,11 @@ type AdminServerOption func(*AdminServer)
 // AdminServer is an HTTP server that implements the administrative Gophish
 // handlers, including the dashboard and REST API.
 type AdminServer struct {
-	server  *http.Server
-	worker  worker.Worker
-	config  config.AdminServer
-	limiter *ratelimit.PostLimiter
+	server    *http.Server
+	worker    worker.Worker
+	smsworker smsworker.Worker
+	config    config.AdminServer
+	limiter   *ratelimit.PostLimiter
 }
 
 var defaultTLSConfig = &tls.Config{
@@ -69,20 +71,29 @@ func WithWorker(w worker.Worker) AdminServerOption {
 	}
 }
 
+// WithSmsWorker is an option that sets the background sms worker.
+func WithSmsWorker(s smsworker.Worker) AdminServerOption {
+	return func(as *AdminServer) {
+		as.smsworker = s
+	}
+}
+
 // NewAdminServer returns a new instance of the AdminServer with the
 // provided config and options applied.
 func NewAdminServer(config config.AdminServer, options ...AdminServerOption) *AdminServer {
 	defaultWorker, _ := worker.New()
+	defaultSmsWorker, _ := smsworker.New()
 	defaultServer := &http.Server{
 		ReadTimeout: 10 * time.Second,
 		Addr:        config.ListenURL,
 	}
 	defaultLimiter := ratelimit.NewPostLimiter()
 	as := &AdminServer{
-		worker:  defaultWorker,
-		server:  defaultServer,
-		limiter: defaultLimiter,
-		config:  config,
+		worker:    defaultWorker,
+		smsworker: defaultSmsWorker,
+		server:    defaultServer,
+		limiter:   defaultLimiter,
+		config:    config,
 	}
 	for _, opt := range options {
 		opt(as)
@@ -95,6 +106,9 @@ func NewAdminServer(config config.AdminServer, options ...AdminServerOption) *Ad
 func (as *AdminServer) Start() {
 	if as.worker != nil {
 		go as.worker.Start()
+	}
+	if as.smsworker != nil {
+		go as.smsworker.Start()
 	}
 	if as.config.UseTLS {
 		// Only support TLS 1.2 and above - ref #1691, #1689
@@ -142,6 +156,7 @@ func (as *AdminServer) registerRoutes() {
 	// Create the API routes
 	api := api.NewServer(
 		api.WithWorker(as.worker),
+		api.WithSmsWorker(as.smsworker),
 		api.WithLimiter(as.limiter),
 	)
 	router.PathPrefix("/api/").Handler(api)
@@ -218,14 +233,14 @@ func (as *AdminServer) CampaignID(w http.ResponseWriter, r *http.Request) {
 	getTemplate(w, "campaign_results").ExecuteTemplate(w, "base", params)
 }
 
-// Campaigns handles the default path and template execution
+// SMSCampaigns handles the default path and template execution
 func (as *AdminServer) SMSCampaigns(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "SMS Campaigns"
 	getTemplate(w, "sms_campaigns").ExecuteTemplate(w, "base", params)
 }
 
-// CampaignID handles the default path and template execution
+// SMSCampaignID handles the default path and template execution
 func (as *AdminServer) SMSCampaignID(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "SMS Campaign Results"
@@ -253,6 +268,7 @@ func (as *AdminServer) EmailSendingProfiles(w http.ResponseWriter, r *http.Reque
 	getTemplate(w, "sending_profiles").ExecuteTemplate(w, "base", params)
 }
 
+// SMSSendingProfiles handles the default path and template execution
 func (as *AdminServer) SMSSendingProfiles(w http.ResponseWriter, r *http.Request) {
 	params := newTemplateParams(r)
 	params.Title = "Sending Profiles"

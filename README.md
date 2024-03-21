@@ -1,8 +1,7 @@
-:warning: **ARCHIVED**: This repository is no longer actively maintained for public use. However, a maintained version may still be available exclusively for sponsors (depending on when you are reading this). [Become a sponsor](https://github.com/sponsors/fin3ss3g0d) to gain access.
-
 # Table of Contents
 
 - [evilgophish](#evilgophish)
+  * [A Word About Sponsorship](#a-word-about-sponsorship)
   * [Credits](#credits)
   * [Prerequisites](#prerequisites)
   * [Disclaimer](#disclaimer)
@@ -12,8 +11,10 @@
   * [setup.sh](#setupsh)
   * [replace_rid.sh](#replace_ridsh)
   * [Email Campaign Setup](#email-campaign-setup)
+  * [QR Code Generator](#qr-code-generator)
   * [SMS Campaign Setup](#sms-campaign-setup)
-  * [Live Feed Setup](#live-feed-setup)  
+  * [Live Feed Setup](#live-feed-setup)
+  * [A Word About Phishlets](#a-word-about-phishlets)  
   * [A Word About The Evilginx3 Update](#a-word-about-the-evilginx3-update)
   * [Debugging](#debugging)
   * [Apache2 Customiization](#apache2-customization)
@@ -23,13 +24,18 @@
   * [Changes to GoPhish](#changes-to-gophish)
   * [Changelog](#changelog)
   * [Issues and Support](#issues-and-support)
-  * [A Word About Sponsorship](#a-word-about-sponsorship)
   * [Future Goals](#future-goals)
   * [Contributing](#contributing)
+
+![logo](images/logo.jpg)
 
 # evilgophish
 
 Combination of [evilginx3](https://github.com/kgretzky/evilginx2) and [GoPhish](https://github.com/gophish/gophish).
+
+# A Word About Sponsorship
+
+This is the public, free version of the repository, **IT IS NOT THE LATEST VERSION**. I am purposefully keeping this public version of the repository behind my version for people that sponsor me via `GitHub Sponsors`. This means this version may be lacking bug fixes or features and there should be no expectations for bug fixes, adding features, or support here. Become a sponsor [here](https://github.com/sponsors/fin3ss3g0d) to gain access to the latest version.
 
 ## Credits
 
@@ -112,6 +118,26 @@ Once `setup.sh` is run, the next steps are:
 4. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx3` phishlet
 5. **PROFIT**
 
+## QR Code Generator
+
+The `QR Code Generator` feature allows you to generate QR codes to deploy QR code social engineering campaigns. Here are the steps to use it:
+
+1. When editing an email template, either HTML or raw Text you can now include the `{{.QR}}` template variable:
+
+![qr-code-generator](images/qr-template-example.png)
+
+2. When starting a new campaign, enter a size for the QR code images:
+
+![qr-campaign-example](images/qr-campaign-example.png)
+
+3. The outcome will be similar to the following, but you can adjust the size to meet your needs:
+
+![qr-inbox-example.png](images/qr-inbox-example.png)
+
+4. **PROFIT**
+
+*Note that this feature is only supported for email campaigns at the moment*
+
 ## SMS Campaign Setup
 
 An entire reworking of `GoPhish` was performed in order to provide `SMS` campaign support with `Twilio`. Your new `evilgophish` dashboard will look like below:
@@ -124,7 +150,7 @@ Once you have run `setup.sh`, the next steps are:
 
 ![sms-message-template](images/sms-message-template.png)
 
-2. Configure `SMS Sending Profile`. Enter your phone number from `Twilio`, `Account SID`, `Auth Token`, and delay in between messages into the `SMS Sending Profiles` page:
+2. Configure `SMS Sending Profile`. Enter your phone number from `Twilio`, `Account SID`, and `Auth Token`:
 
 ![sms-sending-profile](images/sms-sending-profile.png)
 
@@ -157,9 +183,13 @@ Realtime campaign event notifications are handled by a local websocket/http serv
 
 - The live feed page hooks a websocket for events with `JavaScript` and you **DO NOT** need to refresh the page. If you refresh the page, you will **LOSE** all events up to that point.
 
+## A Word About Phishlets
+
+I will add `phishlets` to this repository at my own discretion. There should be no expectation of me creating `phishlets` as part of this repository, you are expected to create your own. ***DO NOT OPEN ISSUES IN THIS REPOSITORY FOR PHISHLETS***
+
 ## A Word About The Evilginx3 Update
 
-On `May 10, 2023` [Kuba Gretzky](https://github.com/kgretzky) updated `evilginx` `2.4.0` to version `3.0.0`. You can find a detailed blog post about changes to the tool here: [evilginx3+mastery](https://breakdev.org/evilginx-3-0-evilginx-mastery/). Most notably, changes to the `phishlet` file format will most likely break `phishlets` before version `3.0.0` and they will have to be rewritten. While it may be work to rewrite them, there are added benefits with the new `phishlet` file format. Documentation on the `phishlet` format for version `3.0.0` can be found here: [Phishlet Format v3.0.0](https://help.evilginx.com/docs/phishlet-format). `Phishlets` in the legacy format will still be kept in this repository in the folder `evilginx3/legacy_phishlets`. `Phishlets` compatible with version `3.x.x` will be stored in `evilginx3/phishlets` in the private version of this repository for sponsors. Please refer to: [A Word About Sponsorship](#a-word-about-sponsorship)
+On `May 10, 2023` [Kuba Gretzky](https://github.com/kgretzky) updated `evilginx` `2.4.0` to version `3.0.0`. You can find a detailed blog post about changes to the tool here: [evilginx3+mastery](https://breakdev.org/evilginx-3-0-evilginx-mastery/). Most notably, changes to the `phishlet` file format will most likely break `phishlets` before version `3.0.0` and they will have to be rewritten. While it may be work to rewrite them, there are added benefits with the new `phishlet` file format. Documentation on the `phishlet` format for version `3.0.0` can be found here: [Phishlet Format v3.0.0](https://help.evilginx.com/docs/phishlet-format). `Phishlets` in the legacy format will still be kept in this repository in the folder `evilginx3/legacy_phishlets`. `Phishlets` compatible with version `3.0.0` will be stored in `evilginx3/phishlets`. Not all of the legacy `phishlets` have been converted to version `3.x.x` format yet, I will continue to update them as time allows!
 
 ## Debugging
 
@@ -195,16 +225,13 @@ See the `CHANGELOG.md` file for changes made since the initial release.
 
 ## Issues and Support
 
-I have become extremely busy with work, private development projects, and research. The likelihood of receiving support for this project is extremely low. Issues without output are highly likely to be ignored/deleted.
-
-## A Word About Sponsorship
-
-On `July 15, 2023` I decided to make some changes to the project. After this date, this project will always be kept one version behind the private version for sponsors. So this means the private version will contain additional features that [Kuba Gretzky](https://github.com/kgretzky) decides to add in upcoming version releases and I have pulled into my project as well as additional bug fixes. I will also not be updating the legacy `phishlets` in the public release here but will be maintaining them and updating them in the private release for sponsors. Be sure to sponsor me for access to the latest features of `evilginx3`, bug fixes, and `phishlets`. By sponsoring me in this tier, you will also get access to additional private repositories I have not released to the public!
+There should be no expectation for me to respond to issues in this public version of the repository. You're not sponsoring me or funding the development of the project, so there should be no expectations for support. Sponsor me for increased support.
 
 ## Future Goals
 
 - Additions to IP blacklist and redirect rules
-- Continue to incorporate updates and bug fixes for `evilginx3`
+- Convert legacy phishlets to `evilginx` `3.x.x` format
+- Add more phishlets
 
 ## Contributing
 

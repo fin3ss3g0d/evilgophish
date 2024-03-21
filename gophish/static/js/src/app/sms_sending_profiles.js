@@ -12,6 +12,7 @@ function save(idx) {
     profile.name = $("#name").val()
     profile.account_sid = $("#account_sid").val()
     profile.auth_token = $("#auth_token").val()
+    profile.sms_from = $("#sms_from").val()
 
     if (idx != -1) {
         profile.id = profiles[idx].id
@@ -43,6 +44,7 @@ function dismiss() {
     $("#name").val("")
     $("#account_sid").val("")
     $("#auth_token").val("")
+    $("#sms_from").val("")
     $("#headersTable").dataTable().DataTable().clear().draw()
     $("#modal").modal('hide')
 }
@@ -107,6 +109,7 @@ function edit(idx) {
         $("#name").val(profile.name)
         $("#account_sid").val(profile.account_sid)
         $("#auth_token").val(profile.token)
+        $("#sms_from").val(profile.sms_from)
     } else {
         $("#profileModalLabel").text("New Sending Profile")
     }
@@ -121,6 +124,7 @@ function copy(idx) {
     $("#name").val("Copy of " + profile.name)
     $("#account_sid").val(profile.account_sid)
     $("#auth_token").val(profile.auth_token)
+    $("#sms_from").val(profile.sms_from)
 }
 
 function load() {

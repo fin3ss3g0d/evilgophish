@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS "pages" ("id" integer primary key autoincrement,"user
 CREATE TABLE IF NOT EXISTS "groups" ("id" integer primary key autoincrement,"user_id" bigint,"name" varchar(255),"modified_date" datetime );
 CREATE TABLE IF NOT EXISTS "group_targets" ("group_id" bigint,"target_id" bigint );
 CREATE TABLE IF NOT EXISTS "events" ("id" integer primary key autoincrement,"campaign_id" bigint,"email" varchar(255),"time" datetime,"message" varchar(255) );
-CREATE TABLE IF NOT EXISTS "campaigns" ("id" integer primary key autoincrement,"user_id" bigint,"name" varchar(255) NOT NULL ,"created_date" datetime,"completed_date" datetime,"template_id" bigint,"page_id" bigint,"status" varchar(255),"url" varchar(255) );
+CREATE TABLE IF NOT EXISTS "campaigns" ("id" integer primary key autoincrement,"user_id" bigint,"name" varchar(255) NOT NULL ,"created_date" datetime,"completed_date" datetime,"template_id" bigint,"page_id" bigint,"status" varchar(255),"url" varchar(255),"qr_size" varchar(255) );
 CREATE TABLE IF NOT EXISTS "attachments" ("id" integer primary key autoincrement,"template_id" bigint,"content" varchar(255),"type" varchar(255),"name" varchar(255) );
 
 -- +goose Down

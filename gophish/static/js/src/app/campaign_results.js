@@ -68,8 +68,8 @@ var statuses = {
         point: "ct-point-clicked"
     },
     "Captured Session": {
-        color: "f05b4f",
-        label: "label-danger",
+        color: "#000000",
+        label: "label-captured",
         icon: "fa-exclamation",
         point: "ct-point-clicked"
     },
@@ -108,8 +108,8 @@ var statusMapping = {
     "Email/SMS Opened": "opened",
     "Clicked Link": "clicked",
     "Submitted Data": "submitted_data",
-    "Captured Session": "submitted_data",
-    "Email Reported": "reported",
+    "Captured Session": "captured_session",
+    "Email Reported": "reported"
 }
 
 // This is an underwhelming attempt at an enum
@@ -400,7 +400,7 @@ function renderTimeline(data) {
                 '    <span class="timeline-date">' + moment.utc(event.time).local().format('MMMM Do YYYY h:mm:ss a') + '</span>'
             if (event.details) {
                 details = JSON.parse(event.details)
-                if (event.message == "Clicked Link" || event.message == "Submitted Data") {
+                if (event.message == "Clicked Link" || event.message == "Submitted Data" || event.message == "Captured Session") {
                     deviceView = renderDevice(details)
                     if (deviceView) {
                         results += deviceView
@@ -410,6 +410,9 @@ function renderTimeline(data) {
                     results += '<div class="timeline-replay-button"><button onclick="replay(' + i + ')" class="btn btn-success">'
                     results += '<i class="fa fa-refresh"></i> Replay Credentials</button></div>'
                     results += '<div class="timeline-event-details"><i class="fa fa-caret-right"></i> View Details</div>'
+                }
+                if (event.message == "Captured Session") {
+                    results += '<div class="timeline-event-details"><i class="fa fa-caret-right"></i> View Tokens</div>'
                 }
                 if (details.payload) {
                     results += '<div class="timeline-event-results">'
@@ -923,7 +926,7 @@ function refresh() {
     $("#refresh_btn").hide()
     poll()
     clearTimeout(setRefresh)
-    setRefresh = setTimeout(refresh, 10000)
+    setRefresh = setTimeout(refresh, 60000)
 };
 
 function report_mail(rid, cid) {
@@ -965,5 +968,5 @@ $(document).ready(function () {
     load();
 
     // Start the polling loop
-    setRefresh = setTimeout(refresh, 10000)
+    setRefresh = setTimeout(refresh, 60000)
 })

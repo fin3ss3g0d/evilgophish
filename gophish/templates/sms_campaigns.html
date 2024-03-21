@@ -87,7 +87,7 @@
                 <div class="form-group">
                     <label for="name">Name:</label>
                     <input type="text" class="form-control" id="name" placeholder="Campaign name" autofocus>
-                    <label class="control-label" for="template">Email Template:</label>
+                    <label class="control-label" for="template">SMS Template:</label>
                     <select class="form-control" placeholder="Template Name" id="template" />
                     <option></option>
                     </select>
@@ -95,6 +95,18 @@
                         <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="Full evilginx lure URL (must be reachable by targets!)"></i>
                     </label>
                     <input type="text" class="form-control" placeholder="http://192.168.1.1" id="url" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="control-label" for="url">Launch Date </label>
+                            <input type="text" class="form-control" id="launch_date" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="control-label" for="delay">Send SMSs By (Optional)
+                                <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="If specified, Gophish will send emails evenly between the campaign launch and this date."></i>
+                            </label>
+                            <input type="text" class="form-control" id="send_by_date" autocomplete="random-data"/> <!--Chrome ignores autocomplete="off".-->
+                        </div>
+                    </div>
                     <label class="control-label" for="profile">SMS Sending Profile:</label>
                     <div class="input-group">
                         <select class="form-control" placeholder="Sending Profile" id="profile" />

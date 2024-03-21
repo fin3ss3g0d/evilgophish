@@ -6,6 +6,7 @@ import (
 	mid "github.com/gophish/gophish/middleware"
 	"github.com/gophish/gophish/middleware/ratelimit"
 	"github.com/gophish/gophish/models"
+	"github.com/gophish/gophish/smsworker"
 	"github.com/gophish/gophish/worker"
 	"github.com/gorilla/mux"
 )
@@ -18,19 +19,22 @@ type ServerOption func(*Server)
 // stopped. Rather, it's meant to be used as an http.Handler in the
 // AdminServer.
 type Server struct {
-	handler http.Handler
-	worker  worker.Worker
-	limiter *ratelimit.PostLimiter
+	handler   http.Handler
+	worker    worker.Worker
+	smsworker smsworker.Worker
+	limiter   *ratelimit.PostLimiter
 }
 
 // NewServer returns a new instance of the API handler with the provided
 // options applied.
 func NewServer(options ...ServerOption) *Server {
 	defaultWorker, _ := worker.New()
+	defaultSmsWorker, _ := smsworker.New()
 	defaultLimiter := ratelimit.NewPostLimiter()
 	as := &Server{
-		worker:  defaultWorker,
-		limiter: defaultLimiter,
+		worker:    defaultWorker,
+		smsworker: defaultSmsWorker,
+		limiter:   defaultLimiter,
 	}
 	for _, opt := range options {
 		opt(as)
@@ -43,6 +47,13 @@ func NewServer(options ...ServerOption) *Server {
 func WithWorker(w worker.Worker) ServerOption {
 	return func(as *Server) {
 		as.worker = w
+	}
+}
+
+// WithSmsWorker is an option that sets the background sms worker.
+func WithSmsWorker(s smsworker.Worker) ServerOption {
+	return func(as *Server) {
+		as.smsworker = s
 	}
 }
 

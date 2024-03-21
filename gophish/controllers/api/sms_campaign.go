@@ -22,7 +22,7 @@ func (as *Server) SMSCampaigns(w http.ResponseWriter, r *http.Request) {
 	//POST: Create a new campaign and return it as JSON
 	case r.Method == "POST":
 		c := models.Campaign{}
-		// Put the request into a campaign		
+		// Put the request into a campaign
 		err := json.NewDecoder(r.Body).Decode(&c)
 		if err != nil {
 			JSONResponse(w, models.Response{Success: false, Message: "Invalid JSON structure"}, http.StatusBadRequest)
@@ -36,9 +36,8 @@ func (as *Server) SMSCampaigns(w http.ResponseWriter, r *http.Request) {
 		// If the campaign is scheduled to launch immediately, send it to the worker.
 		// Otherwise, the worker will pick it up at the scheduled time
 		if c.Status == models.CampaignInProgress {
-			go as.worker.LaunchSMSCampaign(c)
+			go as.smsworker.LaunchCampaign(c)
 		}
 		JSONResponse(w, c, http.StatusCreated)
 	}
 }
-

@@ -86,6 +86,12 @@ var api = {
             return query("/campaigns/summary", "GET", {}, false)
         }
     },
+    sms_campaigns: {
+        // post() - Posts a campaign to POST /sms_campaigns
+        post: function (data) {
+            return query("/sms_campaigns/", "POST", data, false)
+        }
+    },
     // campaignId contains the endpoints for /campaigns/:id
     campaignId: {
         // get() - Queries the API for GET /campaigns/:id
@@ -205,7 +211,7 @@ var api = {
         },
         // put() - Puts a SMS to PUT /smtp/:id
         put: function (sms) {
-            return query("/sms/" + smtp.id, "PUT", sms, false)
+            return query("/sms/" + sms.id, "PUT", sms, false)
         },
         // delete() - Deletes a SMS at DELETE /smtp/:id
         delete: function (id) {
