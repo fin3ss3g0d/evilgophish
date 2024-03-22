@@ -138,6 +138,8 @@ The `QR Code Generator` feature allows you to generate QR codes to deploy QR cod
 
 *Note that this feature is only supported for email campaigns at the moment*
 
+Blog post [here](https://fin3ss3g0d.net/index.php/2024/02/24/qr-code-phishing-with-evilgophish/).
+
 ## SMS Campaign Setup
 
 An entire reworking of `GoPhish` was performed in order to provide `SMS` campaign support with `Twilio`. Your new `evilgophish` dashboard will look like below:
@@ -162,6 +164,8 @@ Once you have run `setup.sh`, the next steps are:
 5. Ensure `Apache2` server is started
 6. Launch campaign from `GoPhish` and make the landing URL your lure path for `evilginx3` phishlet
 7. **PROFIT**
+
+Blog post [here](https://fin3ss3g0d.net/index.php/2024/03/04/smishing-with-evilgophish/).
 
 ## Live Feed Setup
 
