@@ -122,7 +122,7 @@ Once `setup.sh` is run, the next steps are:
 
 The `QR Code Generator` feature allows you to generate QR codes to deploy QR code social engineering campaigns. Here are the steps to use it:
 
-1. When editing an email template, either HTML or raw Text you can now include the `{{.QR}}` template variable:
+1. When editing an email HTML template, you can now include the `{{.QR}}` template variable:
 
 ![qr-code-generator](images/qr-template-example.png)
 
