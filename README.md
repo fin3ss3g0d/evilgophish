@@ -136,7 +136,7 @@ The `QR Code Generator` feature allows you to generate QR codes to deploy QR cod
 
 4. **PROFIT**
 
-*Note that this feature is only supported for email campaigns at the moment*
+*Note that this feature is only supported for email campaigns and HTML email templates at the moment*
 
 Blog post [here](https://fin3ss3g0d.net/index.php/2024/02/24/qr-code-phishing-with-evilgophish/).
 
