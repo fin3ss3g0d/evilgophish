@@ -1,40 +1,40 @@
-<mxfile host="app.diagrams.net" modified="2024-03-23T21:07:54.918Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0" etag="aBTOzjeOaDid4OdXQZgo" version="24.1.0" type="device">
+<mxfile host="app.diagrams.net" modified="2024-03-23T23:27:59.179Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0" etag="zr5wzQQAI90grEaPNlgx" version="24.1.0" type="device">
   <diagram name="Page-1" id="c37626ed-c26b-45fb-9056-f9ebc6bb27b6">
-    <mxGraphModel dx="2066" dy="1145" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+    <mxGraphModel dx="2066" dy="1104" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="1c7a67bf8fd3230f-83" value="Victim Infrastructure" style="whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;strokeWidth=1;fontFamily=Verdana;fontSize=14;fillColor=#f5f5f5;strokeColor=none;verticalAlign=top;fontStyle=1" parent="1" vertex="1">
+        <mxCell id="1c7a67bf8fd3230f-83" value="&lt;font face=&quot;Lucida Console&quot;&gt;Victim Infrastructure&lt;/font&gt;" style="whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;strokeWidth=1;fontFamily=Verdana;fontSize=14;fillColor=#f5f5f5;strokeColor=none;verticalAlign=top;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="660" y="150" width="800" height="490" as="geometry" />
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-81" value="Attacker Infrastructure" style="whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;strokeWidth=1;fontFamily=Verdana;fontSize=14;fillColor=#f5f5f5;strokeColor=none;fontStyle=1;verticalAlign=top;" parent="1" vertex="1">
-          <mxGeometry x="780" y="750" width="720" height="630" as="geometry" />
+        <mxCell id="1c7a67bf8fd3230f-81" value="&lt;font style=&quot;font-size: 14px;&quot; face=&quot;Lucida Console&quot;&gt;Attacker Infrastructure&lt;/font&gt;" style="whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;strokeWidth=1;fontFamily=Verdana;fontSize=14;fillColor=#f5f5f5;strokeColor=none;fontStyle=1;verticalAlign=top;" parent="1" vertex="1">
+          <mxGeometry x="760" y="760" width="791" height="630" as="geometry" />
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-37" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-3" target="WqFwmYkYYwvrcozoEn8a-9" edge="1">
+        <mxCell id="1c7a67bf8fd3230f-37" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-3" target="WqFwmYkYYwvrcozoEn8a-9" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="774" y="366.54838709677415" as="sourcePoint" />
             <mxPoint x="1020" y="501.45161290322585" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-38" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-2" target="WqFwmYkYYwvrcozoEn8a-4" edge="1">
+        <mxCell id="1c7a67bf8fd3230f-38" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-2" target="WqFwmYkYYwvrcozoEn8a-4" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1072.659411764706" y="362" as="sourcePoint" />
             <mxPoint x="1128.000588235294" y="446" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-45" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.4;exitY=0.1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="1c7a67bf8fd3230f-14" target="WqFwmYkYYwvrcozoEn8a-9" edge="1">
+        <mxCell id="1c7a67bf8fd3230f-45" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.4;exitY=0.1;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="1c7a67bf8fd3230f-14" target="WqFwmYkYYwvrcozoEn8a-9" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1020" y="519" as="sourcePoint" />
             <mxPoint x="774" y="519" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-50" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.708;entryY=0.192;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-1" target="1c7a67bf8fd3230f-14" edge="1">
+        <mxCell id="1c7a67bf8fd3230f-50" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.708;entryY=0.192;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="WqFwmYkYYwvrcozoEn8a-1" target="1c7a67bf8fd3230f-14" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1084" y="553.3652173913044" as="sourcePoint" />
             <mxPoint x="1090" y="690" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c7a67bf8fd3230f-57" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="1c7a67bf8fd3230f-14" target="WqFwmYkYYwvrcozoEn8a-11" edge="1">
+        <mxCell id="1c7a67bf8fd3230f-57" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="1c7a67bf8fd3230f-14" target="WqFwmYkYYwvrcozoEn8a-11" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1150" y="858.839541547278" as="targetPoint" />
           </mxGeometry>
@@ -42,86 +42,89 @@
         <mxCell id="1c7a67bf8fd3230f-14" value="Internet" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;rounded=0;shadow=0;comic=0;strokeWidth=1;fontFamily=Verdana;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="940" y="650" width="120" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-1" value="&amp;nbsp;Organization Firewall" style="shape=mxgraph.cisco.security.firewall;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-1" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 16px;&quot;&gt;&amp;nbsp;Organization Firewall&lt;/font&gt;" style="shape=mxgraph.cisco.security.firewall;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1067.5" y="440" width="52.5" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-2" value="Victim Workstation" style="shape=mxgraph.cisco.computers_and_peripherals.workstation;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-2" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;Victim Workstation&lt;/font&gt;" style="shape=mxgraph.cisco.computers_and_peripherals.workstation;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1031" y="200" width="83" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-3" value="Victim Laptop" style="shape=mxgraph.cisco.computers_and_peripherals.laptop;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-3" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;Victim Laptop&lt;/font&gt;" style="shape=mxgraph.cisco.computers_and_peripherals.laptop;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="805" y="200" width="90" height="61" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-4" value="Layer 3 Switch" style="shape=mxgraph.cisco.switches.layer_3_switch;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;fontSize=18;labelPosition=right;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-4" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 16px;&quot;&gt;Layer 3 Switch&lt;/font&gt;" style="shape=mxgraph.cisco.switches.layer_3_switch;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;fontSize=18;labelPosition=right;" parent="1" vertex="1">
           <mxGeometry x="1238" y="301" width="64" height="64" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-8" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-1" target="WqFwmYkYYwvrcozoEn8a-4">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-8" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;" parent="1" source="WqFwmYkYYwvrcozoEn8a-1" target="WqFwmYkYYwvrcozoEn8a-4" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1180" y="424.99838709677414" as="sourcePoint" />
             <mxPoint x="1426" y="559.9016129032259" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-9" value="&amp;nbsp;Victim Router&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;br style=&quot;font-size: 18px;&quot;&gt;&lt;/div&gt;" style="shape=mxgraph.cisco.routers.router;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-9" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 16px;&quot;&gt;&amp;nbsp;Victim Router&lt;/font&gt;&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;br style=&quot;&quot;&gt;&lt;/div&gt;" style="shape=mxgraph.cisco.routers.router;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="811" y="440" width="78" height="53" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-11" value="&amp;nbsp;Apache2 Proxy" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-11" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 16px;&quot;&gt;&amp;nbsp;Apache2 Proxy&lt;/font&gt;" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1011" y="840" width="59" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-12" value="&amp;nbsp;Redirect Server" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-12" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;Redirect Server&lt;/font&gt;" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1290" y="840" width="60" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-13" value="&amp;nbsp;Unauthorized Requests" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=16;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-11" target="WqFwmYkYYwvrcozoEn8a-12">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1214" y="760" as="sourcePoint" />
-            <mxPoint x="1238" y="880" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-14" value="&amp;nbsp;Evilginx3 Server" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-14" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;Evilginx3 Server&lt;/font&gt;" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=right;outlineConnect=0;labelPosition=left;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1017.75" y="1050" width="62.25" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-15" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-11" target="WqFwmYkYYwvrcozoEn8a-14">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1040" y="930" as="sourcePoint" />
-            <mxPoint x="1064" y="1030" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-16" value="&amp;nbsp;Unauthorized Requests" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=16;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-14">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1080" y="920" as="sourcePoint" />
-            <mxPoint x="1300" y="920" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-17" value="&amp;nbsp;Legitimate Website" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" vertex="1" parent="1">
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-17" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;Legitimate Website&lt;/font&gt;" style="shape=mxgraph.cisco.servers.standard_host;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=middle;verticalAlign=middle;align=left;outlineConnect=0;labelPosition=right;fontSize=18;" parent="1" vertex="1">
           <mxGeometry x="1031" y="1270" width="62.62" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-18" value="&amp;nbsp;Credential Interception" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=16;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;labelPosition=right;verticalLabelPosition=middle;align=left;verticalAlign=middle;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-17">
-          <mxGeometry x="-0.2912" y="-1" relative="1" as="geometry">
-            <mxPoint x="1044.88" y="1130" as="sourcePoint" />
-            <mxPoint x="1052.88" y="1260" as="targetPoint" />
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-19" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=3;fontFamily=Verdana;fontSize=12;" parent="1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="1320" as="sourcePoint" />
+            <mxPoint x="1030.9969230769232" y="1320" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="930" y="1320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WqFwmYkYYwvrcozoEn8a-21" value="&lt;font style=&quot;font-size: 16px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;Gophish Database&lt;/font&gt;" style="shape=mxgraph.cisco.servers.storage_server;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;fontSize=18;" parent="1" vertex="1">
+          <mxGeometry x="1290" y="1050" width="54" height="83" as="geometry" />
+        </mxCell>
+        <mxCell id="nHtVgFbWRR70eIlc4scK-2" value="" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-11" target="WqFwmYkYYwvrcozoEn8a-14">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1020" y="1040" as="sourcePoint" />
+            <mxPoint x="1070" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nHtVgFbWRR70eIlc4scK-3" value="&lt;font style=&quot;font-size: 14px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;&lt;font style=&quot;font-size: 14px;&quot;&gt;Unauthorized Requests&lt;/font&gt;&lt;/font&gt;" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-11" target="WqFwmYkYYwvrcozoEn8a-12">
+          <mxGeometry x="-0.0909" y="10" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1073" y="870" as="sourcePoint" />
+            <mxPoint x="1080" y="1000" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-19" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=12;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="910" y="1320" as="sourcePoint" />
-            <mxPoint x="1030.9969230769232" y="1320" as="targetPoint" />
+        <mxCell id="nHtVgFbWRR70eIlc4scK-4" value="&lt;font style=&quot;font-size: 14px;&quot; face=&quot;Lucida Console&quot;&gt;&amp;nbsp;&lt;font style=&quot;font-size: 14px;&quot;&gt;Unauthorized Requests&lt;/font&gt;&lt;/font&gt;" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-12">
+          <mxGeometry x="0.0362" y="-2" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1080" y="1060" as="sourcePoint" />
+            <mxPoint x="1302" y="1064.5" as="targetPoint" />
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-20" value="&amp;nbsp;Cookie Interception" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=16;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-14">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="910" y="1320" as="sourcePoint" />
-            <mxPoint x="947.4969230769232" y="1190" as="targetPoint" />
+        <mxCell id="nHtVgFbWRR70eIlc4scK-5" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 14px;&quot;&gt;Event Triggers&lt;/font&gt;" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-21">
+          <mxGeometry x="0.0508" y="14" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1080" y="1097" as="sourcePoint" />
+            <mxPoint x="1290" y="940" as="targetPoint" />
+            <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-21" value="&amp;nbsp;Gophish Database" style="shape=mxgraph.cisco.servers.storage_server;sketch=0;html=1;pointerEvents=1;dashed=0;fillColor=#036897;strokeColor=#ffffff;strokeWidth=2;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;fontSize=18;" vertex="1" parent="1">
-          <mxGeometry x="1290" y="1050" width="54" height="83" as="geometry" />
+        <mxCell id="nHtVgFbWRR70eIlc4scK-6" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 14px;&quot;&gt;Credential Interception&lt;/font&gt;" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-17">
+          <mxGeometry x="0.0051" y="5" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1050" y="1130" as="sourcePoint" />
+            <mxPoint x="1260" y="1125" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="WqFwmYkYYwvrcozoEn8a-22" value="&amp;nbsp;Event Triggers" style="edgeStyle=none;html=1;labelBackgroundColor=none;startFill=0;endArrow=none;endFill=0;strokeWidth=2;fontFamily=Verdana;fontSize=16;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=top;" edge="1" parent="1" source="WqFwmYkYYwvrcozoEn8a-14" target="WqFwmYkYYwvrcozoEn8a-21">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1248" y="980" as="sourcePoint" />
-            <mxPoint x="1256" y="1110" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="1190" y="1090" />
-            </Array>
+        <mxCell id="nHtVgFbWRR70eIlc4scK-7" value="&lt;font face=&quot;Lucida Console&quot; style=&quot;font-size: 14px;&quot;&gt;Cookie Interception&lt;/font&gt;" style="endArrow=classic;html=1;rounded=0;arcSize=20;strokeWidth=3;entryX=0;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="WqFwmYkYYwvrcozoEn8a-14">
+          <mxGeometry x="0.0056" y="-8" width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="830" y="1320" as="sourcePoint" />
+            <mxPoint x="1070" y="1280" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
