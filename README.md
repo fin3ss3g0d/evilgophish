@@ -1,3 +1,5 @@
+![logo](images/logo.webp)
+
 # Table of Contents
 
 - [evilgophish](#evilgophish)
@@ -26,8 +28,6 @@
   * [Issues and Support](#issues-and-support)
   * [Future Goals](#future-goals)
   * [Contributing](#contributing)
-
-![logo](images/logo.jpg)
 
 # evilgophish
 
