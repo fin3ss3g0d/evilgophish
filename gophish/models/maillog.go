@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/gophish/gomail"
-	"github.com/gophish/gophish/config"
 	log "github.com/gophish/gophish/logger"
 	"github.com/gophish/gophish/mailer"
 )
@@ -195,12 +194,6 @@ func (m *MailLog) Generate(msg *gomail.Message) error {
 	ptx, err := NewPhishingTemplateContext(c, r.BaseRecipient, r.RId)
 	if err != nil {
 		return err
-	}
-
-	// Add the transparency headers
-	msg.SetHeader("X-Mailer", config.ServerName)
-	if conf.ContactAddress != "" {
-		msg.SetHeader("X-Contact", conf.ContactAddress)
 	}
 
 	// Add Message-Id header as described in RFC 2822.
