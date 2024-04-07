@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Cloudflare</title>
+</head>
+<body>
+<div style="position: absolute; width: 300px; height: 200px; z-index: 15; top: 50%; left: 50%; margin: -100px 0 0 -150px;">
+<style>
+  input[type=button], input[type=submit], input[type=reset] {
+    background-color: #2374f7; 
+    border: none;
+    border-radius: 5px; 
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px;
+  } 
+</style>
+{{if .ErrorMessage}}
+<p>{{.ErrorMessage}}</p>
+{{end}}
+<form action="{{.FormActionURL}}" method="POST">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <div class="cf-turnstile" data-sitekey="{{.TurnstilePublicKey}}"></div>
+    <input type="submit" name="button" value="Submit">
+</form>
+</div>
+</body>
+</html>

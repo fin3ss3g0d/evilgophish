@@ -34,6 +34,9 @@ ws.onclose = function(evt) {
     console.log("CLOSE");
     ws = null;
 }
+ws.onerror = function(evt) {
+    console.error("ERROR: ", evt);
+}
 
 const feedDiv = document.getElementById('feed');
 

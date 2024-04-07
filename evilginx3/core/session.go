@@ -28,6 +28,7 @@ type Session struct {
 	RId            string
 	Browser        map[string]string
 	DoneSignal     chan struct{}
+	IsCaptchaDone  bool
 }
 
 func NewSession(name string) (*Session, error) {

