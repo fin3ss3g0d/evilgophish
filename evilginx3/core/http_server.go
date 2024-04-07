@@ -153,7 +153,6 @@ type PageData struct {
 	FormActionURL      string
 	TurnstilePublicKey string
 	ErrorMessage       string
-	RedirectScript     string
 }
 
 func (s *HttpServer) turnstilePage(writer http.ResponseWriter, request *http.Request) {
