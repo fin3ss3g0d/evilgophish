@@ -104,6 +104,8 @@ Example:
 ./evilginx3 -feed -g ../gophish/gophish.db -turnstile <PUBLIC_KEY>:<PRIVATE_KEY>
 ```
 
+Blog post [here](https://fin3ss3g0d.net/index.php/2024/04/08/evilgophishs-approach-to-advanced-bot-detection-with-cloudflare-turnstile/).
+
 ## Cloudflare Turnstile HTML Template Guide
 
 If I were to include a static HTML page for the `Cloudflare Turnstile` functionality, everyone's phishing infrastructure would have the same page and it would lead to static HTML code detections. *In comes Go HTML templates*. I have included a starter template in `evilginx3/templates/turnstile.html` as a guideline **YOU WANT TO CHANGE THIS**. Here are the rules around how the template code is setup, failure to follow these rules will likely result in breaking the `Cloudflare Turnstile` functionality:
