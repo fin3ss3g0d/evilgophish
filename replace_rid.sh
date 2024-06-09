@@ -40,7 +40,7 @@ function main () {
     cd gophish || exit 1
     go build
     cd ..
-    cd evilginx2 || exit 1
+    cd evilginx3 || exit 1
     go build
     cd ..
     print_good "Replaced previous rid and rebuilt successfully!"

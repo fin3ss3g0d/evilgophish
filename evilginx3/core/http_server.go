@@ -94,19 +94,19 @@ func checkTurnstile(remoteip, response string) (result bool, err error) {
 	resp, err := http.PostForm(turnstileServerName,
 		url.Values{"secret": {turnstilePrivateKey}, "remoteip": {remoteip}, "response": {response}})
 	if err != nil {
-		log.Error("Post error: %s", err)
+		log.Error("Post error: %v", err)
 		return false, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Error("Read error: could not read body: %s", err)
+		log.Error("Read error: could not read body: %v", err)
 		return false, err
 	}
 	r := RecaptchaResponse{}
 	err = json.Unmarshal(body, &r)
 	if err != nil {
-		log.Error("Read error: got invalid JSON: %s", err)
+		log.Error("Read error: got invalid JSON: %v", err)
 		return false, err
 	}
 	return r.Success, nil
@@ -119,7 +119,7 @@ func processTurnstile(request *http.Request) (result bool) {
 	if responseFound {
 		result, err := checkTurnstile(remote_addr, recaptchaResponse[0])
 		if err != nil {
-			log.Error("turnstile server error", err)
+			log.Error("Turnstile server error: %v", err)
 		}
 		return result
 	}
@@ -133,7 +133,7 @@ func sendForbiddenResponse(w http.ResponseWriter) {
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
 		// Log the error and return a basic 403 response if the template fails to load
-		log.Printf("Error loading 403 template: %v", err)
+		log.Error("Error loading 403 template: %v", err)
 		http.Error(w, "403 Forbidden", http.StatusForbidden)
 		return
 	}
@@ -145,7 +145,7 @@ func sendForbiddenResponse(w http.ResponseWriter) {
 	err = tmpl.Execute(w, nil)
 	if err != nil {
 		// Log the error; at this point, the status code is already set
-		log.Printf("Error executing 403 template: %v", err)
+		log.Error("Error executing 403 template: %v", err)
 	}
 }
 
@@ -173,7 +173,7 @@ func (s *HttpServer) turnstilePage(writer http.ResponseWriter, request *http.Req
 	tmplPath := filepath.Join("templates", "turnstile.html")
 	tmpl, err := template.ParseFiles(tmplPath)
 	if err != nil {
-		log.Fatal("Error loading template:", err)
+		log.Error("Error loading template: %v", err)
 		sendForbiddenResponse(writer)
 		return
 	}
@@ -201,7 +201,7 @@ func (s *HttpServer) turnstilePage(writer http.ResponseWriter, request *http.Req
 			}
 
 			if err := request.ParseForm(); err != nil {
-				log.Printf("Error parsing form: %v", err)
+				log.Error("Error parsing form: %v", err)
 				sendForbiddenResponse(writer)
 				return
 			}
@@ -222,7 +222,7 @@ func (s *HttpServer) turnstilePage(writer http.ResponseWriter, request *http.Req
 			// Execute the template with either the redirect script or error message
 			err = tmpl.Execute(writer, pageData)
 			if err != nil {
-				log.Printf("Error executing template: %v", err)
+				log.Error("Error executing template: %v", err)
 				sendForbiddenResponse(writer)
 				return
 			}

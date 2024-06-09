@@ -121,3 +121,11 @@ Made some improvements to the feed application including error logging via JavaS
 # 04/07/2024
 
 Replaced `Apache2` redirect rules and IP blacklist hardening with `Cloudflare Turnstile`.
+
+# 05/17/2024
+
+Fixed error logging for the `Cloudflare Turnstile` server. Also updated `update_rid.sh` for `evilginx3`.
+
+# 06/09/2024
+
+Added `evilginx3` commits [kgretzky/evilginx2@e6b421af6b0e7f053b8058ede076d060aa9fb249](https://github.com/kgretzky/evilginx2/commit/e6b421af6b0e7f053b8058ede076d060aa9fb249) through [kgretzky/evilginx2@9e32484719681892945130187ea52737b3d72051](https://github.com/kgretzky/evilginx2/commit/9e32484719681892945130187ea52737b3d72051) making the project completely up-to-date.
