@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"path"
 	"text/template"
+
+	"github.com/gophish/gophish/evilginx"
 )
 
 // TemplateContext is an interface that allows both campaigns and email
@@ -58,12 +60,25 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 
 	phishURL, _ := url.Parse(templateURL)
 	q := phishURL.Query()
-	q.Set(RecipientParameter, rid)
-	phishURL.RawQuery = q.Encode()
+	phishURL.RawQuery = ""
+
+	q.Set("fname", r.FirstName)
+	q.Set("lname", r.LastName)
+	q.Set("email", r.Email)
+	q.Set("rid", rid)
+
+	phishUrlString := evilginx.CreatePhishUrl(phishURL.String(), &q)
 
 	trackingURL, _ := url.Parse(templateURL)
-	trackingURL.Path = path.Join(trackingURL.Path, "/track")
-	trackingURL.RawQuery = q.Encode()
+	q = trackingURL.Query()
+	trackingURL.RawQuery = ""
+
+	q.Set("rid", rid)
+	q.Set("o", "track")
+
+	trackerUrlString := evilginx.CreatePhishUrl(trackingURL.String(), &q)
+
+	//fmt.Print(trackerUrlString)
 
 	// Prepare QR code
 	qrBase64 := ""
@@ -71,7 +86,7 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	qr := ""
 	qrSize := ctx.getQRSize()
 	if qrSize != "" {
-		qrBase64, qrName, err = generateQRCode(phishURL.String(), qrSize)
+		qrBase64, qrName, err = generateQRCode(phishUrlString, qrSize)
 		if err != nil {
 			return PhishingTemplateContext{}, err
 		}
@@ -81,9 +96,9 @@ func NewPhishingTemplateContext(ctx TemplateContext, r BaseRecipient, rid string
 	return PhishingTemplateContext{
 		BaseRecipient: r,
 		BaseURL:       baseURL.String(),
-		URL:           phishURL.String(),
-		TrackingURL:   trackingURL.String(),
-		Tracker:       "<img alt='' style='display: none' src='" + trackingURL.String() + "'/>",
+		URL:           phishUrlString,
+		TrackingURL:   trackerUrlString,
+		Tracker:       "<img alt='' style='display: none' src='" + trackerUrlString + "'/>",
 		From:          fn,
 		RId:           rid,
 		QRBase64:      qrBase64,

