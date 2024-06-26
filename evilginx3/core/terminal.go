@@ -56,12 +56,22 @@ func NewTerminal(p *HttpProxy, cfg *Config, crt_db *CertDb, db *database.Databas
 	t.createHelp()
 	t.completer = t.hlp.GetPrefixCompleter(LAYER_TOP)
 
+	// Get the home directory of the current user
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	// Set the path for the history file within the home directory
+	historyFilePath := filepath.Join(homeDir, ".evilginx/.term_hist")
+
 	t.rl, err = readline.NewEx(&readline.Config{
 		Prompt:              DEFAULT_PROMPT,
 		AutoComplete:        t.completer,
 		InterruptPrompt:     "^C",
 		EOFPrompt:           "exit",
 		FuncFilterInputRune: t.filterInput,
+		HistoryFile:         historyFilePath,
 	})
 	if err != nil {
 		return nil, err
@@ -105,6 +115,8 @@ func (t *Terminal) DoWork() {
 		if err != nil {
 			log.Error("syntax error: %v", err)
 		}
+
+		t.rl.SaveHistory(line) // Save line to history file
 
 		argn := len(args)
 		if argn == 0 {
