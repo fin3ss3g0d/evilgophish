@@ -1,0 +1,39 @@
+[Unit]
+Description=Gophish Phishing Framework
+Documentation=https://github.com/theroseinc/evilgophish
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gophish
+Group=gophish
+WorkingDirectory=/opt/evilgophish/gophish
+ExecStart=/opt/evilgophish/gophish/gophish
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=append:/var/log/gophish/gophish.log
+StandardError=append:/var/log/gophish/gophish-error.log
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/evilgophish/gophish
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=1G
+CPUQuota=80%
+
+[Install]
+WantedBy=multi-user.target

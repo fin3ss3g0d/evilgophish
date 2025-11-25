@@ -1,0 +1,37 @@
+[Unit]
+Description=Evilfeed Live Event Dashboard
+Documentation=https://github.com/theroseinc/evilgophish
+After=network.target network-online.target gophish.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=evilfeed
+Group=evilfeed
+WorkingDirectory=/opt/evilgophish/evilfeed
+ExecStart=/opt/evilgophish/evilfeed/evilfeed
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=append:/var/log/evilfeed/evilfeed.log
+StandardError=append:/var/log/evilfeed/evilfeed-error.log
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/evilgophish/evilfeed
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

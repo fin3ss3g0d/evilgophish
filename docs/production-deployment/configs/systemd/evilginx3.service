@@ -1,0 +1,40 @@
+[Unit]
+Description=Evilginx3 MITM Proxy
+Documentation=https://github.com/theroseinc/evilgophish
+After=network.target network-online.target gophish.service
+Wants=network-online.target
+Requires=gophish.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/evilgophish/evilginx3
+
+# Main execution - customize flags as needed
+# -feed: Enable live feed integration
+# -g: Path to gophish database
+# -developer: Use self-signed certs (remove for production)
+# -turnstile: Enable Cloudflare Turnstile (add public:private keys)
+ExecStart=/opt/evilgophish/evilginx3/evilginx3 -feed -g /opt/evilgophish/gophish/gophish.db
+
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=append:/var/log/evilginx3/evilginx3.log
+StandardError=append:/var/log/evilginx3/evilginx3-error.log
+
+# Note: Evilginx3 requires root for port 53/443 binding
+# Alternative using capabilities (requires setcap on binary):
+# User=evilginx
+# CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
+# AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=2G
+
+[Install]
+WantedBy=multi-user.target
